@@ -1,6 +1,6 @@
 /*
  *	This file is part of OGS Engine
- *	Copyright (C) 2018 BlackPhrase
+ *	Copyright (C) 2018-2019 BlackPhrase
  *
  *	OGS Engine is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,10 +23,14 @@
 #include "interface.h"
 #include "input.h"
 
+#include "game/client/IClientGame.hpp"
+
 extern "C"
 {
 #include "pm_shared.h"
 };
+
+extern IClientGame *gpClientGame;
 
 cl_enginefunc_t *gpEngine{nullptr};
 
@@ -51,6 +55,7 @@ int Initialize(cl_enginefunc_t *apEngFuncs, int anVersion)
 
 void HUD_Init()
 {
+	gpClientGame->Init();
 	InitInput();
 };
 
@@ -134,6 +139,7 @@ void HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct
 
 void HUD_Shutdown()
 {
+	gpClientGame->Shutdown();
 };
 
 void HUD_TxferLocalOverrides(struct entity_state_s *state, const struct clientdata_s *client)
@@ -164,6 +170,7 @@ int HUD_GetHullBounds(int hullnumber, float *mins, float *maxs)
 
 void HUD_Frame(double time)
 {
+	gpClientGame->Update(time);
 };
 
 int HUD_Key_Event(int down, int keynum, const char *pszCurrentBinding)
