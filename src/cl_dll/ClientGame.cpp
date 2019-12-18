@@ -22,6 +22,7 @@
 #include "ClientGame.hpp"
 
 CClientGame gClientGame;
+IClientGame *gpClientGame{&gClientGame};
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CClientGame, IClientGame, MGT_CLIENTGAME_INTERFACE_VERSION, gClientGame)
 
