@@ -21,7 +21,9 @@
 
 #include "Game.hpp"
 
-EXPOSE_SINGLE_INTERFACE(CGame, IGame, MGT_GAME_INTERFACE_VERSION)
+CGame gGame;
+
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGame, IGame, MGT_GAME_INTERFACE_VERSION, gGame)
 
 bool CGame::Init(CreateInterfaceFn afnEngineFactory)
 {
