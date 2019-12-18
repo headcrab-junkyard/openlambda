@@ -27,6 +27,8 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CClientGame, IClientGame, MGT_CLIENTGAME_INTER
 
 bool CClientGame::Init(CreateInterfaceFn afnEngineFactory)
 {
+	InitInput();
+	
 	// TODO
 	return true;
 };

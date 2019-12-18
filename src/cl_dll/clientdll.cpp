@@ -56,7 +56,6 @@ int Initialize(cl_enginefunc_t *apEngFuncs, int anVersion)
 void HUD_Init()
 {
 	gpClientGame->Init();
-	InitInput();
 };
 
 int HUD_VidInit()
