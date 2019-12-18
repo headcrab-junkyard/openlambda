@@ -21,7 +21,9 @@
 
 #include "ClientGame.hpp"
 
-EXPOSE_SINGLE_INTERFACE(CClientGame, IClientGame, MGT_CLIENTGAME_INTERFACE_VERSION)
+CClientGame gClientGame;
+
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CClientGame, IClientGame, MGT_CLIENTGAME_INTERFACE_VERSION, gClientGame)
 
 bool CClientGame::Init(CreateInterfaceFn afnEngineFactory)
 {
