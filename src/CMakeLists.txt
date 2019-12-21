@@ -18,4 +18,4 @@ add_subdirectory(game)
 #add_subdirectory(gameui)
 
 #add_subdirectory(dedicated)
-#add_subdirectory(launcher)
+add_subdirectory(launcher)
