@@ -36,7 +36,7 @@ int CApplication::Run()
 		if(!Init())
 			return EXIT_FAILURE;
 		
-		int eEngineResult{mpEngine->Run(nullptr, ".", msCmdLine, nullptr, Sys_GetFactoryThis(), mfnFSFactory)};
+		int eEngineResult{mpEngine->Run(mhInstance, ".", msCmdLine, nullptr, Sys_GetFactoryThis(), mfnFSFactory)};
 		mbRestart = false;
 		
 		Shutdown();
