@@ -36,10 +36,16 @@ int CApplication::Run()
 		if(!Init())
 			return EXIT_FAILURE;
 		
-		if(!mpEngine->Run(nullptr, ".", msCmdLine, nullptr, Sys_GetFactoryThis(), mfnFSFactory))
-			return EXIT_FAILURE;
+		int eEngineResult{mpEngine->Run(nullptr, ".", msCmdLine, nullptr, Sys_GetFactoryThis(), mfnFSFactory)};
+		mbRestart = false;
 		
-		mbRestart = false; // TODO
+		switch(eEngineResult)
+		{
+		case ENGINE_RESULT_UNSUPPORTEDVIDEO:
+			return EXIT_FAILURE;
+		case ENGINE_RESULT_RESTART:
+			mbRestart = true;
+		};
 		
 		Shutdown();
 	}
