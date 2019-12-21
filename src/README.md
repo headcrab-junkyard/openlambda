@@ -1,9 +1,9 @@
 # Contents:
 
-* **cl_dll** - template client dll code;
+* **cl_dll** - legacy API game code (client-side);
 * **dedicated** - dedicated server launcher;
-* **dlls** - template game dll code;
-* **game_shared** - game code shared between both client and server;
+* **dlls** - legacy API game code (server-side);
+* **game** - new API game code (more info inside);
 * **gameui** - reimplemented Game User Interface module;
 * **launcher** - engine launcher code;
 * **optional** - optional engine extensions/components;
