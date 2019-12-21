@@ -52,7 +52,8 @@ private:
 protected:
 	virtual bool PostInit(){return true;}
 	
-	char msCmdLine[512]{};
+	char msCmdLine[512]{}; // TODO: fix magic
+	char msCmdLinePostRestart[512]{}; // TODO: fix magic
 	
 	void *mhInstance{nullptr};
 };

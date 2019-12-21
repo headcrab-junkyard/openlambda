@@ -22,8 +22,6 @@
 #include "Application.hpp"
 #include "AppConfig.hpp"
 
-//const char *gsPostRestartCmdLine{""}; // TODO
-
 int setenv(const char *name, const char *value, int overwrite);
 
 CApplication::CApplication() = default;
@@ -36,7 +34,7 @@ int CApplication::Run()
 		if(!Init())
 			return EXIT_FAILURE;
 		
-		int eEngineResult{mpEngine->Run(mhInstance, ".", msCmdLine, nullptr, Sys_GetFactoryThis(), mfnFSFactory)};
+		int eEngineResult{mpEngine->Run(mhInstance, ".", msCmdLine, &msCmdLinePostRestart, Sys_GetFactoryThis(), mfnFSFactory)};
 		mbRestart = false;
 		
 		Shutdown();
