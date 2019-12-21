@@ -1,7 +1,7 @@
 /*
  *	This file is part of OGS Engine
  *	Copyright (C) 1996-1997 Id Software, Inc.
- *	Copyright (C) 2018 BlackPhrase
+ *	Copyright (C) 2018-2019 BlackPhrase
  *
  *	OGS Engine is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 	//global_hInstance = hInstance; // TODO: move to engine space
 	//global_nCmdShow = nCmdShow;
 	
-	CWinApplication App(lpCmdLine);
+	CWinApplication App(lpCmdLine, hInstance);
 #else
 	CLinuxApplication App(argc, argv);
 #endif
