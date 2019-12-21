@@ -39,7 +39,7 @@ int setenv(const char *name, const char *value, int overwrite)
 	return _putenv_s(name, value);
 };
 
-CWinApplication::CWinApplication(const char *cmdline)
+CWinApplication::CWinApplication(const char *cmdline, HINSTANCE ahInstance) : mhInstance(ahInstance)
 {
 	msCmdLine[0] = '\0';
 	

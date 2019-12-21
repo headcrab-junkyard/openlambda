@@ -53,4 +53,6 @@ protected:
 	virtual bool PostInit(){return true;}
 	
 	char msCmdLine[512]{};
+	
+	void *mhInstance{nullptr};
 };
