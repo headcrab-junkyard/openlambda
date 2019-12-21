@@ -39,6 +39,8 @@ int CApplication::Run()
 		int eEngineResult{mpEngine->Run(nullptr, ".", msCmdLine, nullptr, Sys_GetFactoryThis(), mfnFSFactory)};
 		mbRestart = false;
 		
+		Shutdown();
+		
 		switch(eEngineResult)
 		{
 		case ENGINE_RESULT_UNSUPPORTEDVIDEO:
@@ -46,8 +48,6 @@ int CApplication::Run()
 		case ENGINE_RESULT_RESTART:
 			mbRestart = true;
 		};
-		
-		Shutdown();
 	}
 	while(mbRestart);
 	
