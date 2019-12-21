@@ -1,8 +1,13 @@
+#####################################################################
 
 # Add include directories
 include_directories(
 	${OGS_SDK_PATH}
 )
+
+#####################################################################
+
+# Add subdirectories
 
 add_subdirectory(pm_shared)
 

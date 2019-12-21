@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
+#####################################################################
+
+# Find the required packages
+
+#####################################################################
+
 # Set C language standard
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -10,6 +16,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_CXX_STANDARD_EXTENSIONS ON)
 
+#####################################################################
+
 
 # Set path to SDK
 set(OGS_SDK_PATH ${CMAKE_SOURCE_DIR}/../ogs-sdk/goldsrc
@@ -17,8 +25,12 @@ set(OGS_SDK_PATH ${CMAKE_SOURCE_DIR}/../ogs-sdk/goldsrc
 	"Path to engine SDK"
 )
 
+#####################################################################
+
+# Add subdirectories
 
 # Add engine sdk directory
 add_subdirectory(${OGS_SDK_PATH} ${CMAKE_BINARY_DIR}/sdk)
 
+# Add main sources directory
 add_subdirectory(src)
