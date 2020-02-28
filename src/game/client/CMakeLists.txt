@@ -1,4 +1,4 @@
-project(ogs-cl_dll)
+project(ogs-game-client)
 
 add_library(${PROJECT_NAME} MODULE)
 
