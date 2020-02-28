@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019 BlackPhrase
+ * Copyright (C) 2019-2020 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 CGame gGame;
 
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGame, IGame, MGT_GAME_INTERFACE_VERSION, gGame)
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGame, IGame, OGS_GAME_INTERFACE_VERSION, gGame)
 
 bool CGame::Init(CreateInterfaceFn afnEngineFactory)
 {
