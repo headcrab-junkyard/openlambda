@@ -39,7 +39,7 @@ void CClientGame::Shutdown()
 	// TODO
 };
 
-void CClientGame::Update()
+void CClientGame::Update(double afTime)
 {
 	// TODO
 };

@@ -29,5 +29,5 @@ public:
 	bool Init(CreateInterfaceFn afnEngineFactory /*, cldll_func_t *pcl_funcs*/) override;
 	void Shutdown() override;
 	
-	void Update() override;
+	void Update(double afTime) override;
 };
