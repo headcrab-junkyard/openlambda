@@ -23,11 +23,19 @@
 
 #include "next/game/server/IGame.hpp"
 
+struct IGameRules;
+
 class CGame /*final*/ : public IGame
 {
 public:
+	CGame(IGameRules *apRules) : mpRules(apRules){}
+	
 	bool Init(CreateInterfaceFn afnEngineFactory) override;
 	void Shutdown() override;
 	
 	void Update() override;
+	
+	IGameRules *GetRules() const {return mpRules;}
+private:
+	IGameRules *mpRules{nullptr};
 };
