@@ -21,7 +21,7 @@
 
 #include "Game.hpp"
 
-CGame gGame;
+CGame gGame(nullptr); // TODO
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGame, IGame, OGS_GAME_INTERFACE_VERSION, gGame)
 
