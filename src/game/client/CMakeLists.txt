@@ -22,6 +22,4 @@ if(OPENLAMBDA_TARGET_ENGINE STREQUAL "Next")
 	)
 
 	target_link_libraries(${PROJECT_NAME} ogs-tier1 ogs-pm_shared ogs-mathlib)
-if(WIN32)
-	target_link_libraries(${PROJECT_NAME} winmm) #joyGetPosEx
 endif()
