@@ -23,7 +23,9 @@
 
 CGame gGame(nullptr); // TODO
 
+#if OPENLAMBDA_TARGET_ENGINE == OPENLAMBDA_TARGET_ENGINE_NEXT
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGame, IGame, OGS_GAME_INTERFACE_VERSION, gGame)
+#endif
 
 bool CGame::Init(CreateInterfaceFn afnEngineFactory)
 {
