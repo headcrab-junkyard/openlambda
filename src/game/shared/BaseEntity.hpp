@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018-2019 BlackPhrase
+ * Copyright (C) 2018-2020 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include <string>
 
 #include "edict.h"
-#include "engine.h"
 #include "mathlib/vec3.h"
 #include "mathlib/bounds.h"
 
@@ -43,7 +42,7 @@ public:
 	//CBaseEntity(entvars_t *apData);
 	virtual ~CBaseEntity() = default;
 	
-	edict_t *ToEdict() const {return gpEngine->pfnFindEntityByVars(self);}
+	edict_t *ToEdict() const; // TODO: GetDict()?
 	
 	virtual void Think()
 	{
@@ -99,7 +98,7 @@ public:
 	
 	bool IsValid() const {return (!ToEdict() || ToEdict()->free || self->flags & FL_KILLME) ? false : true;}
 	
-	int GetIndex() const {return gpEngine->pfnIndexOfEdict(ToEdict());}
+	int GetIndex() const;
 	
 	void SetHealth(float afHealth){self->health = afHealth;}
 	float GetHealth() const {return self->health;}
@@ -137,28 +136,19 @@ public:
 	void SetGravity(float afY){self->gravity = afY;}
 	//const idVec3 &GetGravity() const {return idVec3(0.0f, self->gravity, 0.0f);}
 	
-	void SetModel(const std::string &asName)
-	{
-		gpEngine->pfnSetModel(ToEdict(), asName.c_str());
-	};
+	void SetModel(const std::string &asName);
 	const std::string &GetModel() const;
 	
-	void SetOrigin(const idVec3 &avOrigin)
-	{
-		mvOrigin = avOrigin;
-		gpEngine->pfnSetOrigin(ToEdict(), avOrigin);
-	};
+	void SetOrigin(const idVec3 &avOrigin);
 	const idVec3 &GetOrigin() const {return mvOrigin;}
+	
+	void SetSize(const idVec3 &avMins, const idVec3 &avMaxs);
 	
 	void SetSize(const Bounds &aSize)
 	{
-		gpEngine->pfnSetSize(ToEdict(), aSize.mins, aSize.maxs);
+		SetSize(aSize.mins, aSize.maxs);
 	};
 	
-	void SetSize(const idVec3 &avMins, const idVec3 &avMaxs)
-	{
-		gpEngine->pfnSetSize(ToEdict(), avMins, avMaxs);
-	};
 	const Bounds &GetSize() const;
 	
 	void SetMoveType(int anType){self->movetype = anType;}
@@ -178,10 +168,7 @@ public:
 	void SetSkin(int anSkin){self->skin = anSkin;}
 	int GetSkin() const {return self->skin;}
 	
-	void EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags, int anPitch)
-	{
-		gpEngine->pfnEmitSound(ToEdict(), anChannel, asSample.c_str(), afVolume, afAttenuation, anFlags, anPitch);
-	};
+	void EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags, int anPitch);
 	
 	void MarkForDeletion()
 	{
