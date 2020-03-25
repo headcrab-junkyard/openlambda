@@ -1,0 +1,3 @@
+/// @file
+
+#include "BaseMonster.hpp"
