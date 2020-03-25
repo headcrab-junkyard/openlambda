@@ -21,33 +21,64 @@
 #include "BaseEntity.hpp"
 #include "engine.h"
 
+enum class TargetEngineAPI : int
+{
+	Legacy,
+	Next
+};
+
+#ifdef OPENLAMBDA_USE_LEGACY_ENGINE_API
+	constexpr auto TargetAPI{TargetEngineAPI::Legacy};
+#else
+	constexpr auto TargetAPI{TargetEngineAPI::Next};
+#endif
+
 edict_t *CBaseEntity::ToEdict() const
 {
-	return gpEngine->pfnFindEntityByVars(self);
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		return gpEngine->pfnFindEntityByVars(self);
 };
 	
 int CBaseEntity::GetIndex() const
 {
-	return gpEngine->pfnIndexOfEdict(ToEdict());
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		return gpEngine->pfnIndexOfEdict(ToEdict());
 };
 
 void CBaseEntity::SetModel(const std::string &asName)
 {
-	gpEngine->pfnSetModel(ToEdict(), asName.c_str());
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnSetModel(ToEdict(), asName.c_str());
 };
 
 void CBaseEntity::SetOrigin(const idVec3 &avOrigin)
 {
 	mvOrigin = avOrigin;
-	gpEngine->pfnSetOrigin(ToEdict(), avOrigin);
+	
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnSetOrigin(ToEdict(), avOrigin);
 };
 
 void CBaseEntity::SetSize(const idVec3 &avMins, const idVec3 &avMaxs)
 {
-	gpEngine->pfnSetSize(ToEdict(), avMins, avMaxs);
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnSetSize(ToEdict(), avMins, avMaxs);
 };
 
 void CBaseEntity::EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags, int anPitch)
 {
-	gpEngine->pfnEmitSound(ToEdict(), anChannel, asSample.c_str(), afVolume, afAttenuation, anFlags, anPitch);
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnEmitSound(ToEdict(), anChannel, asSample.c_str(), afVolume, afAttenuation, anFlags, anPitch);
 };
