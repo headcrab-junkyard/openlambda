@@ -25,6 +25,15 @@ set(OGS_SDK_PATH ${CMAKE_SOURCE_DIR}/../ogs-sdk/goldsrc
 	"Path to engine SDK"
 )
 
+# Set the target engine
+set(OPENLAMBDA_TARGET_ENGINE "Next" CACHE STRING "Specify the target engine that the code will be built for")
+set_property(CACHE OPENLAMBDA_TARGET_ENGINE PROPERTY STRINGS
+	"Legacy"
+	"Next"
+)
+
+message(STATUS "Building for ${OPENLAMBDA_TARGET_ENGINE} engine!")
+
 #####################################################################
 
 # Add subdirectories
