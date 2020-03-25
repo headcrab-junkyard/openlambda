@@ -19,9 +19,12 @@ include_directories(
 
 add_subdirectory(pm_shared)
 
-#add_subdirectory(cl_dll)
-#add_subdirectory(dlls)
 add_subdirectory(game)
+
+if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
+	add_subdirectory(cl_dll)
+	add_subdirectory(dlls)
+endif()
 
 #add_subdirectory(gameui)
 
