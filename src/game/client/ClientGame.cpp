@@ -24,7 +24,9 @@
 CClientGame gClientGame;
 IClientGame *gpClientGame{&gClientGame};
 
+#if OPENLAMBDA_TARGET_ENGINE == OPENLAMBDA_TARGET_ENGINE_NEXT
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CClientGame, IClientGame, OGS_CLIENTGAME_INTERFACE_VERSION, gClientGame)
+#endif
 
 bool CClientGame::Init(CreateInterfaceFn afnEngineFactory)
 {
