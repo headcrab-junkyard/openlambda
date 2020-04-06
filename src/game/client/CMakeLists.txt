@@ -2,7 +2,7 @@ project(ogs-game-client)
 
 set(LIB_TYPE MODULE)
 
-if(OPENLAMBDA_TARGET_ENGINE STREQUAL "Legacy")
+if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
 	set(LIB_TYPE STATIC)
 endif()
 
@@ -16,7 +16,7 @@ target_sources(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ogs_game_shared-client)
 
-if(OPENLAMBDA_TARGET_ENGINE STREQUAL "Next")
+if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		OUTPUT_NAME "client"
 	)
