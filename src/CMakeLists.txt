@@ -11,6 +11,7 @@ include_directories(
 	${OGS_SDK_PATH}/engine
 	${OGS_SDK_PATH}/pm_shared
 	${OGS_SDK_PATH}/public
+	${OGS_SDK_PATH}/next
 )
 
 #####################################################################
