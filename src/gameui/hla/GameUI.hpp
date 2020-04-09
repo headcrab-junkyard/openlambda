@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "gameui/IGameUI.hpp"
+#include "next/gameui/IGameUI.hpp"
 
 class CGameUI final : public IGameUI
 {
