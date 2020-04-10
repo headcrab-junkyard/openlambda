@@ -6,6 +6,7 @@ set(CMAKE_SHARED_MODULE_PREFIX "")
 
 # Add include directories
 include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}/common
 	${OGS_SDK_PATH}
 	${OGS_SDK_PATH}/common
 	${OGS_SDK_PATH}/engine
