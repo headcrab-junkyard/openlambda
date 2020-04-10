@@ -23,7 +23,7 @@
 #include "interface.h"
 #include "input.h"
 
-#include "game/client/IClientGame.hpp"
+#include "next/game/client/IClientGame.hpp"
 
 extern "C"
 {
