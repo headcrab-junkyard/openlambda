@@ -189,6 +189,8 @@ public:
 	void SetGoal(CBaseEntity *apGoal){mpGoal = apGoal;}
 	CBaseEntity *GetGoal() const {return mpGoal;}
 private:
+	void SetClassName(const char *asName){self->classname = asName;} // TODO
+private:
 	idVec3 mvOrigin{0.0f};
 	idVec3 mvAngles{0.0f};
 	idVec3 mvVelocity{0.0f};
