@@ -175,6 +175,8 @@ public:
 		self->flags |= FL_KILLME;
 	};
 	
+	bool MarkedForDeletion() const {return self->flags & FL_KILLME;}
+
 	int GetWaterType() const {return self->watertype;}
 	int GetWaterLevel() const {return self->waterlevel;}
 	
