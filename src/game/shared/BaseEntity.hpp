@@ -96,7 +96,7 @@ public:
 		return false;
 	};
 	
-	bool IsValid() const {return (!ToEdict() || ToEdict()->free || self->flags & FL_KILLME) ? false : true;}
+	bool IsValid() const {return (!ToEdict() || ToEdict()->free || MarkedForDeletion()) ? false : true;}
 	
 	int GetIndex() const;
 	
