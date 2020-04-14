@@ -172,7 +172,7 @@ public:
 	
 	void MarkForDeletion()
 	{
-		//self->flags |= FL_KILLME; // TODO
+		self->flags |= FL_KILLME;
 	};
 	
 	int GetWaterType() const {return self->watertype;}
