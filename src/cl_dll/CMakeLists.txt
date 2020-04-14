@@ -1,5 +1,15 @@
 project(ogs-cl_dll)
 
+#####################################################################
+
+# Find the required packages
+
+if(OGS_USE_SDL)
+	find_package(SDL2 REQUIRED)
+endif()
+
+#####################################################################
+
 add_library(${PROJECT_NAME} MODULE)
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PROJECT_SOURCES)
