@@ -118,7 +118,7 @@ int PM_FlyMove(void)
 			break; // moved the entire distance
 
 		// save entity for contact
-		pmove->touchindex[pmove->numtouch] = trace.ent;
+		pmove->touchindex[pmove->numtouch].ent = trace.ent;
 		pmove->numtouch++;
 
 		if(trace.plane.normal[2] > 0.7)
@@ -563,7 +563,7 @@ void PM_CatagorizePosition(void)
 		// standing on an entity other than the world
 		if(tr.ent > 0)
 		{
-			pmove->touchindex[pmove->numtouch] = tr.ent;
+			pmove->touchindex[pmove->numtouch].ent = tr.ent;
 			pmove->numtouch++;
 		}
 	}
