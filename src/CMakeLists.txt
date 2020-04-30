@@ -24,11 +24,18 @@ add_subdirectory(pm_shared)
 add_subdirectory(game)
 
 if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
-	add_subdirectory(cl_dll)
 	add_subdirectory(dlls)
-elseif(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
-	add_subdirectory(gameui)
 endif()
 
 add_subdirectory(dedicated)
-add_subdirectory(launcher)
+
+# If not building as dedicated server then build these modules too
+if(NOT OGS_DEDICATED)
+	if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
+		add_subdirectory(cl_dll)
+	elseif(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
+		add_subdirectory(gameui)
+	endif()
+
+	add_subdirectory(launcher)
+endif()
