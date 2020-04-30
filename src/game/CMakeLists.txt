@@ -1,4 +1,7 @@
 add_subdirectory(shared)
 
-add_subdirectory(client)
+if(NOT OGS_DEDICATED)
+	add_subdirectory(client)
+endif()
+
 add_subdirectory(server)
