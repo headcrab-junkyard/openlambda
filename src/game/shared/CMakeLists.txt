@@ -7,14 +7,16 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/hl HL_SOURCES)
 
 ###############################################################################
 
-add_library(${PROJECT_NAME}-client STATIC)
+if(NOT OGS_DEDICATED)
+	add_library(${PROJECT_NAME}-client STATIC)
 
-target_compile_definitions(${PROJECT_NAME}-client PRIVATE OGS_CLIENT_DLL)
+	target_compile_definitions(${PROJECT_NAME}-client PRIVATE OGS_CLIENT_DLL)
 
-target_sources(${PROJECT_NAME}-client
-	PRIVATE ${COMMON_SOURCES}
-	PRIVATE ${HL_SOURCES}
-)
+	target_sources(${PROJECT_NAME}-client
+		PRIVATE ${COMMON_SOURCES}
+		PRIVATE ${HL_SOURCES}
+	)
+endif()
 
 ###############################################################################
 
