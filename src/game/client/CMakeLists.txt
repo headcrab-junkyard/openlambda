@@ -8,6 +8,8 @@ endif()
 
 add_library(${PROJECT_NAME} ${LIB_TYPE})
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../shared)
+
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PROJECT_SOURCES)
 
 target_sources(${PROJECT_NAME}
