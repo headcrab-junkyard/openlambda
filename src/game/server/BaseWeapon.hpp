@@ -25,6 +25,9 @@
 class CBaseWeapon : public CBaseItem
 {
 public:
+	//CBaseWeapon();
+	virtual ~CBaseWeapon();
+	
 	virtual void PrimaryAttack(){}
 	virtual void SecondaryAttack(){}
 	
@@ -49,4 +52,14 @@ public:
 	virtual bool UseDecrement() const {return false;}
 	
 	virtual bool IsUsable() const {return true;}
+protected:
+	float mfNextPrimaryAttack{0.0f};
+	float mfNextSecondaryAttack{0.0f};
+	
+	float mfFireRate{0.0f};
+	
+	float mfMinRange{0.0f};
+	float mfMaxRange{0.0f};
+	
+	bool mbFiresUnderwater{false};
 };
