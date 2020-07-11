@@ -28,12 +28,18 @@ class CBaseWeapon;
 class CBaseItem : public CBaseEntity
 {
 public:
+	//CBaseItem();
+	virtual ~CBaseItem();
+	
+	virtual void Think();
+	
 	virtual void PreFrame(){}
 	virtual void PostFrame(){}
 	
 	virtual void Drop(){}
 	virtual void Kill(){}
 	
+	//virtual void GiveToPlayer(CBasePlayer *apPlayer){}
 	virtual bool AddToPlayer(CBasePlayer *apPlayer){return false;}
 	virtual void AttachToPlayer(CBasePlayer *apPlayer){}
 	
@@ -44,14 +50,28 @@ public:
 	
 	virtual bool CanDeploy() const {return false;}
 	virtual bool CanHolster() const {return false;}
+	virtual bool CanDrop() const {return false;} // CS Only
 	
 	virtual void UpdateItemInfo(){}
-	virtual void UpdateClientData(CBasePlayer *apPlayer);
+	virtual void UpdateClientData(CBasePlayer *apPlayer){}
 	
-	int PrimaryAmmoIndex() const;
-	int SecondaryAmmoIndex() const;
+	virtual void ItemPreFrame(){}
+	virtual void ItemPostFrame(){}
+	virtual void ItemHolsterFrame(){}
+	virtual void ItemBusyFrame(){}
 	
-	int ItemSlot() const;
+	virtual float GetMaxSpeed() const {return 1.0f;} // CS Only
 	
-	CBaseWeapon *GetWeaponPtr() const;
+	int PrimaryAmmoIndex() const {return 0;}
+	int SecondaryAmmoIndex() const {return 0;}
+	
+	int ItemSlot() const {return 0;}
+	
+	CBaseWeapon *GetWeaponPtr() const {return nullptr;}
+protected:
+	float mfNextPrimaryAttackTime{0.0f};
+	float mfNextSecondaryAttackTime{0.0f};
+	
+	bool mbHolstered{false};
+	bool mbReloading{false};
 };
