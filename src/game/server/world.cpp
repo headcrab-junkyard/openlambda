@@ -220,10 +220,55 @@ void CWorldSpawn::Spawn()
 	gpEngine->pfnLightStyle(63, "a");
 };
 
-bool CWorldSpawn::HandleKeyValue(KeyValueData *apKVData)
+bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &asValue)
 {
-	// TODO
-	return false;
+	if(asKey == "skyname")
+	{
+		gpEngine->pfnCVarSetString("sv_skyname", asValue.c_str());
+		return true;
+	}
+	else if(asKey == "sounds")
+	{
+		gpGlobals->cdAudioTrack = std::stoi(asValue);
+		return true;
+	}
+	else if(asKey == "WaveHeight")
+	{
+		return true;
+	}
+	else if(asKey == "MaxRange")
+	{
+		self->speed = std::stof(asValue);
+		return true;
+	}
+	else if(asKey == "chaptertitle")
+	{
+		return true;
+	}
+	else if(asKey == "startdark")
+	{
+		return true;
+	}
+	else if(asKey == "newunit")
+	{
+		if(std::stoi(asValue))
+			gpEngine->pfnCVarSetFloat("sv_newunit", "1");
+		return true;
+	}
+	else if(asKey == "gametitle")
+	{
+		return true;
+	}
+	else if(asKey == "mapteams")
+	{
+		return true;
+	}
+	else if(asKey == "defaultteam")
+	{
+		return true;
+	};
+	
+	return CBaseEntity::HandleKeyValue(asKey, asValue);
 };
 
 /*
@@ -242,40 +287,60 @@ class CBodyQue : public CBaseEntity
 
 LINK_ENTITY_TO_CLASS(bodyque, CBodyQue);
 
-void InitBodyQue()
+static void InitBodyQue()
 {
 	// TODO
 /*
 	bodyque_head = gpEngine->pfnSpawn();
 	bodyque_head->v.classname = "bodyque";
-	bodyque_head->v.owner = gpEngine->pfnSpawn();
-	bodyque_head->v.owner->v.classname = "bodyque";
-	bodyque_head->v.owner->v.owner = gpEngine->pfnSpawn();
-	bodyque_head->v.owner->v.owner->v.classname = "bodyque";
-	bodyque_head->v.owner->v.owner->v.owner = gpEngine->pfnSpawn();
-	bodyque_head->v.owner->v.owner->v.owner->v.classname = "bodyque";
+	
+	// Reserve 3 more slots for dead bodies
+	//for(int i = 0; i < 3; ++i)
+	//{
+		bodyque_head->v.owner = gpEngine->pfnSpawn();
+		bodyque_head->v.owner->v.classname = "bodyque";
+		
+		bodyque_head->v.owner->v.owner = gpEngine->pfnSpawn();
+		bodyque_head->v.owner->v.owner->v.classname = "bodyque";
+		
+		bodyque_head->v.owner->v.owner->v.owner = gpEngine->pfnSpawn();
+		bodyque_head->v.owner->v.owner->v.owner->v.classname = "bodyque";
+	//};
+	
 	bodyque_head->v.owner->v.owner->v.owner->v.owner = bodyque_head;
 */
 };
 
 // make a body que entry for the given ent so the ent can be
 // respawned elsewhere
-void CopyToBodyQue(edict_t *ent)
+void CopyToBodyQue(entvars_t *ent)
 {
-	// TODO
-/*
-	bodyque_head.angles = ent.angles;
-	bodyque_head.model = ent.model;
-	bodyque_head.modelindex = ent.modelindex;
-	bodyque_head.frame = ent.frame;
-	bodyque_head.colormap = ent.colormap;
-	bodyque_head.movetype = ent.movetype;
-	bodyque_head.velocity = ent.velocity;
-	bodyque_head.flags = 0;
+	if(ent->effects & EF_NODRAW)
+		return;
 	
-	gpEngine->pfnSetOrigin(bodyque_head, ent.origin);
-	gpEngine->pfnSetSize(bodyque_head, ent.mins, ent.maxs);
+	auto pBodyQueVars{gpEngine->pfnGetVarsOfEntity(bodyque_head)};
 	
-	bodyque_head = bodyque_head.owner;
-*/
+	pBodyQueVars->angles = ent->angles;
+	pBodyQueVars->model = ent->model;
+	pBodyQueVars->modelindex = ent->modelindex;
+	pBodyQueVars->frame = ent->frame;
+	pBodyQueVars->colormap = ent->colormap;
+	pBodyQueVars->movetype = MOVETYPE_TOSS; // TODO: was ent->movetype
+	pBodyQueVars->velocity = ent->velocity;
+	pBodyQueVars->flags = 0;
+	
+	pBodyQueVars->deadflag = ent->deadflag;
+	
+	pBodyQueVars->renderfx = kRenderFxDeadPlayer; // TODO
+	pBodyQueVars->renderamt = GetEntityIndex(GetEntityFromVars(ent)); // TODO
+	
+	pBodyQueVars->effects = ent->effects | EF_NOINTERP;
+	
+	pBodyQueVars->sequence = ent->sequence;
+	pBodyQueVars->animtime = ent->animtime;
+	
+	gpEngine->pfnSetOrigin(pBodyQueVars, ent->origin);
+	gpEngine->pfnSetSize(pBodyQueVars, ent->mins, ent->maxs);
+	
+	bodyque_head = pBodyQueVars->owner;
 };
