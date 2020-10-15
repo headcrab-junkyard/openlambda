@@ -25,7 +25,8 @@
 #include "Game.hpp"
 #include "Util.hpp"
 
-LINK_ENTITY_TO_CLASS(player, CBasePlayer)
+
+LINK_ENTITY_TO_CLASS(player, CBasePlayer); // TODO
 
 CBasePlayer::CBasePlayer() : mpGame(gpGame){}
 
@@ -34,6 +35,7 @@ void CBasePlayer::Spawn()
 	self->classname = "player";
 	SetMaxHealth(100);
 	SetHealth(GetMaxHealth());
+	SetArmorValue(0);
 	self->takedamage = DAMAGE_AIM;
 	SetSolidity(SOLID_SLIDEBOX);
 	SetMoveType(MOVETYPE_WALK);
@@ -41,6 +43,12 @@ void CBasePlayer::Spawn()
 	SetFlags(FL_CLIENT);
 	self->air_finished = gpGlobals->time + 12;
 	self->dmg = 2; // initial water damage
+	
+	self->dmg_take = 0;
+	self->dmg_save = 0;
+	
+	SetFriction(1.0);
+	SetGravity(1.0);
 	
 /*
 	self->super_damage_finished = 0;
@@ -74,4 +82,135 @@ void CBasePlayer::Spawn()
 	SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
 	
 	mpGame->GetRules()->OnPlayerSpawn(this);
+};
+
+int CBasePlayer::TakeDamage(const CBaseEntity &aInflictor, const CBaseEntity &aAttacker, float afDamage, int anDmgTypeBitSum)
+{
+	// Already ded :P
+	if(!IsAlive())
+		return 0;
+	
+	if(!gpGame->GetRules()->PlayerCanTakeDamage(*this, aAttacker)) // TODO: this also can be moved inside the game rules' PlayerTakeDamage method
+		return 0;
+	
+	float fDmgTaken{0.0f};
+	
+	fDmgTaken = gpGame->GetRules()->PlayerTakeDamage(*this, aInflictor, aAttacker, afDamage, anDmgTypeBitSum);
+	
+	return fDmgTaken;
+};
+
+void CBasePlayer::RemoveAllItems(int anFlags)
+{
+};
+
+void CBasePlayer::Killed(const CBaseEntity &aAttacker, const CBaseEntity &aLastInflictor, int anGib)
+{
+	gpGame->GetRules()->PlayerKilled(*this, aAttacker, aLastInflictor);
+	
+	SetAnimation(PLAYER_DIE);
+	
+	DeathSound();
+	
+	SetThinkCallback(CBasePlayer::DeathThink);
+	SetNextThink(gpGlobals->time + 0.1);
+};
+
+void CBasePlayer::SetAnimation(eAnimType aeAnimType)
+{
+	if(self->flags & FL_FROZEN)
+	{
+		aeAnimType = PLAYER_IDLE;
+	};
+	
+	switch(aeAnimType)
+	{
+		// TODO:
+	};
+};
+
+void CBasePlayer::DeathThink()
+{
+	respawn(self);
+	SetNextThink(-1);
+};
+
+void CBasePlayer::Duck()
+{
+	if((self->button & IN_DUCK) && GetIdealActivity() != ACT_LEAP)
+		SetAnimation(PLAYER_WALK);
+};
+
+void CBasePlayer::PreThink()
+{
+	gpGame->GetRules()->PlayerThink(*this);
+	
+	ItemPreFrame();
+	WaterMove();
+	
+	if(self->deadflag >= DEAD_DYING)
+	{
+		DeathThink();
+		return;
+	};
+};
+
+void CBasePlayer::PostThink()
+{
+	ItemPostFrame();
+};
+
+void CBasePlayer::SelectNextItem(int anItemID)
+{
+};
+
+void CBasePlayer::SelectPrevItem(int anItemID)
+{
+	// NOTE: nothing
+};
+
+void CBasePlayer::SelectItem(const char *asItem)
+{
+};
+
+void CBasePlayer::SelectLastItem()
+{
+};
+
+void CBasePlayer::GiveNamedItem(const char *asName)
+{
+};
+
+void CBasePlayer::HandleImpulseCommands()
+{
+	switch(self->impulse)
+	{
+	default:
+		CheatImpulseCommands(self->impulse);
+		break;
+	};
+	
+	self->impulse = 0;
+};
+
+bool CBasePlayer::AddItem(const CBaseItem &aItem)
+{
+	return false;
+};
+
+bool CBasePlayer::RemoveItem(const CBaseItem &aItem)
+{
+	return false;
+};
+
+void CBasePlayer::ItemPreFrame()
+{
+	if(mpActiveItem)
+		mpActiveItem->ItemPreFrame();
+};
+
+void CBasePlayer::ItemPostFrame()
+{
+	if(mpActiveItem)
+		mpActiveItem->ItemPostFrame();
 };
