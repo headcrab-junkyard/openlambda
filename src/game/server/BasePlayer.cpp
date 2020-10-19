@@ -26,8 +26,6 @@
 #include "Util.hpp"
 
 
-LINK_ENTITY_TO_CLASS(player, CBasePlayer); // TODO
-
 CBasePlayer::CBasePlayer() : mpGame(gpGame){}
 
 void CBasePlayer::Spawn()
