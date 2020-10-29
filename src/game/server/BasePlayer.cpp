@@ -24,7 +24,10 @@
 #include "BasePlayer.hpp"
 #include "Game.hpp"
 #include "Util.hpp"
+#include "IGameRules.hpp"
+#include "BaseItem.hpp"
 
+unsigned long modelindex_player{0};
 
 CBasePlayer::CBasePlayer() : mpGame(gpGame){}
 
@@ -37,9 +40,9 @@ void CBasePlayer::Spawn()
 	self->takedamage = DAMAGE_AIM;
 	SetSolidity(SOLID_SLIDEBOX);
 	SetMoveType(MOVETYPE_WALK);
-	self->show_hostile = 0;
+	//self->show_hostile = 0; // TODO
 	SetFlags(FL_CLIENT);
-	self->air_finished = gpGlobals->time + 12;
+	self->air_finished = gpGlobals->time + 12; // TODO: level.time in q2
 	self->dmg = 2; // initial water damage
 	
 	self->dmg_take = 0;
@@ -55,24 +58,24 @@ void CBasePlayer::Spawn()
 	self->invincible_finished = 0;
 */
 	SetEffects(0); // TODO: ClearEffects?
-	self->invincible_time = 0;
+	//self->invincible_time = 0; // TODO
 	
-	DecodeLevelParms();
+	//DecodeLevelParms(); // TODO
 	
-	W_SetCurrentAmmo();
+	//W_SetCurrentAmmo(); // TODO
 
-	self->attack_finished = gpGlobals->time;
-	self->th_pain = player_pain;
-	self->th_die = PlayerDie;
+	//self->attack_finished = gpGlobals->time; // TODO
+	//self->th_pain = player_pain; // TODO
+	//self->th_die = PlayerDie; // TODO
 	
 	self->deadflag = DEAD_NO;
 
 	// pausetime is set by teleporters to keep the player from moving a while
-	self->pausetime = 0;
+	//self->pausetime = 0; // TODO
 	
 	// oh, this is a hack!
 	SetModel("models/eyes.mdl");
-	modelindex_eyes = self->modelindex;
+	//modelindex_eyes = self->modelindex; // TODO
 
 	SetModel("models/player.mdl");
 	modelindex_player = self->modelindex;
@@ -88,12 +91,12 @@ int CBasePlayer::TakeDamage(const CBaseEntity &aInflictor, const CBaseEntity &aA
 	if(!IsAlive())
 		return 0;
 	
-	if(!gpGame->GetRules()->PlayerCanTakeDamage(*this, aAttacker)) // TODO: this also can be moved inside the game rules' PlayerTakeDamage method
+	if(!mpGame->GetRules()->PlayerCanTakeDamage(*this, aAttacker)) // TODO: this also can be moved inside the game rules' PlayerTakeDamage method
 		return 0;
 	
 	float fDmgTaken{0.0f};
 	
-	fDmgTaken = gpGame->GetRules()->PlayerTakeDamage(*this, aInflictor, aAttacker, afDamage, anDmgTypeBitSum);
+	fDmgTaken = mpGame->GetRules()->PlayerTakeDamage(*this, aInflictor, aAttacker, afDamage, anDmgTypeBitSum);
 	
 	return fDmgTaken;
 };
@@ -104,7 +107,7 @@ void CBasePlayer::RemoveAllItems(int anFlags)
 
 void CBasePlayer::Killed(const CBaseEntity &aAttacker, const CBaseEntity &aLastInflictor, int anGib)
 {
-	gpGame->GetRules()->PlayerKilled(*this, aAttacker, aLastInflictor);
+	mpGame->GetRules()->OnPlayerKilled(this, aAttacker, aLastInflictor);
 	
 	SetAnimation(PLAYER_DIE);
 	
@@ -135,13 +138,13 @@ void CBasePlayer::DeathThink()
 
 void CBasePlayer::Duck()
 {
-	if((self->button & IN_DUCK) && GetIdealActivity() != ACT_LEAP)
+	if((self->button & IN_DUCK) && GetIdealActivity() != ActivityType::Leap)
 		SetAnimation(PLAYER_WALK);
 };
 
 void CBasePlayer::PreThink()
 {
-	gpGame->GetRules()->PlayerThink(*this);
+	mpGame->GetRules()->PlayerThink(this);
 	
 	ItemPreFrame();
 	WaterMove();
@@ -184,11 +187,15 @@ void CBasePlayer::HandleImpulseCommands()
 	switch(self->impulse)
 	{
 	default:
-		CheatImpulseCommands(self->impulse);
+		HandleCheatImpulse(self->impulse);
 		break;
 	};
 	
 	self->impulse = 0;
+};
+
+void CBasePlayer::HandleCheatImpulse(int anImpulse)
+{
 };
 
 bool CBasePlayer::AddItem(const CBaseItem &aItem)

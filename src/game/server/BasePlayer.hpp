@@ -23,20 +23,69 @@
 
 #include "BaseEntity.hpp"
 
+class CGame;
+class CBaseItem;
+
 class CBasePlayer : public CBaseEntity
 {
 public:
+	CBasePlayer();
+	
+	void Spawn() override;
+	
+	int TakeDamage(const CBaseEntity &aInflictor, const CBaseEntity &aAttacker, float afDamage, int anDmgTypeBitSum) override;
+	
+	void Killed(const CBaseEntity &aAttacker, const CBaseEntity &aLastInflictor, int anGib) override;
+	
 	void PreThink();
 	void PostThink();
 	
-	void Jump();
+	void Jump(){}
 	void Duck();
 	
 	void HandleImpulseCommands();
 	
-	void UpdateClientData();
+	void UpdateClientData(){}
 	
-	bool ShouldFadeOnDeath() const;
+	bool ShouldFadeOnDeath() const {return false;}
 	
-	const idVec3 &GetGunPosition() const; // TODO: return by ref?
+	const idVec3 &GetGunPosition() const {return {};} // TODO: return by ref?
+protected:
+	virtual void RoundRespawn(){} // CS Only
+private:
+	void DeathSound();
+	void DeathThink();
+	
+	void WaterMove();
+	
+	void ItemPreFrame();
+	void ItemPostFrame();
+	
+	bool AddItem(const CBaseItem &aItem);
+	void GiveNamedItem(const char *asName);
+	
+	bool RemoveItem(const CBaseItem &aItem);
+	void RemoveAllItems(int anFlags);
+	
+	void SelectItem(const char *asName);
+	void SelectNextItem(int anID);
+	void SelectPrevItem(int anID);
+	void SelectLastItem();
+	
+	void SetAnimation(eAnimType aeAnimType);
+	
+	void HandleCheatImpulse(int anImpulse);
+	
+	enum class ActivityType : int
+	{
+		Leap
+	};
+	
+	ActivityType GetIdealActivity() const;
+	
+	bool IsAlive() const {return GetHealth() > 0;}
+private:
+	CGame *mpGame{nullptr};
+	
+	CBaseItem *mpActiveItem{nullptr};
 };
