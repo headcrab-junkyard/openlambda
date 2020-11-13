@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+Copyright (C) 2020 BlackPhrase
 
 This file is part of Quake III Arena source code.
 
@@ -33,7 +34,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#define DEBUG
 #define CTF
 
-#define MAX_ITEMS					256
+constexpr auto MAX_ITEMS{256};
+
 //bot flags
 #define BFL_STRAFERIGHT				1	//strafe to the right
 #define BFL_ATTACKED				2	//bot has attacked last ai frame
@@ -42,6 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BFL_AVOIDRIGHT				16	//avoid obstacles by going to the right
 #define BFL_IDEALVIEWSET			32	//bot has ideal view angles set
 #define BFL_FIGHTSUICIDAL			64	//bot is in a suicidal fight
+
 //long term goal types
 #define LTG_TEAMHELP				1	//help a team mate
 #define LTG_TEAMACCOMPANY			2	//accompany a team mate
@@ -58,6 +61,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LTG_ATTACKENEMYBASE			13	//attack the enemy base
 #define LTG_MAKELOVE_UNDER			14
 #define LTG_MAKELOVE_ONTOP			15
+
 //some goal dedication times
 #define TEAM_HELP_TIME				60	//1 minute teamplay help time
 #define TEAM_ACCOMPANY_TIME			600	//10 minutes teamplay accompany time
@@ -73,29 +77,34 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CTF_RUSHBASE_TIME			120	//2 minutes ctf rush base time
 #define CTF_RETURNFLAG_TIME			180	//3 minutes to return the flag
 #define CTF_ROAM_TIME				60	//1 minute ctf roam time
+
 //patrol flags
 #define PATROL_LOOP					1
 #define PATROL_REVERSE				2
 #define PATROL_BACK					4
+
 //teamplay task preference
 #define TEAMTP_DEFENDER				1
 #define TEAMTP_ATTACKER				2
+
 //CTF strategy
 #define CTFS_AGRESSIVE				1
+
 //copied from the aas file header
 #define PRESENCE_NONE				1
 #define PRESENCE_NORMAL				2
 #define PRESENCE_CROUCH				4
+
 //
-#define MAX_PROXMINES				64
+constexpr auto MAX_PROXMINES{64};
 
 //check points
 typedef struct bot_waypoint_s
 {
-	int			inuse;
-	char		name[32];
-	bot_goal_t	goal;
-	struct		bot_waypoint_s *next, *prev;
+	int			inuse{0};
+	char		name[32]{};
+	bot_goal_t	goal{};
+	bot_waypoint_s *next{nullptr}, *prev{nullptr};
 } bot_waypoint_t;
 
 #define MAX_ACTIVATESTACK		8
@@ -121,7 +130,11 @@ typedef struct bot_activategoal_s
 //bot state
 typedef struct bot_state_s
 {
-	int inuse;										//true if this state is used by a bot client
+public:
+	//resets the whole bot state
+	void ResetState();
+public:
+	bool inuse;										//true if this state is used by a bot client
 	int botthink_residual;							//residual for the bot thinks
 	int client;										//client number of the bot
 	int entitynum;									//entity number of the bot
@@ -279,8 +292,6 @@ typedef struct bot_state_s
 	int patrolflags;								//patrol flags
 } bot_state_t;
 
-//resets the whole bot state
-void BotResetState(bot_state_t *bs);
 //returns the number of bots in the game
 int NumBots(void);
 //returns info about the entity
@@ -290,10 +301,10 @@ extern float floattime;
 #define FloatTime() floattime
 
 // from the game source
-void	QDECL BotAI_Print(int type, char *fmt, ...);
-void	QDECL QDECL BotAI_BotInitialChat( bot_state_t *bs, char *type, ... );
+void	QDECL BotAI_Print(int type, const char *fmt, ...);
+void	QDECL BotAI_BotInitialChat( bot_state_t *bs, const char *type, ... );
 void	BotAI_Trace(bsp_trace_t *bsptrace, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int passent, int contentmask);
-int		BotAI_GetClientState( int clientNum, playerState_t *state );
-int		BotAI_GetEntityState( int entityNum, entityState_t *state );
+bool	BotAI_GetClientState( int clientNum, playerState_t *state );
+bool	BotAI_GetEntityState( int entityNum, entityState_t *state );
 int		BotAI_GetSnapshotEntity( int clientNum, int sequence, entityState_t *state );
-int		BotTeamLeader(bot_state_t *bs);
+bool	BotTeamLeader(bot_state_t *bs);

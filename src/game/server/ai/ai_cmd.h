@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+Copyright (C) 2020 BlackPhrase
 
 This file is part of Quake III Arena source code.
 
@@ -19,7 +20,10 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-//
+
+/// @file
+
+#pragma once
 
 /*****************************************************************************
  * name:		ai_cmd.h
@@ -32,6 +36,5 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 extern int notleader[MAX_CLIENTS];
 
-int BotMatchMessage(bot_state_t *bs, char *message);
+int BotMatchMessage(bot_state_t *bs, const char *message);
 void BotPrintTeamGoal(bot_state_t *bs);
-

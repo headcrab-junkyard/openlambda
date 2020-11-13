@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+Copyright (C) 2020 BlackPhrase
 
 This file is part of Quake III Arena source code.
 
@@ -19,7 +20,10 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-//
+
+/// @file
+
+#pragma once
 
 /*****************************************************************************
  * name:		ai_team.h
@@ -33,7 +37,5 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void BotTeamAI(bot_state_t *bs);
 int BotGetTeamMateTaskPreference(bot_state_t *bs, int teammate);
 void BotSetTeamMateTaskPreference(bot_state_t *bs, int teammate, int preference);
-void BotVoiceChat(bot_state_t *bs, int toclient, char *voicechat);
-void BotVoiceChatOnly(bot_state_t *bs, int toclient, char *voicechat);
-
-
+void BotVoiceChat(bot_state_t *bs, int toclient, const char *voicechat);
+void BotVoiceChatOnly(bot_state_t *bs, int toclient, const char *voicechat);

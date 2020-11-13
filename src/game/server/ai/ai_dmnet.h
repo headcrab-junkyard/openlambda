@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+Copyright (C) 2020 BlackPhrase
 
 This file is part of Quake III Arena source code.
 
@@ -19,7 +20,10 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-//
+
+/// @file
+
+#pragma once
 
 /*****************************************************************************
  * name:		ai_dmnet.h
@@ -30,7 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#define MAX_NODESWITCHES	50
+constexpr auto MAX_NODESWITCHES{50};
 
 void AIEnter_Intermission(bot_state_t *bs, char *s);
 void AIEnter_Observer(bot_state_t *bs, char *s);
@@ -56,6 +60,5 @@ int AINode_Battle_Chase(bot_state_t *bs);
 int AINode_Battle_Retreat(bot_state_t *bs);
 int AINode_Battle_NBG(bot_state_t *bs);
 
-void BotResetNodeSwitches(void);
+void BotResetNodeSwitches();
 void BotDumpNodeSwitches(bot_state_t *bs);
-

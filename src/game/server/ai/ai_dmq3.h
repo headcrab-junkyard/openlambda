@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+Copyright (C) 2020 BlackPhrase
 
 This file is part of Quake III Arena source code.
 
@@ -19,7 +20,10 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-//
+
+/// @file
+
+#pragma once
 
 /*****************************************************************************
  * name:		ai_dmq3.h
@@ -31,9 +35,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *****************************************************************************/
 
 //setup the deathmatch AI
-void BotSetupDeathmatchAI(void);
+void BotSetupDeathmatchAI();
 //shutdown the deathmatch AI
-void BotShutdownDeathmatchAI(void);
+void BotShutdownDeathmatchAI();
 //let the bot live within it's deathmatch AI net
 void BotDeathmatchAI(bot_state_t *bs, float thinktime);
 //free waypoints
@@ -49,33 +53,33 @@ void BotUpdateBattleInventory(bot_state_t *bs, int enemy);
 //use holdable items during battle
 void BotBattleUseItems(bot_state_t *bs);
 //return true if the bot is dead
-qboolean BotIsDead(bot_state_t *bs);
+bool BotIsDead(bot_state_t *bs);
 //returns true if the bot is in observer mode
-qboolean BotIsObserver(bot_state_t *bs);
+bool BotIsObserver(bot_state_t *bs);
 //returns true if the bot is in the intermission
-qboolean BotIntermission(bot_state_t *bs);
+bool BotIntermission(bot_state_t *bs);
 //returns true if the bot is in lava or slime
-qboolean BotInLavaOrSlime(bot_state_t *bs);
+bool BotInLavaOrSlime(bot_state_t *bs);
 //returns true if the entity is dead
-qboolean EntityIsDead(aas_entityinfo_t *entinfo);
+bool EntityIsDead(aas_entityinfo_t *entinfo);
 //returns true if the entity is invisible
-qboolean EntityIsInvisible(aas_entityinfo_t *entinfo);
+bool EntityIsInvisible(aas_entityinfo_t *entinfo);
 //returns true if the entity is shooting
-qboolean EntityIsShooting(aas_entityinfo_t *entinfo);
+bool EntityIsShooting(aas_entityinfo_t *entinfo);
 #ifdef MISSIONPACK
 //returns true if this entity has the kamikaze
-qboolean EntityHasKamikaze(aas_entityinfo_t *entinfo);
+bool EntityHasKamikaze(aas_entityinfo_t *entinfo);
 #endif
 // set a user info key/value pair
 void BotSetUserInfo(bot_state_t *bs, char *key, char *value);
 // set the team status (offense, defense etc.)
 void BotSetTeamStatus(bot_state_t *bs);
 //returns the name of the client
-char *ClientName(int client, char *name, int size);
+char *ClientName(int client, const char *name, int size);
 //returns an simplyfied client name
-char *EasyClientName(int client, char *name, int size);
+char *EasyClientName(int client, const char *name, int size);
 //returns the skin used by the client
-char *ClientSkin(int client, char *skin, int size);
+char *ClientSkin(int client, const char *skin, int size);
 // returns the appropriate synonym context for the current game type and situation
 int BotSynonymContext(bot_state_t *bs);
 // set last ordered task
@@ -103,7 +107,7 @@ bot_moveresult_t BotAttackMove(bot_state_t *bs, int tfl);
 //returns true if the bot and the entity are in the same team
 int BotSameTeam(bot_state_t *bs, int entnum);
 //returns true if teamplay is on
-int TeamPlayIsOn(void);
+int TeamPlayIsOn();
 // returns the client number of the team mate flag carrier (-1 if none)
 int BotTeamFlagCarrier(bot_state_t *bs);
 //returns visible team mate flag carrier if available
@@ -113,7 +117,7 @@ int BotEnemyFlagCarrierVisible(bot_state_t *bs);
 //get the number of visible teammates and enemies
 void BotVisibleTeamMatesAndEnemies(bot_state_t *bs, int *teammates, int *enemies, float range);
 //returns true if within the field of vision for the given angles
-qboolean InFieldOfVision(vec3_t viewangles, float fov, vec3_t angles);
+bool InFieldOfVision(vec3_t viewangles, float fov, vec3_t angles);
 //returns true and sets the .enemy field when an enemy is found
 int BotFindEnemy(bot_state_t *bs, int curenemy);
 //returns a roam goal
@@ -165,14 +169,14 @@ int BotGetAlternateRouteGoal(bot_state_t *bs, int base);
 //returns either the alternate route goal or the given goal
 bot_goal_t *BotAlternateRoute(bot_state_t *bs, bot_goal_t *goal);
 //create a new waypoint
-bot_waypoint_t *BotCreateWayPoint(char *name, vec3_t origin, int areanum);
+bot_waypoint_t *BotCreateWayPoint(const char *name, vec3_t origin, int areanum);
 //find a waypoint with the given name
-bot_waypoint_t *BotFindWayPoint(bot_waypoint_t *waypoints, char *name);
+bot_waypoint_t *BotFindWayPoint(bot_waypoint_t *waypoints, const char *name);
 //strstr but case insensitive
 char *stristr(char *str, char *charset);
 //returns the number of the client with the given name
-int ClientFromName(char *name);
-int ClientOnSameTeamFromName(bot_state_t *bs, char *name);
+int ClientFromName(const char *name);
+int ClientOnSameTeamFromName(bot_state_t *bs, const char *name);
 //
 int BotPointAreaNum(vec3_t origin);
 //
@@ -189,12 +193,12 @@ void BotMapScripts(bot_state_t *bs);
 extern int gametype;		//game type
 extern int maxclients;		//maximum number of clients
 
-extern vmCvar_t bot_grapple;
-extern vmCvar_t bot_rocketjump;
-extern vmCvar_t bot_fastchat;
-extern vmCvar_t bot_nochat;
-extern vmCvar_t bot_testrchat;
-extern vmCvar_t bot_challenge;
+extern cvar_t bot_grapple;
+extern cvar_t bot_rocketjump;
+extern cvar_t bot_fastchat;
+extern cvar_t bot_nochat;
+extern cvar_t bot_testrchat;
+extern cvar_t bot_challenge;
 
 extern bot_goal_t ctf_redflag;
 extern bot_goal_t ctf_blueflag;

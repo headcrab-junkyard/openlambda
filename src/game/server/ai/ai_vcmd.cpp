@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+Copyright (C) 2020 BlackPhrase
 
 This file is part of Quake III Arena source code.
 
@@ -19,7 +20,8 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-//
+
+/// @file
 
 /*****************************************************************************
  * name:		ai_vcmd.c
@@ -57,7 +59,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // for the voice chats
 #include "../../ui/menudef.h"
 
-
 typedef struct voiceCommand_s
 {
 	char *cmd;
@@ -86,7 +87,7 @@ void BotVoiceChat_GetFlag(bot_state_t *bs, int client, int mode) {
 	}
 	//
 	bs->decisionmaker = client;
-	bs->ordered = qtrue;
+	bs->ordered = true;
 	bs->order_time = FloatTime();
 	//set the time to send a message to the team mates
 	bs->teammessage_time = FloatTime() + 2 * random();
@@ -126,7 +127,7 @@ void BotVoiceChat_Offense(bot_state_t *bs, int client, int mode) {
 	if (gametype == GT_HARVESTER) {
 		//
 		bs->decisionmaker = client;
-		bs->ordered = qtrue;
+		bs->ordered = true;
 		bs->order_time = FloatTime();
 		//set the time to send a message to the team mates
 		bs->teammessage_time = FloatTime() + 2 * random();
@@ -145,7 +146,7 @@ void BotVoiceChat_Offense(bot_state_t *bs, int client, int mode) {
 	{
 		//
 		bs->decisionmaker = client;
-		bs->ordered = qtrue;
+		bs->ordered = true;
 		bs->order_time = FloatTime();
 		//set the time to send a message to the team mates
 		bs->teammessage_time = FloatTime() + 2 * random();
@@ -188,9 +189,14 @@ void BotVoiceChat_Defend(bot_state_t *bs, int client, int mode) {
 			) {
 		//
 		switch(BotTeam(bs)) {
-			case TEAM_RED: memcpy(&bs->teamgoal, &ctf_redflag, sizeof(bot_goal_t)); break;
-			case TEAM_BLUE: memcpy(&bs->teamgoal, &ctf_blueflag, sizeof(bot_goal_t)); break;
-			default: return;
+			case TEAM_RED:
+				memcpy(&bs->teamgoal, &ctf_redflag, sizeof(bot_goal_t));
+				break;
+			case TEAM_BLUE:
+				memcpy(&bs->teamgoal, &ctf_blueflag, sizeof(bot_goal_t));
+				break;
+			default:
+				return;
 		}
 	}
 	else {
@@ -198,7 +204,7 @@ void BotVoiceChat_Defend(bot_state_t *bs, int client, int mode) {
 	}
 	//
 	bs->decisionmaker = client;
-	bs->ordered = qtrue;
+	bs->ordered = true;
 	bs->order_time = FloatTime();
 	//set the time to send a message to the team mates
 	bs->teammessage_time = FloatTime() + 2 * random();
@@ -239,7 +245,7 @@ void BotVoiceChat_Patrol(bot_state_t *bs, int client, int mode) {
 	bs->lead_time = 0;
 	bs->lastgoal_ltgtype = 0;
 	//
-	BotAI_BotInitialChat(bs, "dismissed", NULL);
+	BotAI_BotInitialChat(bs, "dismissed", nullptr);
 	trap_BotEnterChat(bs->cs, client, CHAT_TELL);
 	BotVoiceChatOnly(bs, -1, VOICECHAT_ONPATROL);
 	//
@@ -278,13 +284,13 @@ void BotVoiceChat_Camp(bot_state_t *bs, int client, int mode) {
 	}
 	//if the other is not visible
 	if (bs->teamgoal.entitynum < 0) {
-		BotAI_BotInitialChat(bs, "whereareyou", EasyClientName(client, netname, sizeof(netname)), NULL);
+		BotAI_BotInitialChat(bs, "whereareyou", EasyClientName(client, netname, sizeof(netname)), nullptr);
 		trap_BotEnterChat(bs->cs, client, CHAT_TELL);
 		return;
 	}
 	//
 	bs->decisionmaker = client;
-	bs->ordered = qtrue;
+	bs->ordered = true;
 	bs->order_time = FloatTime();
 	//set the time to send a message to the team mates
 	bs->teammessage_time = FloatTime() + 2 * random();
@@ -330,13 +336,13 @@ void BotVoiceChat_FollowMe(bot_state_t *bs, int client, int mode) {
 	}
 	//if the other is not visible
 	if (bs->teamgoal.entitynum < 0) {
-		BotAI_BotInitialChat(bs, "whereareyou", EasyClientName(client, netname, sizeof(netname)), NULL);
+		BotAI_BotInitialChat(bs, "whereareyou", EasyClientName(client, netname, sizeof(netname)), nullptr);
 		trap_BotEnterChat(bs->cs, client, CHAT_TELL);
 		return;
 	}
 	//
 	bs->decisionmaker = client;
-	bs->ordered = qtrue;
+	bs->ordered = true;
 	bs->order_time = FloatTime();
 	//the team mate
 	bs->teammate = client;
@@ -392,7 +398,7 @@ void BotVoiceChat_ReturnFlag(bot_state_t *bs, int client, int mode) {
 	}
 	//
 	bs->decisionmaker = client;
-	bs->ordered = qtrue;
+	bs->ordered = true;
 	bs->order_time = FloatTime();
 	//set the time to send a message to the team mates
 	bs->teammessage_time = FloatTime() + 2 * random();
@@ -426,7 +432,7 @@ void BotVoiceChat_StopLeader(bot_state_t *bs, int client, int mode) {
 
 	if (!Q_stricmp(bs->teamleader, ClientName(client, netname, sizeof(netname)))) {
 		bs->teamleader[0] = '\0';
-		notleader[client] = qtrue;
+		notleader[client] = true;
 	}
 }
 
@@ -438,12 +444,13 @@ BotVoiceChat_WhoIsLeader
 void BotVoiceChat_WhoIsLeader(bot_state_t *bs, int client, int mode) {
 	char netname[MAX_MESSAGE_SIZE];
 
-	if (!TeamPlayIsOn()) return;
+	if (!TeamPlayIsOn())
+		return;
 
 	ClientName(bs->client, netname, sizeof(netname));
 	//if this bot IS the team leader
 	if (!Q_stricmp(netname, bs->teamleader)) {
-		BotAI_BotInitialChat(bs, "iamteamleader", NULL);
+		BotAI_BotInitialChat(bs, "iamteamleader", nullptr);
 		trap_BotEnterChat(bs->cs, 0, CHAT_TEAM);
 		BotVoiceChatOnly(bs, -1, VOICECHAT_STARTLEADER);
 	}
@@ -464,7 +471,7 @@ void BotVoiceChat_WantOnDefense(bot_state_t *bs, int client, int mode) {
 	BotSetTeamMateTaskPreference(bs, client, preference);
 	//
 	EasyClientName(client, netname, sizeof(netname));
-	BotAI_BotInitialChat(bs, "keepinmind", netname, NULL);
+	BotAI_BotInitialChat(bs, "keepinmind", netname, nullptr);
 	trap_BotEnterChat(bs->cs, client, CHAT_TELL);
 	BotVoiceChatOnly(bs, client, VOICECHAT_YES);
 	trap_EA_Action(bs->client, ACTION_AFFIRMATIVE);
@@ -485,7 +492,7 @@ void BotVoiceChat_WantOnOffense(bot_state_t *bs, int client, int mode) {
 	BotSetTeamMateTaskPreference(bs, client, preference);
 	//
 	EasyClientName(client, netname, sizeof(netname));
-	BotAI_BotInitialChat(bs, "keepinmind", netname, NULL);
+	BotAI_BotInitialChat(bs, "keepinmind", netname, nullptr);
 	trap_BotEnterChat(bs->cs, client, CHAT_TELL);
 	BotVoiceChatOnly(bs, client, VOICECHAT_YES);
 	trap_EA_Action(bs->client, ACTION_AFFIRMATIVE);
@@ -509,20 +516,19 @@ voiceCommand_t voiceCommands[] = {
 	{VOICECHAT_WHOISLEADER, BotVoiceChat_WhoIsLeader },
 	{VOICECHAT_WANTONDEFENSE, BotVoiceChat_WantOnDefense },
 	{VOICECHAT_WANTONOFFENSE, BotVoiceChat_WantOnOffense },
-	{NULL, BotVoiceChat_Dummy}
+	{nullptr, BotVoiceChat_Dummy}
 };
 
-int BotVoiceChatCommand(bot_state_t *bs, int mode, char *voiceChat) {
+int BotVoiceChatCommand(bot_state_t *bs, int mode, const char *voiceChat)
+{
 	int i, voiceOnly, clientNum, color;
 	char *ptr, buf[MAX_MESSAGE_SIZE], *cmd;
 
-	if (!TeamPlayIsOn()) {
-		return qfalse;
-	}
+	if (!TeamPlayIsOn())
+		return false;
 
-	if ( mode == SAY_ALL ) {
-		return qfalse;	// don't do anything with voice chats to everyone
-	}
+	if ( mode == SAY_ALL )
+		return false;	// don't do anything with voice chats to everyone
 
 	Q_strncpyz(buf, voiceChat, sizeof(buf));
 	cmd = buf;
@@ -536,15 +542,14 @@ int BotVoiceChatCommand(bot_state_t *bs, int mode, char *voiceChat) {
 	while (*cmd && *cmd <= ' ') *cmd++ = '\0';
 	color = atoi(ptr);
 
-	if (!BotSameTeam(bs, clientNum)) {
-		return qfalse;
-	}
+	if (!BotSameTeam(bs, clientNum))
+		return false;
 
 	for (i = 0; voiceCommands[i].cmd; i++) {
 		if (!Q_stricmp(cmd, voiceCommands[i].cmd)) {
 			voiceCommands[i].func(bs, clientNum, mode);
-			return qtrue;
+			return true;
 		}
 	}
-	return qfalse;
+	return false;
 }
