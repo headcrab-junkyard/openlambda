@@ -30,7 +30,7 @@
 
 #include "engine_hlds_api.h"
 
-#include "interface.h"
+#include "tier1/interface.h"
 
 #ifdef _WIN32
 static bool sc_return_on_enter{false};
@@ -84,31 +84,34 @@ char *Sys_ConsoleInput()
 			putch('\n');
 			len = 0;
 			return text;
-		}
+		};
+
 		if(c == 8)
 		{
-			//if (len) // TODO
+			//if(len) // TODO
 			{
 				putch(' ');
 				putch(c);
 				len--;
 				text[len] = 0;
-			}
+			};
 			continue;
-		}
+		};
+
 		text[len] = c;
 		len++;
 		text[len] = 0;
+
 		if(len == sizeof(text))
 			len = 0;
-	}
+	};
 
-	return NULL;
+	return nullptr;
 /*
 #else // if not SWDS
-	static char text[256];
+	static char text[256]{};
 	static int len;
-	INPUT_RECORD recs[1024];
+	INPUT_RECORD recs[1024]{};
 	int count;
 	int i, dummy;
 	int ch, numread, numevents;
@@ -136,7 +139,7 @@ char *Sys_ConsoleInput()
 				switch(ch)
 				{
 				case '\r':
-					WriteFile(houtput, "\r\n", 2, &dummy, NULL);
+					WriteFile(houtput, "\r\n", 2, &dummy, nullptr);
 
 					if(len)
 					{
@@ -150,33 +153,32 @@ char *Sys_ConsoleInput()
 						text[0] = '\r';
 						len = 0;
 						return text;
-					}
+					};
 
 					break;
 
 				case '\b':
-					WriteFile(houtput, "\b \b", 3, &dummy, NULL);
+					WriteFile(houtput, "\b \b", 3, &dummy, nullptr);
 					if(len)
-					{
 						len--;
-					}
+
 					break;
 
 				default:
 					if(ch >= ' ')
 					{
-						WriteFile(houtput, &ch, 1, &dummy, NULL);
+						WriteFile(houtput, &ch, 1, &dummy, nullptr);
 						text[len] = ch;
 						len = (len + 1) & 0xff;
-					}
+					};
 
 					break;
-				}
-			}
-		}
-	}
+				};
+			};
+		};
+	};
 
-	return NULL;
+	return nullptr;
 #endif // SWDS
 */
 
@@ -190,12 +192,12 @@ char *Sys_ConsoleInput()
 	FD_SET(0, &fdset); // stdin
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
-	if(select(1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
-		return NULL;
+	if(select(1, &fdset, nullptr, nullptr, &timeout) == -1 || !FD_ISSET(0, &fdset))
+		return nullptr;
 
 	len = read(0, text, sizeof(text));
 	if(len < 1)
-		return NULL;
+		return nullptr;
 	text[len - 1] = 0; // rip off the /n and terminate
 
 	return text;
