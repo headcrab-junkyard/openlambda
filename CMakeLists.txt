@@ -35,6 +35,15 @@ set_property(CACHE OPENLAMBDA_TARGET_ENGINE PROPERTY STRINGS
 
 message(STATUS "Building for ${OPENLAMBDA_TARGET_ENGINE} engine!")
 
+# Set the game/mod type
+set(OPENLAMBDA_GAME_TYPE "Template" CACHE STRING "Specify the game/mod that the code will be built for")
+set_property(CACHE OPENLAMBDA_GAME_TYPE PROPERTY STRINGS
+	"Template"
+	"HL"
+)
+
+message(STATUS "Building for ${OPENLAMBDA_GAME_TYPE} game/mod!")
+
 #####################################################################
 
 # Add subdirectories
