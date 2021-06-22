@@ -26,7 +26,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	OUTPUT_NAME "client"
 )
 
-target_link_libraries(${PROJECT_NAME} ogs-tier1 ogs-pm_shared ogs-mathlib ogs_game_shared-client ogs-game-client)
+target_link_libraries(${PROJECT_NAME} ogs-tier1 ogs-pm_shared ogs-mathlib ogs-game-client) #ogs_game_shared-client
 
 if(WIN32)
 	target_link_libraries(${PROJECT_NAME} winmm) #joyGetPosEx
