@@ -16,7 +16,7 @@ target_sources(${PROJECT_NAME}
 	PRIVATE ${PROJECT_SOURCES}
 )
 
-target_link_libraries(${PROJECT_NAME} ogs_game_shared-client)
+#target_link_libraries(${PROJECT_NAME} ogs_game_shared-client)
 
 if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
 	set_target_properties(${PROJECT_NAME} PROPERTIES
