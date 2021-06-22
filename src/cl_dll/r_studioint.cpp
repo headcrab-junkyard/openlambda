@@ -18,6 +18,9 @@
 
 /// @file
 
+#include <cstring>
+
+#include "const.h"
 #include "r_studioint.h"
 
 engine_studio_api_t gStudio;

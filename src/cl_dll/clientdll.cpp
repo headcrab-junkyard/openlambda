@@ -20,14 +20,14 @@
 
 #include "const.h"
 #include "engine.h"
-#include "interface.h"
+#include "tier1/interface.h"
 #include "input.h"
 
 #include "next/game/client/IClientGame.hpp"
 
 extern "C"
 {
-#include "pm_shared.h"
+#include "pm_shared/pm_shared.h"
 };
 
 extern IClientGame *gpClientGame;
