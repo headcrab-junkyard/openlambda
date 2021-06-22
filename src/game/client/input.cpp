@@ -80,7 +80,7 @@ state bit 2 is edge triggered on the down to up transition
 
 kbutton_t in_mlook;
 kbutton_t in_klook;
-kbutton_t in_jlook; // TODO
+kbutton_t in_jlook;
 kbutton_t in_left;
 kbutton_t in_right;
 kbutton_t in_forward;
@@ -625,6 +625,8 @@ void InitInput()
 	gpEngine->pfnAddCommand("-klook", IN_KLookUp);
 	gpEngine->pfnAddCommand("+mlook", IN_MLookDown);
 	gpEngine->pfnAddCommand("-mlook", IN_MLookUp);
+	gpEngine->pfnAddCommand("+jlook", IN_JLookDown);
+	gpEngine->pfnAddCommand("-jlook", IN_JLookUp);
 	
 	lookspring = gpEngine->pfnRegisterVariable("lookspring", "0", FCVAR_ARCHIVE);
 	lookstrafe = gpEngine->pfnRegisterVariable("lookstrafe", "0", FCVAR_ARCHIVE);
