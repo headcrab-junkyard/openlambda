@@ -317,6 +317,15 @@ void IN_Attack2Up()
 	KeyUp(&in_attack2);
 }
 
+void IN_ReloadDown()
+{
+	KeyDown(&in_reload);
+}
+void IN_ReloadUp()
+{
+	KeyUp(&in_reload);
+}
+
 void IN_UseDown()
 {
 	KeyDown(&in_use);
@@ -325,6 +334,7 @@ void IN_UseUp()
 {
 	KeyUp(&in_use);
 }
+
 void IN_JumpDown()
 {
 	KeyDown(&in_jump);
@@ -332,6 +342,15 @@ void IN_JumpDown()
 void IN_JumpUp()
 {
 	KeyUp(&in_jump);
+}
+
+void IN_DuckDown()
+{
+	KeyDown(&in_duck);
+}
+void IN_DuckUp()
+{
+	KeyUp(&in_duck);
 }
 
 void IN_Impulse()
@@ -593,10 +612,14 @@ void InitInput()
 	gpEngine->pfnAddCommand("-attack", IN_AttackUp);
 	gpEngine->pfnAddCommand("+attack2", IN_Attack2Down);
 	gpEngine->pfnAddCommand("-attack2", IN_Attack2Up);
+	gpEngine->pfnAddCommand("+reload", IN_DuckDown);
+	gpEngine->pfnAddCommand("-reload", IN_DuckUp);
 	gpEngine->pfnAddCommand("+use", IN_UseDown);
 	gpEngine->pfnAddCommand("-use", IN_UseUp);
 	gpEngine->pfnAddCommand("+jump", IN_JumpDown);
 	gpEngine->pfnAddCommand("-jump", IN_JumpUp);
+	gpEngine->pfnAddCommand("+duck", IN_DuckDown);
+	gpEngine->pfnAddCommand("-duck", IN_DuckUp);
 	gpEngine->pfnAddCommand("impulse", IN_Impulse);
 	gpEngine->pfnAddCommand("+klook", IN_KLookDown);
 	gpEngine->pfnAddCommand("-klook", IN_KLookUp);
