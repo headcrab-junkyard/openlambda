@@ -34,6 +34,8 @@ extern IClientGame *gpClientGame;
 
 cl_enginefunc_t *gpEngine{nullptr};
 
+IBaseInterface *EngineFactoryLocal(const char *name, int *retval);
+
 // TODO
 /*
 int UserMsgHook_Test(const char *sName, int nSize, void *pBuf)
@@ -49,13 +51,15 @@ int Initialize(cl_enginefunc_t *apEngFuncs, int anVersion)
 	
 	gpEngine = apEngFuncs;
 	
+	if(!gpClientGame->Init(EngineFactoryLocal))
+		return 0;
+	
 	//gpEngine->pfnHookUserMsg("Test", UserMsgHook_Test);
 	return 1;
 };
 
 void HUD_Init()
 {
-	gpClientGame->Init();
 };
 
 int HUD_VidInit()
@@ -100,6 +104,8 @@ int CL_IsThirdPerson()
 
 void CL_GetCameraOffsets(float *ofs)
 {
+	if(!ofs)
+		return;
 };
 
 struct kbutton_s *KB_FindKey(const char *name)
@@ -164,12 +170,19 @@ int HUD_ConnectionlessPacket(const struct netadr_s *net_from, const char *args, 
 
 int HUD_GetHullBounds(int hullnumber, float *mins, float *maxs)
 {
+	if(!mins || !maxs)
+		return 0;
+	
+	switch(hullnumber)
+	{
+	};
+	
 	return 0;
 };
 
 void HUD_Frame(double time)
 {
-	gpClientGame->Update(time);
+	gpClientGame->Update(/*time*/);
 };
 
 int HUD_Key_Event(int down, int keynum, const char *pszCurrentBinding)
@@ -196,6 +209,11 @@ void HUD_DirectorMessage(int iSize, void *pbuf)
 
 void HUD_ChatInputPosition(int *x, int *y)
 {
+	if(x)
+		*x = 0;
+	
+	if(y)
+		*y = 0;
 };
 
 int HUD_GetPlayerTeam(int playernum)
