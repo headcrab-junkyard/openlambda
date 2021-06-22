@@ -87,6 +87,11 @@ DWORD dwControlMap[JOY_MAX_AXES];
 cvar_t *m_filter;
 cvar_t *sensitivity;
 
+static cvar_t *m_customaccel;
+static cvar_t *m_customaccel_scale;
+static cvar_t *m_customaccel_max;
+static cvar_t *m_customaccel_exponent;
+
 // none of these cvars are saved over a session
 // this means that advanced controller configuration needs to be executed
 // each time.  this avoids any problems with getting back to a default usage
@@ -1063,6 +1068,12 @@ void IN_Init()
 	joy_yawsensitivity = gpEngine->pfnRegisterVariable("joyyawsensitivity", "-1.0", 0);
 	joy_wwhack1 = gpEngine->pfnRegisterVariable("joywwhack1", "0.0", 0);
 	joy_wwhack2 = gpEngine->pfnRegisterVariable("joywwhack2", "0.0", 0);
+	
+	// TODO: handle
+	m_customaccel = gpEngine->pfnRegisterVariable("m_customaccel", "0", FCVAR_ARCHIVE);
+	m_customaccel_scale = gpEngine->pfnRegisterVariable("m_customaccel_scale", "0.04", FCVAR_ARCHIVE);
+	m_customaccel_max = gpEngine->pfnRegisterVariable("m_customaccel_max", "0", FCVAR_ARCHIVE);
+	m_customaccel_exponent = gpEngine->pfnRegisterVariable("m_customaccel_exponent", "1", FCVAR_ARCHIVE);
 	
 	gpEngine->pfnAddCommand("force_centerview", Force_CenterView_f);
 	gpEngine->pfnAddCommand("joyadvancedupdate", Joy_AdvancedUpdate_f);
