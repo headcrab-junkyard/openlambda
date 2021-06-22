@@ -92,6 +92,8 @@ static cvar_t *m_customaccel_scale;
 static cvar_t *m_customaccel_max;
 static cvar_t *m_customaccel_exponent;
 
+static cvar_t *m_mousethread_sleep;
+
 // none of these cvars are saved over a session
 // this means that advanced controller configuration needs to be executed
 // each time.  this avoids any problems with getting back to a default usage
@@ -1074,6 +1076,10 @@ void IN_Init()
 	m_customaccel_scale = gpEngine->pfnRegisterVariable("m_customaccel_scale", "0.04", FCVAR_ARCHIVE);
 	m_customaccel_max = gpEngine->pfnRegisterVariable("m_customaccel_max", "0", FCVAR_ARCHIVE);
 	m_customaccel_exponent = gpEngine->pfnRegisterVariable("m_customaccel_exponent", "1", FCVAR_ARCHIVE);
+	
+#ifdef _WIN32
+	m_mousethread_sleep = gpEngine->pfnRegisterVariable("m_mousethread_sleep", "10", FCVAR_ARCHIVE);
+#endif
 	
 	gpEngine->pfnAddCommand("force_centerview", Force_CenterView_f);
 	gpEngine->pfnAddCommand("joyadvancedupdate", Joy_AdvancedUpdate_f);
