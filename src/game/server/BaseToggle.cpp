@@ -27,62 +27,58 @@
 
 /// @file
 
-#pragma once
+#include "BaseToggle.hpp"
 
 /*
 =============
 SUB_CalcMove
 
-calculate self.velocity and self.nextthink to reach dest from
-self.origin traveling at speed
+calculate self->velocity and self->nextthink to reach dest from
+self->origin traveling at speed
 ===============
 */
-void CBaseToggle::SUB_CalcMoveEnt(edict_t *ent, vector tdest, float tspeed, void (*func)())
+/*
+void CBaseToggle::SUB_CalcMoveEnt(edict_t *ent, const idVec3 &tdest, float tspeed, void (*func)())
 {
-	edict_t stemp;
+	edict_t *stemp;
 	stemp = *self;
 	self = ent;
 
-	SUB_CalcMove (tdest, tspeed, func);
+	LinearMove (tdest, tspeed, func);
 	self = stemp;
 };
+*/
 
-void CBaseToggle::SUB_CalcMove(idVec3 tdest, float tspeed, void (*func)())
+void CBaseToggle::LinearMove(const idVec3 &tdest, float tspeed)
 {
-	idVec3	vdestdelta;
-	float		len, traveltime;
-
 	if (!tspeed)
 		objerror("No speed is defined!");
 
-	self->think1 = func;
-	self->finaldest = tdest;
-	self->think = SUB_CalcMoveDone;
+	//this->mpfnMoveDoneCallback = func;
+	mvFinalDest = tdest;
+	SetThinkCallback(CBaseToggle::LinearMoveDone);
 
-	if (tdest == self->GetOrigin())
+	if(tdest == GetOrigin())
 	{
-		self->velocity = '0 0 0';
-		self->nextthink = self->ltime + 0.1;
+		SetVelocity(idVec3::Origin);
+		SetNextThink(self->ltime + 0.1);
 		return;
 	};
 		
-// set destdelta to the vector needed to move
-	vdestdelta = tdest - self->GetOrigin();
+	// Set destdelta to the vector needed to move
+	idVec3 vdestdelta = tdest - GetOrigin();
 	
-// calculate length of vector
-	len = vlen (vdestdelta);
-	
-// divide by speed to get time to reach dest
-	traveltime = len / tspeed;
+	// Divide by speed to get time to reach dest
+	float traveltime = vdestdelta.Length() / tspeed;
 
-	if (traveltime < 0.03)
+	if(traveltime < 0.03)
 		traveltime = 0.03;
 	
-// set nextthink to trigger a think when dest is reached
-	self->nextthink = self->ltime + traveltime;
+	// Set nextthink to trigger a think when dest is reached
+	SetNextThink(self->ltime + traveltime);
 
-// scale the destdelta vector by the time spent traveling to get velocity
-	self->velocity = vdestdelta * (1/traveltime);	// qcc won't take vec/float	
+	// Scale the destdelta vector by the time spent traveling to get velocity
+	SetVelocity(vdestdelta * (1 / traveltime));	// qcc won't take vec/float	
 };
 
 /*
@@ -90,60 +86,55 @@ void CBaseToggle::SUB_CalcMove(idVec3 tdest, float tspeed, void (*func)())
 After moving, set origin to exact final destination
 ============
 */
-void CBaseToggle::SUB_CalcMoveDone() // TODO: LinearMoveDone in gs?
+void CBaseToggle::LinearMoveDone()
 {
-	SetOrigin(self->finaldest);
+	SetOrigin(mvFinalDest);
 	SetVelocity(idVec3::Origin);
 	SetNextThink(-1);
-	if (self->think1)
-		self->think1();
+	if(mpfnMoveDoneCallback)
+		(this->*mpfnMoveDoneCallback)();
 };
 
 /*
 =============
 SUB_CalcAngleMove
 
-calculate self.avelocity and self.nextthink to reach destangle from
-self.angles rotating 
+calculate self->avelocity and self->nextthink to reach destangle from
+self->angles rotating 
 
-The calling function should make sure self.think is valid
+The calling function should make sure self->think is valid
 ===============
 */
-void CBaseToggle::SUB_CalcAngleMoveEnt(entity ent, vector destangle, float tspeed, void() func)
+/*
+void CBaseToggle::SUB_CalcAngleMoveEnt(entvars_t *ent, const idVec3 &destangle, float tspeed, void (*func)())
 {
-	entity		stemp;
-	stemp = self;
+	entvars_t *stemp = self;
 	self = ent;
-	SUB_CalcAngleMove (destangle, tspeed, func);
+	SUB_CalcAngleMove(destangle, tspeed, func);
 	self = stemp;
 };
+*/
 
-void CBaseToggle::SUB_CalcAngleMove(vector destangle, float tspeed, void() func)
+void CBaseToggle::SUB_CalcAngleMove(const idVec3 &destangle, float tspeed)
 {
-	vector	destdelta;
-	float		len, traveltime;
-
-	if (!tspeed)
+	if(!tspeed)
 		objerror("No speed is defined!");
 		
-// set destdelta to the vector needed to move
-	destdelta = destangle - self.angles;
+	// Set destdelta to the vector needed to move
+	idVec3 destdelta = destangle - GetAngles();
 	
-// calculate length of vector
-	len = vlen (destdelta);
-	
-// divide by speed to get time to reach dest
-	traveltime = len / tspeed;
+	// Divide by speed to get time to reach dest
+	float traveltime = destdelta.Length() / tspeed;
 
-// set nextthink to trigger a think when dest is reached
-	self.nextthink = self.ltime + traveltime;
+	// Set nextthink to trigger a think when dest is reached
+	SetNextThink(self->ltime + traveltime);
 
-// scale the destdelta vector by the time spent traveling to get velocity
-	self.avelocity = destdelta * (1 / traveltime);
+	// Scale the destdelta vector by the time spent traveling to get velocity
+	self->avelocity = destdelta * (1 / traveltime);
 	
-	self.think1 = func;
-	self.finalangle = destangle;
-	self.think = SUB_CalcAngleMoveDone;
+	//this->mpfnMoveDoneCallback = func;
+	mvFinalAngle = destangle;
+	SetThinkCallback(SUB_CalcAngleMoveDone);
 };
 
 /*
@@ -153,9 +144,9 @@ After rotating, set angle to exact final angle
 */
 void CBaseToggle::SUB_CalcAngleMoveDone() // TODO: AngularMoveDone in gs?
 {
-	SetAngles(self->finalangle);
+	SetAngles(mvFinalAngle);
 	SetAngularVelocity(idVec3::Origin);
 	SetNextThink(-1);
-	if (self->think1)
-		self->think1();
+	if(mpfnMoveDoneCallback)
+		(this->*mpfnMoveDoneCallback)();
 };
