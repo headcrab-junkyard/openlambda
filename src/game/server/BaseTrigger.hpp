@@ -21,10 +21,26 @@
 
 #pragma once
 
-#include "CBaseToggle.hpp"
+#include "BaseToggle.hpp"
 
 class CBaseTrigger : public CBaseToggle
 {
 public:
 	void InitTrigger();
+	
+	void ToggleUse(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
+	void CounterUse(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
+	
+	void MultiTouch(CBaseEntity *apOther);
+	void HurtTouch(CBaseEntity *apOther);
+	void TeleportTouch(CBaseEntity *apOther);
+	void CDAudioTouch(CBaseEntity *apOther);
+	
+	void ActivateMultiTrigger(CBaseEntity *apActivator);
+	
+	void MultiWaitOver();
+	
+	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	
+	virtual int GetObjectCaps() const {return CBaseToggle::GetObjectCaps() & ~FCAP_ACROSS_TRANSITION;}
 };
