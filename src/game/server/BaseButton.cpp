@@ -29,7 +29,24 @@
 
 #include "BaseButton.hpp"
 
-void CButton::Spawn()
+/*QUAKED func_button (0 .5 .8) ?
+When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again.
+
+"angle"		determines the opening direction
+"target"	all entities with a matching targetname will be used
+"speed"		override the default 40 speed
+"wait"		override the default 1 second wait (-1 = never return)
+"lip"		override the default 4 pixel lip remaining at end of move
+"health"	if set, the button must be killed instead of touched
+"sounds"
+0) steam metal
+1) wooden clunk
+2) metallic click
+3) in-out
+*/
+LINK_ENTITY_TO_CLASS(func_button, CBaseButton);
+
+void CBaseButton::Spawn()
 {
 	if (self->sounds == 0)
 	{
@@ -83,13 +100,13 @@ void CButton::Spawn()
 	self->pos2 = self->pos1 + self->movedir * (fabs(self->movedir * self->size) - self->lip);
 };
 
-void CButton::Use(CBaseEntity *other)
+void CBaseButton::Use(CBaseEntity *other)
 {
 	self->SetEnemy(activator);
 	Fire();
 };
 
-void CButton::Touch(CBaseEntity *other)
+void CBaseButton::Touch(CBaseEntity *other)
 {
 	if (other->GetClassName() != "player")
 		return;
@@ -101,18 +118,18 @@ void CButton::Touch(CBaseEntity *other)
 	Fire();
 };
 
-void CButton::Blocked(CBaseEntity *other)
+void CBaseButton::Blocked(CBaseEntity *other)
 {
 	// do nothing, just don't ome all the way back out
 };
 
-void CButton::Wait()
+void CBaseButton::Wait()
 {
 	self->SetState(STATE_TOP);
 	
 	{
 		SetNextThink(self->ltime + self->wait);
-		SetThinkCallback(CButton::Return);
+		SetThinkCallback(CBaseButton::Return);
 	};
 	
 	SUB_UseTargets(GetEnemy(), USE_TOGGLE, 0);
@@ -120,21 +137,21 @@ void CButton::Wait()
 	self->frame = 1; // use alternate textures
 };
 
-void CButton::Done()
+void CBaseButton::Done()
 {
 	self->SetState(STATE_BOTTOM);
 };
 
-void CButton::Return()
+void CBaseButton::Return()
 {
 	self->SetState(STATE_DOWN);
-	SUB_CalcMove(self->pos1, self->speed, CButton::Done);
+	SUB_CalcMove(self->pos1, self->speed, CBaseButton::Done);
 	self->frame = 0; // use normal textures
 	if (GetHealth())
 		SetDamageable(DAMAGE_YES); // can be shot again
 };
 
-void CButton::Fire()
+void CBaseButton::Fire()
 {
 	if (self->GetState() == STATE_UP || self->GetState() == STATE_TOP)
 		return;
@@ -145,27 +162,10 @@ void CButton::Fire()
 	SUB_CalcMove (self->pos2, self->speed, button_wait);
 };
 
-void CButton::Killed(CBaseEntity *attacker)
+void CBaseButton::Killed(CBaseEntity *attacker)
 {
 	SetEnemy(damage_attacker);
 	SetHealth(GetMaxHealth());
 	SetDamageable(DAMAGE_NO); // wil be reset upon return
 	Fire ();
 };
-
-/*QUAKED func_button (0 .5 .8) ?
-When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again.
-
-"angle"		determines the opening direction
-"target"	all entities with a matching targetname will be used
-"speed"		override the default 40 speed
-"wait"		override the default 1 second wait (-1 = never return)
-"lip"		override the default 4 pixel lip remaining at end of move
-"health"	if set, the button must be killed instead of touched
-"sounds"
-0) steam metal
-1) wooden clunk
-2) metallic click
-3) in-out
-*/
-LINK_ENTITY_TO_CLASS(func_button, CButton)
