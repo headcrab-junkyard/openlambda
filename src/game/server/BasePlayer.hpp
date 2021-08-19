@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "BaseEntity.hpp"
+#include "BaseMonster.hpp" // TODO: #include "BaseCharacter.hpp"?
+
 
 class CGame;
 class CBaseItem;
 
-class CBasePlayer : public CBaseEntity
+class CBasePlayer : public CBaseMonster
 {
 public:
 	CBasePlayer();
