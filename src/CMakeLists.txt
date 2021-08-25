@@ -33,9 +33,8 @@ add_subdirectory(dedicated)
 if(NOT OGS_DEDICATED)
 	if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
 		add_subdirectory(cl_dll)
-	elseif(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
-		add_subdirectory(gameui)
 	endif()
-
+	
+	add_subdirectory(gameui)
 	add_subdirectory(launcher)
 endif()
