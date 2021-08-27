@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018 BlackPhrase
+ * Copyright (C) 2018, 2021 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,22 @@
 
 #pragma once
 
-class CNewGameDialog
+#include <vgui_controls/Frame.h>
+
+class CNewGameDialog : public vgui::Frame
 {
+	DECLARE_CLASS_SIMPLE(CNewGameDialog, vgui::Frame);
 public:
-	CNewGameDialog();
+	CNewGameDialog(vgui::Panel *apParent);
 	~CNewGameDialog();
+private:
+	vgui::Label *mpHelpText{nullptr};
+	
+	vgui::RadioButton *mpTrainingRadio{nullptr};
+	
+	vgui::RadioButton *mpEasyRadio{nullptr};
+	vgui::RadioButton *mpMediumRadio{nullptr};
+	vgui::RadioButton *mpHardRadio{nullptr};
+	
+	vgui::Button *mpPlayButton{nullptr};
 };

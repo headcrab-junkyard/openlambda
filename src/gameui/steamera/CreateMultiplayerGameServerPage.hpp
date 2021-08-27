@@ -27,9 +27,10 @@ class CCreateMultiplayerGameServerPage : public vgui::PropertyPage
 {
 	DECLARE_CLASS_SIMPLE(CCreateMultiplayerGameServerPage, vgui::PropertyPage);
 public:
-	CCreateMultiplayerGameServerPage();
+	CCreateMultiplayerGameServerPage(vgui::Panel *apParent, const char *asName);
 	~CCreateMultiplayerGameServerPage();
 	
+	/// Sets currently selected map the map combo box
 	void SetMap(const char *asName);
 	
 	bool IsRandomMapSelected() const;
@@ -41,8 +42,26 @@ public:
 	int GetBotQuota() const;
 	bool GetBotsEnabled() const;
 protected:
+	/// Called to get the info from the dialog
+	/*virtual*/ void OnApplyChanges() override;
+	
+	MESSAGE_FUNC(OnCheckButtonChecked, "CheckButtonChecked");
 private:
+	/// Loads the list of available maps into the map list
 	void LoadMapList();
+	
+	/// Loads the list of available maps into the map list
 	void LoadMaps(const char *asPathID);
 private:
+	static constexpr auto DATA_STR_LENGTH{64};
+	
+	char msMapName[DATA_STR_LENGTH]{};
+	
+	vgui::ComboBox *mpMapList{nullptr};
+	
+	vgui::CheckButton *mpEnableBotsCheckButton{nullptr};
+	
+	CCvarToggleCheckButton *mpEnableTutorCheckButton{nullptr};
+	
+	KeyValues *mpSavedData{nullptr};
 };
