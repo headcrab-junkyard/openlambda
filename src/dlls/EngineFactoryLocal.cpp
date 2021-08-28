@@ -1,6 +1,7 @@
 /*
  * This file is part of OpenLambda Project
- * Copyright (C) 2020 BlackPhrase
+ *
+ * Copyright (C) 2020-2021 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with OpenLambda Project. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 /// @file
 
