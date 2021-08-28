@@ -25,8 +25,7 @@
 
 #include "BaseToggle.hpp"
 
-// TODO: CBaseCharacter?
-class CBaseMonster : public CBaseToggle
+class CBaseCharacter : public CBaseToggle
 {
 public:
 	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
