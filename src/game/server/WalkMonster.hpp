@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "BaseMonster.hpp"
+#include "BaseCharacter.hpp"
 
-class CWalkMonster : public CBaseMonster
+class CWalkMonster : public CBaseCharacter
 {
 public:
 	void Start();
