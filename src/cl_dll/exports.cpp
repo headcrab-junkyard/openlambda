@@ -21,14 +21,7 @@
 #include <cstring>
 
 #include "cdll_int.h"
-
-#ifdef _WIN32
-	#define EXPORT [[dllexport]]
-#else
-	#define EXPORT [[visibility("default")]]
-#endif
-
-#define C_EXPORT extern "C" EXPORT
+#include "exports.h"
 
 extern int Initialize(cl_enginefunc_t *apEngFuncs, int anVersion);
 extern void HUD_Init();

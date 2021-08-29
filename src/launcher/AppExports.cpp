@@ -17,11 +17,7 @@
  * along with OpenLambda Project. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _WIN32
-	#define EXPORT [[dllexport]]
-#else
-	#define EXPORT [[visibility("default")]]
-#endif
+#include "exports.h"
 
 // Prefer dedicated graphics cards if present
 // NOTE: This needs to be placed in the executable, it won’t work in a dll
