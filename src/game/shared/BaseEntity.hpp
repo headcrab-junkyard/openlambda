@@ -198,6 +198,14 @@ public:
 	
 	void SetGoal(CBaseEntity *apGoal){mpGoal = apGoal;}
 	CBaseEntity *GetGoal() const {return mpGoal;}
+	
+	enum class UseType : int
+	{
+		Off = 0,
+		On,
+		Set,
+		Toggle
+	};
 private:
 	void SetClassName(const char *asName){self->classname = asName;} // TODO
 private:
