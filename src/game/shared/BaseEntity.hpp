@@ -123,6 +123,16 @@ public:
 	};
 	const idVec3 &GetVelocity() const {return mvVelocity;}
 	
+	void SetAngularVelocity(const idVec3 &avVelocity)
+	{
+		mvAngularVelocity = avVelocity;
+		
+		self->avelocity[0] = avVelocity.x;
+		self->avelocity[1] = avVelocity.y;
+		self->avelocity[2] = avVelocity.z;
+	};
+	const idVec3 &GetAngularVelocity() const {return mvAngularVelocity;}
+	
 	void SetAngles(const idVec3 &avAngles)
 	{
 		mvAngles = avAngles;
@@ -194,6 +204,7 @@ private:
 	idVec3 mvOrigin{0.0f};
 	idVec3 mvAngles{0.0f};
 	idVec3 mvVelocity{0.0f};
+	idVec3 mvAngularVelocity{idVec3::Origin};
 public:	
 	entvars_t *self{nullptr};
 	CGameWorld *mpWorld{nullptr};
