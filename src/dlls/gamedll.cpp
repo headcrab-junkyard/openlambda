@@ -38,7 +38,7 @@ void GameInit()
 {
 	auto pGameSetup{new CGameSetup_Default()}; // TODO
 	
-	gpGameWorld = pGameSetup->CreateWorld();
+	//gpGameWorld = pGameSetup->CreateWorld();
 	
 	// Initialize the game (master) class
 	//if(!gpGame)
@@ -47,6 +47,8 @@ void GameInit()
 	gpGame = reinterpret_cast<IGame*>(Sys_GetFactoryThis()(OGS_GAME_INTERFACE_VERSION, nullptr));
 	
 	gpGame->Init();
+	
+	//gpGameWorld = gpGame->GetWorld();
 };
 
 int EntitySpawn(edict_t *pent)
