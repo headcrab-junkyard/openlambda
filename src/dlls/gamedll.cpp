@@ -41,8 +41,10 @@ void GameInit()
 	gpGameWorld = pGameSetup->CreateWorld();
 	
 	// Initialize the game (master) class
-	if(!gpGame)
-		gpGame = new CGame(pGameSetup->CreateRules(), gpGameWorld);
+	//if(!gpGame)
+		//gpGame = new CGame(pGameSetup->CreateRules(), gpGameWorld);
+	
+	gpGame = reinterpret_cast<IGame*>(Sys_GetFactoryThis()(OGS_GAME_INTERFACE_VERSION, nullptr));
 	
 	gpGame->Init();
 };
