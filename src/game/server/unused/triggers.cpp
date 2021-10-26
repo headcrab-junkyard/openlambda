@@ -36,108 +36,6 @@ void trigger_reactivate()
 
 //=============================================================================
 
-const float	SPAWNFLAG_NOMESSAGE = 1;
-const float	SPAWNFLAG_NOTOUCH = 1;
-
-void multi_killed()
-{
-	self->SetEnemy(damage_attacker);
-	multi_trigger();
-};
-
-void multi_use()
-{
-	self.enemy = activator;
-	multi_trigger();
-};
-
-/*QUAKED trigger_multiple (.5 .5 .5) ? notouch
-Variable sized repeatable trigger.  Must be targeted at one or more entities.  If "health" is set, the trigger must be killed to activate each time.
-If "delay" is set, the trigger waits some time after activating before firing.
-"wait" : Seconds between triggerings. (.2 default)
-If notouch is set, the trigger is only fired by other entities, not by touching.
-NOTOUCH has been obsoleted by trigger_relay!
-sounds
-1)	secret
-2)	beep beep
-3)	large switch
-4)
-set "message" to text string
-*/
-void trigger_multiple()
-{
-	if (self.sounds == 1)
-	{
-		gpEngine->pfnPrecacheSound ("misc/secret.wav");
-		self.noise = "misc/secret.wav";
-	}
-	else if (self.sounds == 2)
-	{
-		gpEngine->pfnPrecacheSound ("misc/talk.wav");
-		self.noise = "misc/talk.wav";
-	}
-	else if (self.sounds == 3)
-	{
-		gpEngine->pfnPrecacheSound ("misc/trigger1.wav");
-		self.noise = "misc/trigger1.wav";
-	}
-	
-	if (!self.wait)
-		self.wait = 0.2;
-	self.use = multi_use;
-
-	InitTrigger ();
-
-	if (self.health)
-	{
-		if (self.spawnflags & SPAWNFLAG_NOTOUCH)
-			objerror ("health and notouch don't make sense\n");
-		self.max_health = self.health;
-		self.th_die = multi_killed;
-		self.takedamage = DAMAGE_YES;
-		self.solid = SOLID_BBOX;
-		setorigin (self, self.origin);	// make sure it links into the world
-	}
-	else
-	{
-		if ( !(self.spawnflags & SPAWNFLAG_NOTOUCH) )
-			self.touch = multi_touch;
-	};
-};
-
-
-/*QUAKED trigger_once (.5 .5 .5) ? notouch
-Variable sized trigger. Triggers once, then removes itself.  You must set the key "target" to the name of another object in the level that has a matching
-"targetname".  If "health" is set, the trigger must be killed to activate.
-If notouch is set, the trigger is only fired by other entities, not by touching.
-if "killtarget" is set, any objects that have a matching "target" will be removed when the trigger is fired.
-if "angle" is set, the trigger will only fire when someone is facing the direction of the angle.  Use "360" for an angle of 0.
-sounds
-1)	secret
-2)	beep beep
-3)	large switch
-4)
-set "message" to text string
-*/
-void trigger_once()
-{
-	self.wait = -1;
-	trigger_multiple();
-};
-
-//=============================================================================
-
-/*QUAKED trigger_relay (.5 .5 .5) (-8 -8 -8) (8 8 8)
-This fixed size trigger cannot be touched, it can only be fired by other events.  It can contain killtargets, targets, delays, and messages.
-*/
-void trigger_relay()
-{
-	self.use = SUB_UseTargets;
-};
-
-
-//=============================================================================
-
 /*QUAKED trigger_secret (.5 .5 .5) ?
 secret counter trigger
 sounds
@@ -170,25 +68,6 @@ void trigger_secret()
 	trigger_multiple ();
 };
 
-//=============================================================================
-
-/*QUAKED trigger_counter (.5 .5 .5) ? nomessage
-Acts as an intermediary for an action that takes multiple inputs.
-
-If nomessage is not set, t will print "1 more.. " etc when triggered and "sequence complete" when finished.
-
-After the counter has been triggered "count" times (default 2), it will fire all of it's targets and remove itself.
-*/
-void trigger_counter()
-{
-	self.wait = -1;
-	if (!self.count)
-		self.count = 2;
-
-	self.use = counter_use;
-};
-
-
 /*
 ==============================================================================
 
@@ -198,7 +77,6 @@ TELEPORT TRIGGERS
 */
 
 const float	PLAYER_ONLY	= 1;
-const float	SILENT = 2;
 
 void play_teleport()
 {
@@ -300,37 +178,6 @@ void info_teleport_destination()
 		objerror ("no targetname");
 };
 
-void teleport_use()
-{
-	self.nextthink = time + 0.2;
-	force_retouch = 2;		// make sure even still objects get hit
-	self.think = SUB_Null;
-};
-
-/*QUAKED trigger_teleport (.5 .5 .5) ? PLAYER_ONLY SILENT
-Any object touching this will be transported to the corresponding info_teleport_destination entity. You must set the "target" field, and create an object with a "targetname" field that matches.
-
-If the trigger_teleport has a targetname, it will only teleport entities when it has been fired.
-*/
-void trigger_teleport()
-{
-	idVec3 o;
-
-	InitTrigger ();
-	self.touch = teleport_touch;
-	// find the destination 
-	if (!self.target)
-		objerror ("no target");
-	self.use = teleport_use;
-
-	if (!(self.spawnflags & SILENT))
-	{
-		precache_sound ("ambience/hum1.wav");
-		o = (self.mins + self.maxs)*0.5;
-		ambientsound (o, "ambience/hum1.wav",0.5 , ATTN_STATIC);
-	}
-};
-
 /*
 ==============================================================================
 
@@ -389,98 +236,4 @@ void trigger_onlyregistered()
 	precache_sound ("misc/talk.wav");
 	InitTrigger ();
 	self.touch = trigger_onlyregistered_touch;
-};
-
-//============================================================================
-
-void hurt_on()
-{
-	self.solid = SOLID_TRIGGER;
-	self.nextthink = -1;
-};
-
-/*QUAKED trigger_hurt (.5 .5 .5) ?
-Any object touching this will be hurt
-set dmg to damage amount
-defalt dmg = 5
-*/
-void trigger_hurt()
-{
-	InitTrigger ();
-	self.touch = hurt_touch;
-	if (!self.dmg)
-		self.dmg = 5;
-};
-
-//============================================================================
-
-const float PUSH_ONCE = 1;
-
-void trigger_push_touch()
-{
-	if (other.classname == "grenade")
-		other.velocity = self.speed * self.movedir * 10;
-	else if (other.health > 0)
-	{
-		other.velocity = self.speed * self.movedir * 10;
-		if (other.classname == "player")
-		{
-			if (other.fly_sound < time)
-			{
-				other.fly_sound = time + 1.5;
-				sound (other, CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM);
-			}
-		}
-	}
-	if (self.spawnflags & PUSH_ONCE)
-		remove(self);
-};
-
-
-/*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
-Pushes the player
-*/
-void trigger_push()
-{
-	InitTrigger ();
-	precache_sound ("ambience/windfly.wav");
-	self.touch = trigger_push_touch;
-	if (!self.speed)
-		self.speed = 1000;
-};
-
-//============================================================================
-
-void trigger_monsterjump_touch()
-{
-	if ( other.flags & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER )
-		return;
-
-// set XY even if not on ground, so the jump will clear lips
-	other.velocity_x = self.movedir_x * self.speed;
-	other.velocity_y = self.movedir_y * self.speed;
-	
-	if ( !(other.flags & FL_ONGROUND) )
-		return;
-	
-	other.flags = other.flags - FL_ONGROUND;
-
-	other.velocity_z = self.height;
-};
-
-/*QUAKED trigger_monsterjump (.5 .5 .5) ?
-Walking monsters that touch this will jump in the direction of the trigger's angle
-"speed" default to 200, the speed thrown forward
-"height" default to 200, the speed thrown upwards
-*/
-void trigger_monsterjump()
-{
-	if (!self.speed)
-		self.speed = 200;
-	if (!self.height)
-		self.height = 200;
-	if (self.angles == '0 0 0')
-		self.angles = '0 360 0';
-	InitTrigger ();
-	self.touch = trigger_monsterjump_touch;
 };
