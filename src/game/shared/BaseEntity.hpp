@@ -81,6 +81,18 @@ public:
 	
 	const std::string &GetClassName() const;
 	
+	template<typename T>
+	inline void SetThinkCallback(T aTCallback){SetThinkCallback(static_cast<pfnThinkCallback>(aTCallback));}
+	
+	template<typename T>
+	inline void SetTouchCallback(T aTCallback){SetTouchCallback(static_cast<pfnTouchCallback>(aTCallback));}
+	
+	template<typename T>
+	inline void SetUseCallback(T aTCallback){SetUseCallback(static_cast<pfnUseCallback>(aTCallback));}
+	
+	template<typename T>
+	inline void SetBlockedCallback(T aTCallback){SetBlockedCallback(static_cast<pfnBlockedCallback>(aTCallback));}
+	
 	void SetThinkCallback(pfnThinkCallback afnCallback); // TODO: IEntityThinkCallback?
 	void SetTouchCallback(pfnTouchCallback afnCallback); // TODO: IEntityTouchCallback?
 	void SetUseCallback(pfnUseCallback afnCallback); // TODO: IEntityUseCallback?
