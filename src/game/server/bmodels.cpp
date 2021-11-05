@@ -41,23 +41,23 @@ public:
 	void Use(CBaseEntity *other) override;
 };
 
+LINK_ENTITY_TO_CLASS(func_wall, CFuncWall);
+
 void CFuncWall::Spawn()
 {
-	SetAngles(idVec3(0 0 0));
-	SetMoveType(MOVETYPE_PUSH); // so it doesn't get pushed by anything
+	SetAngles(idVec3::Origin);
+	SetMoveType(MOVETYPE_PUSH); // So it doesn't get pushed by anything
 	SetSolidity(SOLID_BSP);
 	SetUseCallback(CFuncWall::Use);
 	
 	SetModel(GetModel());
 };
 
-void CFuncWall::Use(CBaseEntity *other)
+void CFuncWall::Use(CBaseEntity *apOther)
 {
-	// change to alternate textures
+	// Change to alternate textures
 	self->frame = 1 - self->frame;
 };
-
-LINK_ENTITY_TO_CLASS(func_wall, CFuncWall);
 
 //============================================================================
 
@@ -70,15 +70,15 @@ public:
 	void Spawn() override;
 };
 
+LINK_ENTITY_TO_CLASS(func_illusionary, CFuncIllusionary);
+
 void CFuncIllusionary::Spawn()
 {
-	SetAngles(idVec3(0.0f, 0.0f, 0.0f));
+	SetAngles(idVec3::Origin);
 	SetMoveType(MOVETYPE_NONE);
 	SetSolidity(SOLID_NOT);
 	
-	SetModel(self->GetModel());
+	SetModel(GetModel());
 	
-	gpEngine->pfnMakeStatic(this);
+	MakeStatic();
 };
-
-LINK_ENTITY_TO_CLASS(func_illusionary, CFuncIllusionary);
