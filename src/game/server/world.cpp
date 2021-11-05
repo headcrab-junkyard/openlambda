@@ -221,6 +221,36 @@ void CWorldSpawn::Spawn()
 
 	// 63 testing
 	gpEngine->pfnLightStyle(63, "a");
+	
+	//
+	
+	gpEngine->pfnCVarSetFloat("sv_zmax", 4096);
+	
+	if(self->speed > 0)
+		gpEngine->pfnCVarSetFloat("sv_zmax", self->speed);
+	
+	if(self->netname)
+	{
+		auto pEntity{nullptr};
+		if(pEntity)
+		{
+		};
+	};
+	
+	gpEngine->pfnCVarSetFloat("v_dark", 0.0f);
+	
+	if(self->spawnflags & SF_WORLD_DARK)
+		gpEngine->pfnCVarSetFloat("v_dark", 1.0f);
+	
+	gbDisplayTitle = false;
+	
+	if(self->spawnflags & SF_WORLD_TITLE)
+		gbDisplayTitle = true;
+	
+	gpEngine->pfnCVarSetFloat("mp_defaultteam", 0);
+	
+	if(self->spawnflags & SF_WORLD_FORCETEAM)
+		gpEngine->pfnCVarSetFloat("mp_defaultteam", 1);
 };
 
 bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &asValue)
@@ -237,6 +267,8 @@ bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &as
 	}
 	else if(asKey == "WaveHeight")
 	{
+		self->scale = std::stof(asValue) * (1.0 / 8.0);
+		gpEngine->pfnCVarSetFloat("sv_wateramp", self->scale);
 		return true;
 	}
 	else if(asKey == "MaxRange")
@@ -246,10 +278,13 @@ bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &as
 	}
 	else if(asKey == "chaptertitle")
 	{
+		self->netname = gpEngine->pfnAllocString(asValue.c_str());
 		return true;
 	}
 	else if(asKey == "startdark")
 	{
+		if(std::stoi(asValue))
+			self->spawnflags |= SF_WORLD_DARK;
 		return true;
 	}
 	else if(asKey == "newunit")
@@ -260,14 +295,19 @@ bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &as
 	}
 	else if(asKey == "gametitle")
 	{
+		if(std::stoi(asValue))
+			self->spawnflags |= SF_WORLD_TITLE;
 		return true;
 	}
 	else if(asKey == "mapteams")
 	{
+		self->team = gpEngine->pfnAllocString(asValue.c_str());
 		return true;
 	}
 	else if(asKey == "defaultteam")
 	{
+		if(std::stoi(asValue))
+			self->spawnflags |= SF_WORLD_FORCETEAM;
 		return true;
 	};
 	
