@@ -31,9 +31,11 @@
 extern enginefuncs_t gEngFuncs;
 enginefuncs_t *gpEngine = &gEngFuncs;
 
-void InitBodyQue();
+edict_t *bodyque_head{nullptr};
 
-CBaseEntity *lastspawn;
+CBaseEntity *lastspawn{nullptr};
+
+void InitBodyQue();
 
 //=======================
 /*QUAKED worldspawn (0 0 0) ?
@@ -279,8 +281,6 @@ BODY QUE
 
 ==============================================================================
 */
-
-edict_t *bodyque_head;
 
 class CBodyQue : public CBaseEntity
 {
