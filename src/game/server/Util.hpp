@@ -30,6 +30,9 @@ class CBaseEntity;
 
 using entvars_t = struct entvars_s;
 
+extern idVec3 VEC_HULL_MIN;
+extern idVec3 VEC_HULL_MAX;
+
 extern CGameWorld *gpGameWorld;
 
 template<typename T>
