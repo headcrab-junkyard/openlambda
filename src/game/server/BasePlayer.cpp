@@ -33,7 +33,7 @@ CBasePlayer::CBasePlayer() : mpGame(gpGame){}
 
 void CBasePlayer::Spawn()
 {
-	self->classname = "player";
+	SetClassName("player");
 	SetMaxHealth(100);
 	SetHealth(GetMaxHealth());
 	SetArmorValue(0);
@@ -144,7 +144,7 @@ void CBasePlayer::Duck()
 
 void CBasePlayer::PreThink()
 {
-	mpGame->GetRules()->PlayerThink(this);
+	mpGame->GetRules()->OnPlayerThink(this);
 	
 	ItemPreFrame();
 	WaterMove();

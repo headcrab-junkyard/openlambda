@@ -21,11 +21,13 @@
 /// @file
 /// @brief push trigger code
 
-#include "TriggerPush.hpp"
+//#include "TriggerPush.hpp"
+#include "BaseTrigger.hpp"
+#include "Util.hpp"
 
 //============================================================================
 
-const float PUSH_ONCE = 1;
+const int PUSH_ONCE{1};
 
 /*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
 Pushes the player
@@ -45,23 +47,23 @@ void CTriggerPush::Spawn()
 	InitTrigger();
 	gpEngine->pfnPrecacheSound("ambience/windfly.wav");
 	SetTouchCallback(CTriggerPush::Touch);
-	if(!self->GetSpeed())
-		self->speed = 1000;
+	if(!GetSpeed())
+		SetSpeed(1000);
 };
 
 void CTriggerPush::Touch(CBaseEntity *apOther)
 {
-	if(other->GetClassName() == "grenade")
-		other->SetVelocity(self->GetSpeed() * self->GetMoveDir() * 10);
-	else if(other->GetHealth() > 0)
+	if(apOther->GetClassName() == "grenade")
+		apOther->SetVelocity(GetSpeed() * GetMoveDir() * 10);
+	else if(apOther->GetHealth() > 0)
 	{
-		other->SetVelocity(self->GetSpeed() * self->GetMoveDir() * 10);
-		if(other->GetClassName() == "player")
+		apOther->SetVelocity(GetSpeed() * GetMoveDir() * 10);
+		if(apOther->GetClassName() == "player")
 		{
-			if(other->fly_sound < gpGlobals->time)
+			if(apOther->fly_sound < gpGlobals->time)
 			{
-				other->fly_sound = gpGlobals->time + 1.5;
-				other->EmitSound(CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM);
+				apOther->fly_sound = gpGlobals->time + 1.5;
+				apOther->EmitSound(CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM);
 			};
 		};
 	};

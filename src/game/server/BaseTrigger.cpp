@@ -98,10 +98,10 @@ void CBaseTrigger::MultiTouch(CBaseEntity *apOther)
 		return;
 	
 // if the trigger has an angles field, check player's facing direction
-	if (self->movedir != '0 0 0')
+	if(GetMoveDir() != '0 0 0')
 	{
 		gpEngine->pfnMakeVectors(apOther->GetAngles());
-		if (v_forward * self->movedir < 0)
+		if (v_forward * GetMoveDir() < 0)
 			return; // not facing the right way
 	};
 	

@@ -18,18 +18,23 @@
 */
 
 /// @file
+/// @brief generic delay entity
 
 #include "BaseEntity.hpp"
 
 class CBaseDelay : public CBaseEntity
 {
 public:
-	bool HandleKeyValue(KeyValueData *apKVData) override;
+	/*virtual*/ bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
 	
-	//int Save(CSaveData &aSaveData);
-	//int Restore(CRestoreData &aRestoreData);
+	// /*virtual*/ int Save(CSaveData &aSaveData);
+	// /*virtual*/ int Restore(CRestoreData &aRestoreData);
 	
 	void DelayThink();
 	
-	void SUB_UseTargets(CBaseEntity *apActivator, USE_TYPE aeUseType, float afValue);
+	void SUB_UseTargets(CBaseEntity *apActivator, UseType aeUseType, float afValue);
+public: // TODO: private:
+	float mfDelay{0.0f};
+	
+	int mnKillTargetString{-1};
 };

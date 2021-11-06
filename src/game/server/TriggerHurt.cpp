@@ -22,6 +22,7 @@
 /// @brief hurt trigger code
 
 #include "BaseTrigger.hpp"
+#include "Util.hpp"
 
 //============================================================================
 

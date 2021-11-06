@@ -23,6 +23,7 @@
 
 //#include "TriggerCounter.hpp"
 #include "BaseTrigger.hpp"
+#include "Util.hpp"
 
 //=============================================================================
 
@@ -37,16 +38,18 @@ class CTriggerCounter : public CBaseTrigger
 {
 public:
 	void Spawn() override;
+private:
+	int mnCount{0}; ///< Num of activations remaining
 };
 
 LINK_ENTITY_TO_CLASS(trigger_counter, CTriggerCounter);
 
 void CTriggerCounter::Spawn()
 {
-	mfWait = -1;
+	mfWaitTime = -1;
 	
-	if(!self->count)
-		self->count = 2;
+	if(!mnCount)
+		mnCount = 2;
 
 	SetUseCallback(CTriggerCounter::CounterUse);
 };

@@ -66,10 +66,10 @@ void CBaseToggle::LinearMove(const idVec3 &tdest, float tspeed)
 	};
 		
 	// Set destdelta to the vector needed to move
-	idVec3 vdestdelta = tdest - GetOrigin();
+	idVec3 vdestdelta{tdest - GetOrigin()};
 	
 	// Divide by speed to get time to reach dest
-	float traveltime = vdestdelta.Length() / tspeed;
+	float traveltime{vdestdelta.Length() / tspeed};
 
 	if(traveltime < 0.03)
 		traveltime = 0.03;
@@ -91,8 +91,8 @@ void CBaseToggle::LinearMoveDone()
 	SetOrigin(mvFinalDest);
 	SetVelocity(idVec3::Origin);
 	SetNextThink(-1);
-	if(mpfnMoveDoneCallback)
-		(this->*mpfnMoveDoneCallback)();
+	if(mfnMoveDoneCallback)
+		(this->*mfnMoveDoneCallback)();
 };
 
 /*
@@ -121,16 +121,16 @@ void CBaseToggle::SUB_CalcAngleMove(const idVec3 &destangle, float tspeed)
 		objerror("No speed is defined!");
 		
 	// Set destdelta to the vector needed to move
-	idVec3 destdelta = destangle - GetAngles();
+	idVec3 destdelta{destangle - GetAngles()};
 	
 	// Divide by speed to get time to reach dest
-	float traveltime = destdelta.Length() / tspeed;
+	float traveltime{destdelta.Length() / tspeed};
 
 	// Set nextthink to trigger a think when dest is reached
 	SetNextThink(self->ltime + traveltime);
 
 	// Scale the destdelta vector by the time spent traveling to get velocity
-	self->avelocity = destdelta * (1 / traveltime);
+	SetAngularVelocity(destdelta * (1 / traveltime));
 	
 	//this->mpfnMoveDoneCallback = func;
 	mvFinalAngle = destangle;
@@ -147,6 +147,6 @@ void CBaseToggle::SUB_CalcAngleMoveDone() // TODO: AngularMoveDone in gs?
 	SetAngles(mvFinalAngle);
 	SetAngularVelocity(idVec3::Origin);
 	SetNextThink(-1);
-	if(mpfnMoveDoneCallback)
-		(this->*mpfnMoveDoneCallback)();
+	if(mfnMoveDoneCallback)
+		(this->*mfnMoveDoneCallback)();
 };

@@ -28,6 +28,7 @@
 /// @file
 
 #include "PointEntity.hpp"
+#include "Util.hpp"
 
 /*
 ==============================================================================
@@ -56,19 +57,32 @@ class CPathCorner : public CPointEntity
 public:
 	void Spawn() override;
 	
+	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	
 	void Touch(CBaseEntity *apOther) override;
 };
 
 LINK_ENTITY_TO_CLASS(path_corner, CPathCorner);
 
-void CPointEntity::Spawn()
+void CPathCorner::Spawn()
 {
 	if(!self->targetname)
 		objerror("monster_movetarget: no targetname");
 		
 	SetSolidity(SOLID_TRIGGER);
-	SetTouchCallback(t_movetarget);
+	SetTouchCallback(CPathCorner::Touch);
 	SetSize(idVec3(-8,-8, -8), idVec3(8, 8, 8));
+};
+
+bool CPathCorner::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+{
+	if(asKey == "wait")
+	{
+		
+		return true;
+	};
+	
+	return CPointEntity::HandleKeyValue(asKey, asValue);
 };
 
 /*

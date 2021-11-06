@@ -21,7 +21,9 @@
 /// @file
 /// @brief monster jump trigger code
 
-#include "TriggerMonsterJump.hpp"
+//#include "TriggerMonsterJump.hpp"
+#include "BaseTrigger.hpp"
+#include "Util.hpp"
 
 //============================================================================
 
@@ -36,35 +38,42 @@ public:
 	void Spawn() override;
 	
 	void Touch(CBaseEntity *apOther) override;
+private:
+	float GetHeight() const {return mfHeight;}
+private:
+	float mfHeight{0.0f};
 };
 
 LINK_ENTITY_TO_CLASS(trigger_monsterjump, CTriggerMonsterJump);
 
 void CTriggerMonsterJump::Spawn()
 {
-	if(!self->speed)
+	if(!GetSpeed())
 		self->speed = 200;
-	if(!self->height)
-		self->height = 200;
-	if(self->angles == '0 0 0')
-		self->angles = '0 360 0';
+	if(!GetHeight())
+		mfHeight = 200;
+	if(GetAngles() == idVec3::Origin)
+		SetAngles(idVec3(0, 360, 0));
 	InitTrigger();
 	SetTouchCallback(CTriggerMonsterJump::Touch);
 };
 
 void CTriggerMonsterJump::Touch(CBaseEntity *apOther)
 {
-	if ( apOther->GetFlags() & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER )
+	if(apOther->GetFlags() & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER)
 		return;
 
-// set XY even if not on ground, so the jump will clear lips
-	apOther->velocity_x = self->movedir_x * self->GetSpeed();
-	apOther->velocity_y = self->movedir_y * self->GetSpeed();
+	// set XY even if not on ground, so the jump will clear lips
+	float fVelX{GetMoveDir().x * GetSpeed()};
+	float fVelY{GetMoveDir().y * GetSpeed()};
+	float fVelZ{0.0f};
 	
-	if(!(apOther->GetFlags() & FL_ONGROUND))
-		return;
+	if(apOther->HasFlags(FL_ONGROUND))
+	{
+		apOther->RemoveFlags(FL_ONGROUND);
+		
+		fVelZ = GetHeight();
+	};
 	
-	apOther->flags = apOther->GetFlags() - FL_ONGROUND;
-
-	apOther->velocity_z = self->height;
+	apOther->SetVelocity(idVec3(fVelX, fVelY, fVelZ));
 };

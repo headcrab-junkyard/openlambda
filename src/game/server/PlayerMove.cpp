@@ -21,6 +21,8 @@
 
 #include "PlayerMove.hpp"
 
+#include <pm_shared/pm_shared.h>
+
 EXPOSE_SINGLE_INTERFACE(CPlayerMove, IPlayerMove, OGS_PLAYERMOVE_SERVER_INTERFACE_VERSION);
 
 void CPlayerMove::Init(struct playermove_s *ppmove)

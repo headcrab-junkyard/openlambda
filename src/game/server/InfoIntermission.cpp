@@ -1,7 +1,8 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019-2020 BlackPhrase
+ * Copyright (C) 1996-1997 Id Software, Inc.
+ * Copyright (C) 2019-2021 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,21 +20,17 @@
 
 /// @file
 
-#include "BaseEntity.hpp"
+#include "PointEntity.hpp"
+#include "Util.hpp"
 
 /*QUAKED info_intermission (1 0.5 0.5) (-16 -16 -16) (16 16 16)
 This is the camera point for the intermission.
 Use mangle instead of angle, so you can set pitch or roll as well as yaw.  'pitch roll yaw'
 */
-void CInfoIntermission : public CBaseEntity
+class CInfoIntermission : public CPointEntity
 {
 public:
 	void Spawn() override;
-private:
-	string_t nextmap;
-
-	float intermission_running;
-	float intermission_exittime;
 };
 
 LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission);

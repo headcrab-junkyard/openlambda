@@ -24,10 +24,22 @@
 
 //=============================================================================
 
-bool CBaseDelay::HandleKeyValue(KeyValueData *apKVData)
+LINK_ENTITY_TO_CLASS(DelayedUse, CBaseDelay);
+
+bool CBaseDelay::HandleKeyValue(const std::string &asKey, const std::string &asValue)
 {
-	// TODO
-	return false;
+	if(asKey == "delay")
+	{
+		mfDelay = std::stof(asValue);
+		return true;
+	}
+	else if(asKey == "killtarget")
+	{
+		mnKillTargetString = gpEngine->pfnAllocString(asValue);
+		return true;
+	};
+	
+	return CBaseEntity::HandleKeyValue(asKey, asValue);
 };
 
 void CBaseDelay::DelayThink()
@@ -55,77 +67,97 @@ match (string)self.target and call their .use function
 
 ==============================
 */
-void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, USE_TYPE aeUseType, float afValue)
+void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float afValue)
 {
-	CBaseEntity *stemp, *otemp, *act;
-
 	//
 	// check for a delay
 	//
-	if (self->delay)
+	if(mfDelay != 0.0f)
 	{
 		// create a temp object to fire at a later time
-		CBaseEntity *t = mpWorld->SpawnEntity();
+		CBaseDelay *t{mpWorld->SpawnEntity()};
+		
 		t->SetClassName("DelayedUse");
-		t->SetNextThink(gpGlobals->time + self->delay);
+		t->SetNextThink(gpGlobals->time + mfDelay);
 		t->SetThinkCallback(CBaseDelay::DelayThink);
-		t->SetEnemy(activator);
-		t->message = self->message;
-		t->killtarget = self->killtarget;
+		
+		// Save the use type
+		t->self->button = (int)aeUseType;
+		
+		//t->SetEnemy(activator); // TODO: ?
+		//t->message = self->message; // TODO: unused
+		
+		t->mnKillTargetString = mnKillTargetString;
 		t->SetTarget(self->target);
+		
+		t->mfDelay = 0.0f; // Prevent "recursion"
+		
+		t->SetOwner(nullptr);
+		
+		if(false)
+			t->SetOwner(activator);
+		
 		return;
 	};
 	
 	//
 	// print the message
 	//
+	// TODO: UNUSED
+	/*
 	if (activator->GetClassName() == "player" && self.message != "")
 	{
 		gpEngine->pfnCenterPrint (activator, self->message);
 		if (!self->noise)
 			activator->EmitSound(CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM, PITCH_NORM);
 	};
+	*/
 
 	//
 	// kill the killtagets
 	//
-	if (self.killtarget)
+	if(mnKillTargetString)
 	{
 		t = world;
 		do
 		{
-			t = gpEngine->pfnFind (t, targetname, self.killtarget);
-			if (!t)
+			t = gpEngine->pfnFind(t, targetname, mnKillTargetString);
+			if(!t)
 				return;
-			gpEngine->pfnRemove (t);
+			gpEngine->pfnRemove(t);
 		}
-		while ( 1 );
+		while(1);
 	};
 	
 	//
 	// fire targets
 	//
-	if (self.target)
+	CBaseEntity *stemp, *otemp, *act;
+	
+	if(self->target)
 	{
 		act = activator;
 		t = world;
+		
 		do
 		{
-			t = gpEngine->pfnFind (t, targetname, self.target);
-			if (!t)
+			t = gpEngine->pfnFind(t, targetname, self->target);
+			
+			if(!t)
 				return;
+			
 			stemp = self;
 			otemp = other;
 			self = t;
 			other = stemp;
-			if (self->GetUseCallback() != SUB_Null)
-			{
+			
+			if(self->GetUseCallback() != SUB_Null)
 				self->Use();
-			};
+			
 			self = stemp;
 			other = otemp;
 			activator = act;
 		}
-		while ( 1 );
+		while(1);
 	};
 };

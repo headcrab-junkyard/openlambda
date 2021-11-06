@@ -23,11 +23,12 @@
 
 //#include "TriggerMulti.hpp"
 #include "BaseTrigger.hpp"
+#include "Util.hpp"
 
 //=============================================================================
 
-const float	SPAWNFLAG_NOMESSAGE{1};
-const float	SPAWNFLAG_NOTOUCH{1};
+const int SPAWNFLAG_NOMESSAGE{1};
+const int SPAWNFLAG_NOTOUCH{1};
 
 /*QUAKED trigger_multiple (.5 .5 .5) ? notouch
 Variable sized repeatable trigger.  Must be targeted at one or more entities.  If "health" is set, the trigger must be killed to activate each time.
@@ -47,9 +48,9 @@ class CTriggerMulti : public CBaseTrigger
 public:
 	void Spawn() override;
 	
-	void Use(CBaseEntity *apActivator) override;
+	//void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
 	
-	void Killed() override;
+	//void Killed() override;
 };
 
 LINK_ENTITY_TO_CLASS(trigger_multiple, CTriggerMulti);
@@ -74,8 +75,8 @@ void CTriggerMulti::Spawn()
 	};
 	*/
 	
-	if(!mfWait)
-		mfWait = 0.2;
+	if(!GetDelay())
+		SetDelay(0.2);
 	
 	SetUseCallback(CTriggerMulti::Use);
 
@@ -83,29 +84,33 @@ void CTriggerMulti::Spawn()
 
 	if(GetHealth() > 0)
 	{
-		if(self->spawnflags & SPAWNFLAG_NOTOUCH)
-			objerror("health and notouch don't make sense\n");
+		//if(self->spawnflags & SPAWNFLAG_NOTOUCH)
+			//objerror("health and notouch don't make sense\n");
 		SetMaxHealth(GetHealth());
-		self->th_die = CTriggerMulti::Killed;
+		//self->th_die = CTriggerMulti::Killed;
 		SetDamageable(DAMAGE_YES);
 		SetSolidity(SOLID_BBOX);
 		SetOrigin(GetOrigin());	// make sure it links into the world
 	}
 	else
 	{
-		if(!(self.spawnflags & SPAWNFLAG_NOTOUCH))
-			SetTouchCallback(CTriggerMulti::Touch);
+		if(!(self->spawnflags & SPAWNFLAG_NOTOUCH))
+			SetTouchCallback(CTriggerMulti::MultiTouch);
 	};
 };
 
+/*
 void CTriggerMulti::Killed()
 {
 	SetEnemy(damage_attacker);
 	multi_trigger();
 };
+*/
 
-void CTriggerMulti::Use(CBaseEntity *apActivator)
+/*
+void CTriggerMulti::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
 	SetEnemy(apActivator);
 	multi_trigger();
 };
+*/

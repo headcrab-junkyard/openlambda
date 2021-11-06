@@ -19,8 +19,10 @@
 */
 
 /// @file
+/// @brief button and multiple button code
 
 #include "BaseButton.hpp"
+#include "Util.hpp"
 
 /*QUAKED func_button (0 .5 .8) ?
 When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again.
@@ -41,72 +43,77 @@ LINK_ENTITY_TO_CLASS(func_button, CBaseButton);
 
 void CBaseButton::Spawn()
 {
-	if (self->sounds == 0)
+	//
+	//Precache();
+	//
+	switch(mnSounds)
 	{
-		gpEngine->pfnPrecacheSound ("buttons/airbut1.wav");
-		self->noise = "buttons/airbut1.wav";
+	case 0:
+		gpEngine->pfnPrecacheSound("buttons/airbut1.wav");
+		self->noise = gpEngine->pfnAllocString("buttons/airbut1.wav");
+		break;
+	case 1:
+		gpEngine->pfnPrecacheSound("buttons/switch21.wav");
+		self->noise = gpEngine->pfnAllocString("buttons/switch21.wav");
+		break;
+	case 2:
+		gpEngine->pfnPrecacheSound("buttons/switch02.wav");
+		self->noise = gpEngine->pfnAllocString("buttons/switch02.wav");
+		break;
+	case 3:
+		gpEngine->pfnPrecacheSound("buttons/switch04.wav");
+		self->noise = gpEngine->pfnAllocString("buttons/switch04.wav");
+		break;
 	};
-	if (self->sounds == 1)
-	{
-		gpEngine->pfnPrecacheSound ("buttons/switch21.wav");
-		self->noise = "buttons/switch21.wav";
-	};
-	if (self->sounds == 2)
-	{
-		gpEngine->pfnPrecacheSound ("buttons/switch02.wav");
-		self->noise = "buttons/switch02.wav";
-	};
-	if (self->sounds == 3)
-	{
-		gpEngine->pfnPrecacheSound ("buttons/switch04.wav");
-		self->noise = "buttons/switch04.wav";
-	};
+	//
 	
-	SetMovedir ();
+	SetMovedir(self);
 
 	SetMoveType(MOVETYPE_PUSH);
 	SetSolidity(SOLID_BSP);
-	SetModel(self->GetModel());
+	SetModel(GetModel());
 
-	SetBlockedCallback(CButton::Blocked);
-	SetUseCallback(CButton::Use);
+	//SetBlockedCallback(CBaseButton::Blocked);
+	//SetUseCallback(CBaseButton::Use);
 
-	if (GetHealth())
+	if(GetHealth() > 0)
 	{
-		SetMaxHealth(GetHealth());
-		self->th_die = CButton::Killed;
-		self->takedamage = DAMAGE_YES;
+		//SetMaxHealth(GetHealth());
+		//self->th_die = CBaseButton::Killed;
+		SetDamageable(DAMAGE_YES);
 	}
-	else
-		SetTouchCallback(CButton::Touch);
+	//else
+		//SetTouchCallback(CBaseButton::Touch);
 
-	if (!self->speed)
-		self->speed = 40;
-	if (!self->wait)
-		self->wait = 1;
-	if (!self->lip)
-		self->lip = 4;
+	if(!GetSpeed())
+		SetSpeed(40);
+	
+	if(!GetDelay())
+		SetDelay(1);
+	
+	if(!mfLip)
+		mfLip = 4;
 
-	state = STATE_BOTTOM;
+	meState = State::Bottom;
 
-	self->pos1 = GetOrigin();
-	self->pos2 = self->pos1 + self->movedir * (fabs(self->movedir * self->size) - self->lip);
+	mvPos1 = GetOrigin();
+	mvPos2 = mvPos1 + GetMoveDir() * (fabs(GetMoveDir() * self->size) - mfLip);
 };
 
-void CBaseButton::Use(CBaseEntity *other)
+void CBaseButton::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
-	self->SetEnemy(activator);
+	SetEnemy(apActivator);
 	Fire();
 };
 
-void CBaseButton::Touch(CBaseEntity *other)
+void CBaseButton::Touch(CBaseEntity *apOther)
 {
-	if (other->GetClassName() != "player")
+	if(apOther->GetClassName() != "player")
 		return;
 	
-	mpActivator = other;
+	mpActivator = apOther;
 	
-	SetEnemy(other);
+	SetEnemy(apOther);
 	
 	Fire();
 };
@@ -118,47 +125,51 @@ void CBaseButton::Blocked(CBaseEntity *other)
 
 void CBaseButton::Wait()
 {
-	self->SetState(STATE_TOP);
+	SetState(State::Top);
 	
 	{
-		SetNextThink(self->ltime + self->wait);
+		SetNextThink(self->ltime + GetDelay());
 		SetThinkCallback(CBaseButton::Return);
 	};
 	
-	SUB_UseTargets(GetEnemy(), USE_TOGGLE, 0);
+	SUB_UseTargets(GetEnemy(), UseType::Toggle, 0);
 	
 	self->frame = 1; // use alternate textures
 };
 
 void CBaseButton::Done()
 {
-	self->SetState(STATE_BOTTOM);
+	SetState(State::Bottom);
 };
 
 void CBaseButton::Return()
 {
-	self->SetState(STATE_DOWN);
-	SUB_CalcMove(self->pos1, self->speed, CBaseButton::Done);
+	SetState(State::GoingDown);
+	SetMoveDoneCallback(CBaseButton::Done);
+	LinearMove(mvPos1, GetSpeed());
 	self->frame = 0; // use normal textures
-	if (GetHealth())
-		SetDamageable(DAMAGE_YES); // can be shot again
+	//if(GetHealth())
+		//SetDamageable(DAMAGE_YES); // can be shot again
 };
 
 void CBaseButton::Fire()
 {
-	if (self->GetState() == STATE_UP || self->GetState() == STATE_TOP)
+	if(GetState() == State::GoingUp || GetState() == State::Top)
 		return;
 
-	EmitSound(CHAN_VOICE, self->noise, 1, ATTN_NORM);
+	EmitSound(CHAN_VOICE, GetNoise(), 1, ATTN_NORM);
 
-	self->SetState(STATE_UP);
-	SUB_CalcMove (self->pos2, self->speed, button_wait);
+	SetState(State::GoingUp);
+	SetMoveDoneCallback(CBaseButton::Wait);
+	LinearMove(mvPos2, GetSpeed());
 };
 
-void CBaseButton::Killed(CBaseEntity *attacker)
+/*
+void CBaseButton::Killed(CBaseEntity *apAttacker)
 {
 	SetEnemy(damage_attacker);
 	SetHealth(GetMaxHealth());
 	SetDamageable(DAMAGE_NO); // wil be reset upon return
-	Fire ();
+	Fire();
 };
+*/

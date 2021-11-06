@@ -27,18 +27,18 @@
 
 /// @file
 
-#include "BaseEntity.hpp"
+#include "BaseToggle.hpp"
 
-class CBaseButton : public CBaseEntity
+class CBaseButton : public CBaseToggle
 {
 public:
 	void Spawn() override;
 	
-	void Use(CBaseEntity *other) override;
-	void Touch(CBaseEntity *other) override;
-	void Blocked(CBaseEntity *other) override;
+	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
+	void Touch(CBaseEntity *apOther) override; // TODO: ButtonTouch?
+	void Blocked(CBaseEntity *apOther) override;
 	
-	bool HandleKeyValue(KeyValueData *apData) override;
+	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
 	
 	void Wait();
 	void Done();
@@ -46,9 +46,23 @@ public:
 	
 	void Fire();
 	
-	void Killed();
+	//void Killed(CBaseEntity *apAttacker);
+private:
+	enum class State : int
+	{
+		Top,
+		GoingUp,
+		GoingDown,
+		Bottom
+	};
+	
+	void SetState(State aeState){meState = aeState;}
+	State GetState() const {return meState;}
 private:
 	CEntityHandle mpActivator{nullptr};
-
+	
+	State meState{};
+	
 	int state{0};
+	int mnSounds{0};
 };

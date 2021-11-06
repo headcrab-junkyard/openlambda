@@ -22,6 +22,7 @@
 /// @brief relay trigger code
 
 #include "BaseDelay.hpp"
+#include "Util.hpp"
 
 //=============================================================================
 
@@ -33,7 +34,7 @@ class CTriggerRelay : public CBaseDelay
 public:
 	void Spawn() override;
 	
-	void Use(CBaseEntity *apActivator) override;
+	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
 };
 
 LINK_ENTITY_TO_CLASS(trigger_relay, CTriggerRelay);
@@ -43,7 +44,7 @@ void CTriggerRelay::Spawn()
 	//SetUseCallback(CBaseEntity::SUB_UseTargets);
 };
 
-void CTriggerRelay:::Use(CBaseEntity *apActivator)
+void CTriggerRelay::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
 	SUB_UseTargets(this, meTriggerType, 0);
 };

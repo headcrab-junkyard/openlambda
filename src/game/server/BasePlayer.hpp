@@ -23,6 +23,7 @@
 
 #include "BaseCharacter.hpp"
 
+#include "GameTypes.hpp"
 
 class CGame;
 class CBaseItem;

@@ -22,8 +22,9 @@
 /// @brief teleport trigger code
 
 #include "BaseTrigger.hpp"
+#include "Util.hpp"
 
-const float	SILENT{2};
+const int SILENT{2};
 
 /*QUAKED trigger_teleport (.5 .5 .5) ? PLAYER_ONLY SILENT
 Any object touching this will be transported to the corresponding info_teleport_destination entity. You must set the "target" field, and create an object with a "targetname" field that matches.
@@ -35,7 +36,7 @@ class CTriggerTeleport : public CBaseTrigger
 public:
 	void Spawn() override;
 	
-	void Use(CBaseEntity *apActivator) override;
+	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
 };
 
 LINK_ENTITY_TO_CLASS(trigger_teleport, CTriggerTeleport);
@@ -60,9 +61,9 @@ void CTriggerTeleport::Spawn()
 	};
 };
 
-void CTriggerTeleport::Use(CBaseEntity *apActivator)
+void CTriggerTeleport::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
 	SetNextThink(gpGlobals->time + 0.2);
-	force_retouch = 2; // make sure even still objects get hit
+	gpGlobals->force_retouch = 2; // make sure even still objects get hit
 	SetThinkCallback(SUB_Null);
 };

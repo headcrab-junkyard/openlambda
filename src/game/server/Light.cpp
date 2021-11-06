@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2020 BlackPhrase
+ * Copyright (C) 2020-2021 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,17 @@
 
 /// @file
 
-#include "BaseEntity.hpp"
+#include "PointEntity.hpp"
+#include "Util.hpp"
 
-const float START_OFF = 1;
+/*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) START_OFF
+Non-displayed light.
+Default light value is 300
+Default style is 0
+If targeted, it will toggle between on or off.
+*/
+
+const int START_OFF{1};
 
 class CLight : public CPointEntity
 {
@@ -30,10 +38,17 @@ public:
 	bool PreSpawn() const override;
 	void Spawn() override;
 	
-	void Use(CBaseEntity *other) override;
+	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	
+	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
+private:
+	int mnStyle{0};
 };
 
-bool CLight::PreSpawn()
+LINK_ENTITY_TO_CLASS(light, CLight);
+LINK_ENTITY_TO_CLASS(light_spot, CLight);
+
+bool CLight::PreSpawn() const
 {
 	if(!self->targetname)
 	{
@@ -46,34 +61,47 @@ bool CLight::PreSpawn()
 
 void CLight::Spawn()
 {
-	if(self->style >= 32)
+	if(mnStyle >= 32)
 	{
-		SetUseCallback(CLight::Use);
+		//SetUseCallback(CLight::Use);
 		if(self->spawnflags & START_OFF)
-			gpEngine->SetLightStyle(self->style, "a");
+			gpEngine->pfnLightStyle(mnStyle, "a");
 		else
-			gpEngine->SetLightStyle(self->style, "m");
+			gpEngine->pfnLightStyle(mnStyle, "m");
 	};
 };
 
-void CLight::Use(CBaseEntity *other)
+bool CLight::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+{
+	if(asKey == "style")
+	{
+		mnStyle = std::stoi(asValue);
+		return true;
+	}
+	else if(asKey == "pitch")
+	{
+		self->angles[0] = std::stof(asValue);
+		return true;
+	}
+	else if(asKey == "pattern")
+	{
+		//mnPattern = gpEngine->pfnAllocString(asValue.c_str());
+		return true;
+	};
+	
+	return CPointEntity::HandleKeyValue(asKey, asValue);
+};
+
+void CLight::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
 	if(self->spawnflags & START_OFF)
 	{
-		gpEngine->SetLightStyle(self->style, "m");
-		self->spawnflags = self->spawnflags - START_OFF;
+		gpEngine->pfnLightStyle(mnStyle, "m");
+		self->spawnflags &= ~START_OFF;
 	}
 	else
 	{
-		gpEngine->SetLightStyle(self->style, "a");
-		self->spawnflags = self->spawnflags + START_OFF;
+		gpEngine->pfnLightStyle(mnStyle, "a");
+		self->spawnflags |= START_OFF;
 	};
 };
-
-/*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) START_OFF
-Non-displayed light.
-Default light value is 300
-Default style is 0
-If targeted, it will toggle between on or off.
-*/
-LINK_ENTITY_TO_CLASS(light, CLight);

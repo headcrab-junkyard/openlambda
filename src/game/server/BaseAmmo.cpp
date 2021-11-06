@@ -21,13 +21,16 @@
 /// @file
 
 #include "BaseAmmo.hpp"
+#include "Game.hpp"
+#include "IGameRules.hpp"
 
 void CBaseAmmo::Spawn()
 {
-	//SetMoveType();
+	SetMoveType(MOVETYPE_TOSS);
 	SetSolidity(SOLID_TRIGGER);
-	SetSize(idVec3(0), idVec3(32, 32, 56));
-	//SetOrigin();
+	SetSize(idVec3(-16, -16, 0), idVec3(16, 16, 16));
+	SetOrigin(GetOrigin());
+	
 	SetTouchCallback(CBaseAmmo::Touch);
 	
 	PostSpawn();
@@ -36,58 +39,71 @@ void CBaseAmmo::Spawn()
 void CBaseAmmo::Respawn()
 {
 	// remove it in single player, or setup for respawning in deathmatch
-	SetModel(string_null);
+	self->effects |= EF_NODRAW; // TODO: was SetModel(string_null);
 	SetSolidity(SOLID_NOT);
 
-	if (deathmatch != 2)
-		SetNextThink(gpGlobals->time + 30);
+	//if(deathmatch != 2)
+		//SetNextThink(gpGlobals->time + 30);
 
 // Xian -- If playing in DM 3.0 mode, halve the time ammo respawns        
 
-	if (deathmatch == 3 || deathmatch == 5)        
-		SetNextThink(gpGlobals->time + 15);
+	//if(deathmatch == 3 || deathmatch == 5)        
+		//SetNextThink(gpGlobals->time + 15);
+	
+	SetNextThink(gpGame->GetRules()->GetAmmoRespawnTime(this));
 
 	SetThinkCallback(SUB_regen);
 };
 
-void CBaseAmmo::Touch(CBaseEntity *other)
+void CBaseAmmo::SUB_regen()
 {
-	if (other->GetClassName() != "player")
+	SetTouchCallback(CBaseAmmo::Touch);
+};
+
+void CBaseAmmo::Touch(CBaseEntity *apOther)
+{
+	if(apOther->GetClassName() != "player")
 		return;
-	if (other->GetHealth() <= 0)
+	
+	if(apOther->GetHealth() <= 0)
 		return;
 
-	if(GiveTo(other)) // TODO: OnPickup?
+	if(GiveTo(apOther)) // TODO: OnPickup?
 	{
-		SetTouchCallback(nullptr);
-		SetThinkCallback(CBaseAmmo::SUB_Remove);
-		SetNextThink(gpGlobals->time + 0.1);
+		if(false)
+			; //Respawn();
+		else
+		{
+			SetTouchCallback(nullptr);
+			SetThinkCallback(CBaseAmmo::SUB_Remove);
+			SetNextThink(gpGlobals->time + 0.1);
+		};
 	};
 
 /*
 	// if the player was using his best weapon, change up to the new one if better          
-	float best = other->GetBestWeapon();
+	float best = apOther->GetBestWeapon();
 
 	bound_other_ammo ();
 	
-	sprint (other, PRINT_LOW, "You got the ");
-	sprint (other, PRINT_LOW, self->netname);
+	sprint (apOther, PRINT_LOW, "You got the ");
+	sprint (apOther, PRINT_LOW, self->netname);
 	sprint (other, PRINT_LOW, "\n");
 
-	stuffcmd (other, "bf\n");
+	stuffcmd (apOther, "bf\n");
 
 // change to a better weapon if appropriate
 
-	if ( other->weapon == best )
+	if ( apOther->weapon == best )
 	{
-		self->weapon = other->GetBestWeapon();
-		other->SetCurrentAmmo ();
+		self->weapon = apOther->GetBestWeapon();
+		apOther->SetCurrentAmmo ();
 	}
 
 // if changed current ammo, update it
-	other->SetCurrentAmmo();
+	apOther->SetCurrentAmmo();
 
-	activator = other;
+	activator = apOther;
 	SUB_UseTargets(); // fire all targets / killtargets
 */
 };

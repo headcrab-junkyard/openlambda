@@ -23,14 +23,19 @@
 
 #include "BaseEntity.hpp"
 
+class CBasePlayer;
+
 class CBaseAmmo : public CBaseEntity
 {
 public:
 	void Spawn() override;
+	void Respawn();
 	
-	void Touch(CBaseEntity *other) override;
+	void Touch(CBaseEntity *apOther) override;
 	
-	virtual void GiveTo(CBasePlayer *apPlayer){}
+	virtual bool GiveTo(CBaseEntity *apOther){return true;}
 protected:
 	virtual void PostSpawn(){}
+private:
+	void SUB_regen();
 };

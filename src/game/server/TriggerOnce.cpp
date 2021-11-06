@@ -22,7 +22,8 @@
 /// @brief one-time trigger code
 
 //#include "TriggerOnce.hpp"
-#include "BaseTrigger.hpp"
+#include "TriggerMulti.hpp"
+#include "Util.hpp"
 
 //=============================================================================
 
@@ -49,6 +50,6 @@ LINK_ENTITY_TO_CLASS(trigger_once, CTriggerOnce);
 
 void CTriggerOnce::Spawn()
 {
-	mfWait = -1;
+	SetDelay(-1);
 	CTriggerMulti::Spawn();
 };

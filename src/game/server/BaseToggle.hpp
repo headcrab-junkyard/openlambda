@@ -20,15 +20,22 @@
 
 /// @file
 
-#include "BaseDelay.hpp"
+#include "BaseAnimating.hpp"
 
-class CBaseToggle : public CBaseDelay
+class CBaseToggle : public CBaseAnimating
 {
 public:
-	bool HandleKeyValue(KeyValueData *apKVData) override;
+	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
 	
 	int GetState() const {return mnState;}
-	float GetDelay() const {return mfDelay;}
+	/*virtual*/ float GetDelay() const {return mfWaitTime;} // TODO: GetWaitTime?
+	
+	using pfnMoveDoneCallback = void (CBaseToggle::*)();
+	
+	void SetMoveDoneCallback(pfnMoveDoneCallback afnCallback){mfnMoveDoneCallback = afnCallback;}
+	
+	template<typename T>
+	inline void SetMoveDoneCallback(T aTCallback){SetMoveDoneCallback(static_cast<pfnMoveDoneCallback>(aTCallback));}
 	
 	void LinearMove(const idVec3 &tdest, float tspeed); // TODO: was SUB_CalcMove
 	void LinearMoveDone(); // TODO: was SUB_CalcMoveDone
@@ -37,13 +44,21 @@ public:
 	void SUB_CalcAngleMoveDone(); // TODO: AngularMoveDone
 	
 	bool IsLockedByMaster() const;
+protected:
+	void SetDelay(float afTime){mfWaitTime = afTime;}
+protected:
+	idVec3 mvPos1{idVec3::Origin};
+	idVec3 mvPos2{idVec3::Origin};
+	
+	float mfWaitTime{0.0f};
+	float mfLip{0.0f};
+	
+	int mnCount{0};
 private:
 	idVec3 mvFinalDest{idVec3::Origin};
 	idVec3 mvFinalAngle{idVec3::Origin};
 	
-	void (CBaseToggle::*mpfnMoveDoneCallback)();
-	
-	float mfDelay{0.0f};
+	pfnMoveDoneCallback mfnMoveDoneCallback{nullptr};
 	
 	int mnState{-1};
 };
