@@ -21,6 +21,7 @@
 /// @file
 
 #include "BaseEntity.hpp"
+#include "Util.hpp"
 
 /*
 ==============================================================================
@@ -38,7 +39,7 @@ class CFuncWall : public CBaseEntity
 public:
 	void Spawn() override;
 	
-	void Use(CBaseEntity *other) override;
+	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
 };
 
 LINK_ENTITY_TO_CLASS(func_wall, CFuncWall);
@@ -53,7 +54,7 @@ void CFuncWall::Spawn()
 	SetModel(GetModel());
 };
 
-void CFuncWall::Use(CBaseEntity *apOther)
+void CFuncWall::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
 	// Change to alternate textures
 	self->frame = 1 - self->frame;

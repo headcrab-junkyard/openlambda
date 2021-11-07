@@ -22,9 +22,11 @@
 #pragma once
 
 #include "engine.h"
+#include "mathlib/vec3.h"
+#include "exports.h"
 
 #define LINK_ENTITY_TO_CLASS(mapClassName, dllClassName) \
-	C_EXPORT void mapClassName(entvars_t *self){GetClassPtr(static_cast<dllClassName*>(self));}
+	C_EXPORT void mapClassName(entvars_t *self){GetClassPtr(reinterpret_cast<dllClassName*>(self));}
 
 class CBaseEntity;
 

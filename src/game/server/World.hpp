@@ -28,5 +28,5 @@ class CWorldSpawn : public CBaseEntity
 public:
 	void Spawn() override;
 	
-	bool HandleKeyValue(KeyValueData *apKVData) override;
+	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
 };

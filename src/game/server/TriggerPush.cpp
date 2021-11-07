@@ -60,14 +60,14 @@ void CTriggerPush::Touch(CBaseEntity *apOther)
 		apOther->SetVelocity(GetSpeed() * GetMoveDir() * 10);
 		if(apOther->GetClassName() == "player")
 		{
-			if(apOther->fly_sound < gpGlobals->time)
+			//if(apOther->self->fly_sound < gpGlobals->time)
 			{
-				apOther->fly_sound = gpGlobals->time + 1.5;
-				apOther->EmitSound(CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM);
+				//apOther->self->fly_sound = gpGlobals->time + 1.5;
+				//apOther->EmitSound(CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM);
 			};
 		};
 	};
 	
 	if(self->spawnflags & PUSH_ONCE)
-		gpEngine->pfnRemove(ToEdict());
+		gpEngine->pfnRemoveEntity(ToEdict());
 };

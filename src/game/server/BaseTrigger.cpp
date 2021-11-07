@@ -98,10 +98,10 @@ void CBaseTrigger::MultiTouch(CBaseEntity *apOther)
 		return;
 	
 // if the trigger has an angles field, check player's facing direction
-	if(GetMoveDir() != '0 0 0')
+	if(GetMoveDir() != idVec3::Origin)
 	{
 		gpEngine->pfnMakeVectors(apOther->GetAngles());
-		if (v_forward * GetMoveDir() < 0)
+		if(v_forward * GetMoveDir() < 0)
 			return; // not facing the right way
 	};
 	
@@ -141,13 +141,13 @@ void CBaseTrigger::TeleportTouch(CBaseEntity *apOther)
 	// put a tfog where the player was
 	spawn_tfog(apOther->GetOrigin());
 
-	edict_t *t = gpEngine->pfnFind(world, targetname, self->target);
+	edict_t *t = gpEngine->pfnFindEntityByString(world, "targetname", self->target);
 	if (!t)
 		objerror ("couldn't find target");
 		
-// spawn a tfog flash in front of the destination
-	makevectors (t->mangle);
-	idVec3 org = t->GetOrigin() + 32 * v_forward;
+	// spawn a tfog flash in front of the destination
+	gpEngine->pfnMakeVectors(t->mangle);
+	idVec3 org{t->GetOrigin() + 32 * gpGlobals->v_forward};
 
 	spawn_tfog (org);
 	spawn_tdeath(t->GetOrigin(), apOther);
@@ -156,7 +156,7 @@ void CBaseTrigger::TeleportTouch(CBaseEntity *apOther)
 	if (!apOther->GetHealth())
 	{
 		apOther->SetOrigin(t->origin);
-		apOther->velocity = (v_forward * apOther->GetVelocity().x) + (v_forward * apOther->GetVelocity().y);
+		apOther->velocity = (gpGlobals->v_forward * apOther->GetVelocity().x) + (gpGlobals->v_forward * apOther->GetVelocity().y);
 		return;
 	};
 
@@ -168,7 +168,7 @@ void CBaseTrigger::TeleportTouch(CBaseEntity *apOther)
 		apOther->teleport_time = gpGlobals->time + 0.7;
 		if(apOther->GetFlags() & FL_ONGROUND)
 			apOther->flags = apOther->flags - FL_ONGROUND;
-		apOther->SetVelocity(v_forward * 300);
+		apOther->SetVelocity(gpGlobals->v_forward * 300);
 	};
 	apOther->flags = apOther->flags - apOther->flags & FL_ONGROUND;
 };
@@ -195,7 +195,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity *apActivator)
 	};
 
 	if(self->noise)
-		EmitSound(CHAN_VOICE, self->noise, 1, ATTN_NORM, PITCH_NORM);
+		EmitSound(CHAN_VOICE, GetNoise(), 1, ATTN_NORM);
 
 	// don't trigger again until reset
 	SetDamageable(DAMAGE_NO);

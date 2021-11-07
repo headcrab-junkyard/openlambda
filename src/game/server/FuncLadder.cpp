@@ -21,6 +21,7 @@
 /// @brief ladder entity code
 
 #include "BaseTrigger.hpp"
+#include "Util.hpp"
 
 class CFuncLadder : public CBaseTrigger
 {
@@ -40,7 +41,7 @@ void CFuncLadder::Spawn()
 	
 	//SetEffects();
 	
-	SetModel(gpEngine->pfnGetString(self->model));
+	SetModel(gpEngine->pfnSzFromIndex(self->model));
 	SetMoveType(MOVETYPE_PUSH);
 };
 

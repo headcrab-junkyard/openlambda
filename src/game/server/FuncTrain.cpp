@@ -27,7 +27,8 @@
 
 /// @file
 
-#include "BaseEntity.hpp"
+#include "BaseToggle.hpp"
+#include "Util.hpp"
 
 /*QUAKED func_train (0 .5 .8) ?
 Trains are moving platforms that players can ride.
@@ -40,7 +41,7 @@ sounds
 1) ratchet metal
 
 */
-class CFuncTrain : public CBaseEntity
+class CFuncTrain : public CBaseToggle
 {
 public:
 	//CFuncTrain();
@@ -49,13 +50,17 @@ public:
 	void Spawn() override;
 	
 	void Blocked(CBaseEntity *apOther) override;
-	void Use(CBaseEntity *apActivator) override;
+	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
 	
 	void Wait();
 	
 	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
 private:
 	void Next();
+private: // TODO: public?
+	int mnSounds{0};
+	
+	bool mbActivated{false};
 };
 
 LINK_ENTITY_TO_CLASS(func_train, CFuncTrain);
@@ -68,24 +73,24 @@ void CFuncTrain::Spawn()
 	//
 	//Precache();
 	//
-	switch(self->sounds)
+	switch(mnSounds)
 	{
 	case 0:
 		gpEngine->pfnPrecacheSound("misc/null.wav");
-		self->noise = "misc/null.wav";
-		self->noise1 = "misc/null.wav";
+		self->noise = gpEngine->pfnAllocString("misc/null.wav");
+		self->noise1 = gpEngine->pfnAllocString("misc/null.wav");
 		break;
 	case 1:
 		gpEngine->pfnPrecacheSound("plats/train1.wav");
 		gpEngine->pfnPrecacheSound("plats/train2.wav");
-		self->noise = gpEngine->pfnMakeString("plats/train2.wav");
-		self->noise1 = gpEngine->pfnMakeString("plats/train1.wav");
+		self->noise = gpEngine->pfnAllocString("plats/train2.wav");
+		self->noise1 = gpEngine->pfnAllocString("plats/train1.wav");
 		break;
 	case 2:
 		gpEngine->pfnPrecacheSound("plats/platmove1.wav");
 		gpEngine->pfnPrecacheSound("plats/platstop1.wav");
-		self->noise = gpEngine->pfnMakeString("plats/platstop1.wav");
-		self->noise1 = gpEngine->pfnMakeString("plats/platmove1.wav");
+		self->noise = gpEngine->pfnAllocString("plats/platstop1.wav");
+		self->noise1 = gpEngine->pfnAllocString("plats/platmove1.wav");
 		break;
 	};
 	//
@@ -93,7 +98,7 @@ void CFuncTrain::Spawn()
 	if(!GetSpeed())
 		SetSpeed(100);
 	
-	if(!self->target)
+	if(!GetTarget())
 		objerror("func_train without a target");
 	
 	if(!self->dmg)
@@ -107,8 +112,8 @@ void CFuncTrain::Spawn()
 	
 	SetMoveType(MOVETYPE_PUSH);
 	
-	//SetBlockedCallback(train_blocked);
-	//SetUseCallback(train_use);
+	//SetBlockedCallback(CFuncTrain::Blocked);
+	//SetUseCallback(CFuncTrain::Use);
 	
 	//SetClassName("train");
 
@@ -126,13 +131,13 @@ void CFuncTrain::Spawn()
 		mfVolume = 0.85;
 };
 
-void CFuncTrain::Blocked(CBaseEntity *other)
+void CFuncTrain::Blocked(CBaseEntity *apOther)
 {
 	if(gpGlobals->time < self->attack_finished)
 		return;
 	self->attack_finished = gpGlobals->time + 0.5;
-	//other->deathtype = "squish";
-	other->TakeDamage(self, self, self->dmg, DMG_CRUSH);
+	//apOther->deathtype = "squish";
+	apOther->TakeDamage(self, self, self->dmg, DMG_CRUSH);
 };
 
 void CFuncTrain::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
@@ -144,9 +149,9 @@ void CFuncTrain::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType ae
 
 void CFuncTrain::Wait()
 {
-	if(self->wait)
+	if(GetDelay())
 	{
-		SetNextThink(self->ltime + self->wait);
+		SetNextThink(self->ltime + GetDelay());
 		EmitSound(CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise, 1, ATTN_NORM);
 	}
 	else
@@ -157,23 +162,24 @@ void CFuncTrain::Wait()
 
 void CFuncTrain::Next()
 {
-	CBaseEntity *targ{gpEngine->pfnFindEntityByString(world, targetname, self->target)};
-	self->target = targ->target;
-	if(!self->target)
+	CBaseEntity *pTargetEnt{gpEngine->pfnFindEntityByString(world, "targetname", GetTarget())};
+	SetTarget(pTargetEnt->GetTarget());
+	if(!GetTarget())
 		objerror("train_next: no next target");
-	if(targ->wait)
-		self->wait = targ->wait;
+	if(pTargetEnt->GetDelay())
+		SetDelay(pTargetEnt->GetDelay());
 	else
-		self->wait = 0;
+		SetDelay(0);
 	EmitSound(CHAN_VOICE, self->noise1, 1, ATTN_NORM);
-	SUB_CalcMove(targ->GetOrigin() - self->mins, GetSpeed(), train_wait);
+	SetMoveDoneCallback(CFuncTrain::Wait);
+	LinearMove(pTargetEnt->GetOrigin() - GetSize().mins, GetSpeed());
 };
 
 bool CFuncTrain::HandleKeyValue(const std::string &asKey, const std::string &asValue)
 {
 	if(asKey == "sounds")
 	{
-		mSounds = std::stoi(asValue);
+		mnSounds = std::stoi(asValue);
 		return true;
 	};
 	

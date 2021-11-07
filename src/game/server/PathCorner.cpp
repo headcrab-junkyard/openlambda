@@ -95,7 +95,7 @@ moving towards it, change the next destination and continue.
 */
 void CPathCorner::Touch(CBaseEntity *apOther)
 {
-	if(apOther->movetarget != self)
+	if(apOther->GetGoal() != this)
 		return;
 	
 	if(apOther->GetEnemy())
@@ -109,12 +109,12 @@ void CPathCorner::Touch(CBaseEntity *apOther)
 		apOther->EmitSound(CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE); // play chainsaw drag sound
 
 	//dprint ("t_movetarget\n");
-	apOther->goalentity = self->movetarget = find(world, targetname, apOther->target);
-	apOther->ideal_yaw = vectoyaw(apOther->GetGoalEntity()->GetOrigin() - apOther->GetOrigin());
-	if(!self->movetarget)
+	apOther->SetGoal(/*apOther->movetarget =*/ gpEngine->pfnFindEntityByString(world, "targetname", apOther->GetTarget()));
+	
+	if(!apOther->GetGoal())
 	{
-		self->pausetime = gpGlobals->time + 999999;
-		self->th_stand();
+		//apOther->pausetime = gpGlobals->time + 999999;
+		//apOther->th_stand();
 		return;
 	};
 };

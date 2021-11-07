@@ -21,6 +21,7 @@
 /// @file
 
 #include "BaseDelay.hpp"
+#include "Util.hpp"
 
 //=============================================================================
 
@@ -35,7 +36,7 @@ bool CBaseDelay::HandleKeyValue(const std::string &asKey, const std::string &asV
 	}
 	else if(asKey == "killtarget")
 	{
-		mnKillTargetString = gpEngine->pfnAllocString(asValue);
+		mnKillTargetString = gpEngine->pfnAllocString(asValue.c_str());
 		return true;
 	};
 	
@@ -44,7 +45,7 @@ bool CBaseDelay::HandleKeyValue(const std::string &asKey, const std::string &asV
 
 void CBaseDelay::DelayThink()
 {
-	SUB_UseTargets(GetEnemy());
+	SUB_UseTargets(GetEnemy(), static_cast<UseType>(self->button), 0);
 	gpEngine->pfnRemove(ToEdict());
 };
 
@@ -67,7 +68,7 @@ match (string)self.target and call their .use function
 
 ==============================
 */
-void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float afValue)
+void CBaseDelay::SUB_UseTargets(CBaseEntity *apActivator, UseType aeUseType, float afValue)
 {
 	//
 	// check for a delay
@@ -84,18 +85,18 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float
 		// Save the use type
 		t->self->button = (int)aeUseType;
 		
-		//t->SetEnemy(activator); // TODO: ?
+		//t->SetEnemy(apActivator); // TODO: ?
 		//t->message = self->message; // TODO: unused
 		
 		t->mnKillTargetString = mnKillTargetString;
-		t->SetTarget(self->target);
+		t->SetTarget(GetTarget());
 		
 		t->mfDelay = 0.0f; // Prevent "recursion"
 		
 		t->SetOwner(nullptr);
 		
 		if(false)
-			t->SetOwner(activator);
+			t->SetOwner(apActivator);
 		
 		return;
 	};
@@ -105,11 +106,11 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float
 	//
 	// TODO: UNUSED
 	/*
-	if (activator->GetClassName() == "player" && self.message != "")
+	if (apActivator->GetClassName() == "player" && self.message != "")
 	{
-		gpEngine->pfnCenterPrint (activator, self->message);
+		gpEngine->pfnCenterPrint (apActivator, self->message);
 		if (!self->noise)
-			activator->EmitSound(CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM, PITCH_NORM);
+			apActivator->EmitSound(CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM, PITCH_NORM);
 	};
 	*/
 
@@ -121,7 +122,7 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float
 		t = world;
 		do
 		{
-			t = gpEngine->pfnFind(t, targetname, mnKillTargetString);
+			t = gpEngine->pfnFindEntityByString(t, "targetname", mnKillTargetString);
 			if(!t)
 				return;
 			gpEngine->pfnRemove(t);
@@ -134,14 +135,14 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float
 	//
 	CBaseEntity *stemp, *otemp, *act;
 	
-	if(self->target)
+	if(GetTarget())
 	{
-		act = activator;
+		act = apActivator;
 		t = world;
 		
 		do
 		{
-			t = gpEngine->pfnFind(t, targetname, self->target);
+			t = gpEngine->pfnFindEntityByString(t, "targetname", GetTarget());
 			
 			if(!t)
 				return;
@@ -151,12 +152,12 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *activator, UseType aeUseType, float
 			self = t;
 			other = stemp;
 			
-			if(self->GetUseCallback() != SUB_Null)
-				self->Use();
+			if(!t->HasFlags(FL_KILLME))
+				t->Use(apActivator, this, aeUseType, afValue);
 			
 			self = stemp;
 			other = otemp;
-			activator = act;
+			apActivator = act;
 		}
 		while(1);
 	};
