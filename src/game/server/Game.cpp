@@ -22,19 +22,50 @@
 
 #include "Game.hpp"
 
+#include "next/filesystem/IFileSystem.hpp"
+#include "next/engine/IVoiceServer.hpp"
+//#include "next/physics/IPhysicsSystem.hpp"
+//#include "next/scriptsystem/IScriptSystem.hpp"
 
 bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 {
-	// TODO
+	mpFileSystem = reinterpret_cast<IFileSystem*>(afnEngineFactory(OGS_FILESYSTEM_INTERFACE_VERSION, nullptr));
+	mpVoiceServer = reinterpret_cast<IVoiceServer*>(afnEngineFactory(OGS_VOICESERVER_INTERFACE_VERSION, nullptr));
+	//mpPhysics = reinterpret_cast<IPhysicsSystem*>(afnEngineFactory(OGS_PHYSICSSYSTEM_INTERFACE_VERSION, nullptr));
+	//mpScript = reinterpret_cast<IScriptSystem*>(afnEngineFactory(OGS_SCRIPTSYSTEM_INTERFACE_VERSION, nullptr));
+	
+	if(!mpFileSystem)
+		return false;
+	
+	if(!mpVoiceServer)
+		return false;
+	
+	//if(!mpPhysics)
+		//return false;
+	
+	//if(!mpScript)
+		//return false;
+	
 	return true;
 };
 
 void CBaseGame::Shutdown()
 {
-	// TODO
+	// NOTE: free resources here
 };
 
 void CBaseGame::Update()
 {
-	// TODO
+	if(mpRules)
+		mpRules->Think();
+	
+	//
+	// cvars checked each frame
+	//
+	//timelimit = cvar("timelimit") * 60;
+	//fraglimit = cvar("fraglimit");
+	gpGlobals->teamplay = teamplay.value; // teamplay = cvar("teamplay");
+	//deathmatch = cvar("deathmatch");
+
+	framecount++;
 };

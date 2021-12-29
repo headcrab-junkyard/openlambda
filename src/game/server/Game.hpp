@@ -23,7 +23,15 @@
 
 #include "next/game/server/IGame.hpp"
 
-struct IGameRules;
+interface IFileSystem;
+interface IVoiceServer;
+interface IPhysicsSystem;
+interface IScriptSystem;
+
+//interface IGameSetup;
+interface IGameRules;
+
+class IGameWorld;
 
 class CBaseGame /*final*/ : public IGame
 {
@@ -32,13 +40,29 @@ public:
 	//CBaseGame(IGameRules *apRules) : mpRules(apRules){}
 	//CBaseGame(IGameRules *apRules, IGameWorld *apWorld);
 	//~CBaseGame();
+public: // IGame interface impl
 	bool Init(CreateInterfaceFn afnEngineFactory) override;
 	void Shutdown() override;
 	
-	void Update() override;
+	void Frame(double afFrameTime) override;
+public: // Public methods
+	virtual void InstallRules() = 0;
 	
+	//void SetRules(IGameRules *apRules){mpRules = apRules;}
 	IGameRules *GetRules() const {return mpRules;}
+	
+	IGameWorld *GetWorld() const {return mpWorld;}
 private:
+	IFileSystem *mpFileSystem{nullptr};
+	IVoiceServer *mpVoiceServer{nullptr};
+	IPhysicsSystem *mpPhysics{nullptr};
+	IScriptSystem *mpScript{nullptr};
+	
 	IGameRules *mpRules{nullptr};
+	IGameWorld *mpWorld{nullptr};
+	//CBasePlayer *GetPlayer(int anIndex) const; // TODO
+	
+	unsigned long framecount{0};
 };
+
 extern CBaseGame *gpGame; // BP: oof...
