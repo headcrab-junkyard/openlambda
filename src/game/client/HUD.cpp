@@ -24,6 +24,11 @@
 #include "cvardef.h"
 #include "cdll_int.h"
 
+void UserCmd_Close()
+{
+	gpEngine->pfnClientCmd("escape");
+};
+
 CHUD::~CHUD()
 {
 };
@@ -32,6 +37,9 @@ void CHUD::Init()
 {
 	default_fov = gpEngine->pfnRegisterVariable("default_fov", "90", 0);
 	mpCvarDraw = gpEngine->pfnRegisterVariable("hud_draw", "1", FCVAR_ARCHIVE);
+	
+	// CHUDAmmo::Init
+	gpEngine->pfnAddCommand("cancelselect", UserCmd_Close);
 };
 
 void CHUD::VidInit()
