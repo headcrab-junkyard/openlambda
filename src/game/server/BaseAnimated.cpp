@@ -19,20 +19,4 @@
 
 /// @file
 
-#pragma once
-
-#include "BaseDelay.hpp"
-
-class CBaseAnimating : public CBaseDelay
-{
-public:
-public: // TODO: private:
-	float mfFrameRate{0.0f};
-	
-	float mfGroundSpeed{0.0f};
-	
-	float mfLastEventCheck{0.0f};
-	
-	bool mbSequenceFinished{false};
-	bool mbSequenceLoops{false};
-};
+#include "BaseAnimated.hpp"

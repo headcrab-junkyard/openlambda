@@ -20,9 +20,9 @@
 
 /// @file
 
-#include "BaseAnimating.hpp"
+#include "BaseAnimated.hpp"
 
-class CBaseToggle : public CBaseAnimating
+class CBaseToggle : public CBaseAnimated
 {
 public:
 	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
