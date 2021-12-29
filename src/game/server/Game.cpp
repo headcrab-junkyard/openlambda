@@ -23,18 +23,18 @@
 #include "Game.hpp"
 
 
-bool CGame::Init(CreateInterfaceFn afnEngineFactory)
+bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 {
 	// TODO
 	return true;
 };
 
-void CGame::Shutdown()
+void CBaseGame::Shutdown()
 {
 	// TODO
 };
 
-void CGame::Update()
+void CBaseGame::Update()
 {
 	// TODO
 };

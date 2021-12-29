@@ -25,11 +25,13 @@
 
 struct IGameRules;
 
-class CGame /*final*/ : public IGame
+class CBaseGame /*final*/ : public IGame
 {
 public:
-	CGame(IGameRules *apRules) : mpRules(apRules){}
-	
+	CBaseGame();
+	//CBaseGame(IGameRules *apRules) : mpRules(apRules){}
+	//CBaseGame(IGameRules *apRules, IGameWorld *apWorld);
+	//~CBaseGame();
 	bool Init(CreateInterfaceFn afnEngineFactory) override;
 	void Shutdown() override;
 	
@@ -39,3 +41,4 @@ public:
 private:
 	IGameRules *mpRules{nullptr};
 };
+extern CBaseGame *gpGame; // BP: oof...
