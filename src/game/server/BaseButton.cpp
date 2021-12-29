@@ -24,6 +24,8 @@
 #include "BaseButton.hpp"
 #include "Util.hpp"
 
+extern void SetMovedir(entvars_t *self);
+
 /*QUAKED func_button (0 .5 .8) ?
 When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again.
 
@@ -111,7 +113,7 @@ void CBaseButton::Touch(CBaseEntity *apOther)
 	if(apOther->GetClassName() != "player")
 		return;
 	
-	mpActivator = apOther;
+	mhActivator = apOther;
 	
 	SetEnemy(apOther);
 	
@@ -120,7 +122,7 @@ void CBaseButton::Touch(CBaseEntity *apOther)
 
 void CBaseButton::Blocked(CBaseEntity *other)
 {
-	// do nothing, just don't ome all the way back out
+	// Do nothing, just don't ome all the way back out
 };
 
 void CBaseButton::Wait()

@@ -46,7 +46,7 @@ bool CBaseDelay::HandleKeyValue(const std::string &asKey, const std::string &asV
 void CBaseDelay::DelayThink()
 {
 	SUB_UseTargets(GetEnemy(), static_cast<UseType>(self->button), 0);
-	gpEngine->pfnRemove(ToEdict());
+	mpWorld->RemoveEntity(this);
 };
 
 /*
@@ -95,7 +95,7 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *apActivator, UseType aeUseType, flo
 		
 		t->SetOwner(nullptr);
 		
-		if(false)
+		if(apActivator && apActivator->GetClassName() == "player")
 			t->SetOwner(apActivator);
 		
 		return;
@@ -106,11 +106,11 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *apActivator, UseType aeUseType, flo
 	//
 	// TODO: UNUSED
 	/*
-	if (apActivator->GetClassName() == "player" && self.message != "")
+	if (apActivator->GetClassName() == "player" && self->message != "")
 	{
-		gpEngine->pfnCenterPrint (apActivator, self->message);
-		if (!self->noise)
-			apActivator->EmitSound(CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM, PITCH_NORM);
+		gpEngine->pfnCenterPrint(apActivator, self->message);
+		if(!self->noise)
+			apActivator->EmitSound(CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
 	};
 	*/
 
@@ -122,10 +122,10 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity *apActivator, UseType aeUseType, flo
 		t = world;
 		do
 		{
-			t = gpEngine->pfnFindEntityByString(t, "targetname", mnKillTargetString);
+			t = mpWorld->FindEntityByString(t, "targetname", mnKillTargetString);
 			if(!t)
 				return;
-			gpEngine->pfnRemove(t);
+			mpWorld->RemoveEntity(t);
 		}
 		while(1);
 	};

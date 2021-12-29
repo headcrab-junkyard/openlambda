@@ -117,4 +117,6 @@ void CPathCorner::Touch(CBaseEntity *apOther)
 		//apOther->th_stand();
 		return;
 	};
+	
+	apOther->SetIdealYaw((apOther->GetGoal()->GetOrigin() - apOther->GetOrigin()).ToYaw());
 };

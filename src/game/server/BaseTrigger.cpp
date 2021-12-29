@@ -26,6 +26,11 @@
 
 extern void SetMovedir(entvars_t *self);
 
+const int SPAWNFLAG_NOMESSAGE{1};
+const int SPAWNFLAG_NOTOUCH{1};
+
+const int PLAYER_ONLY{1};
+
 LINK_ENTITY_TO_CLASS(trigger, CBaseTrigger);
 
 /*
@@ -73,23 +78,23 @@ void CBaseTrigger::CounterUse(CBaseEntity *apActivator, CBaseEntity *apCaller, U
 		&& (self->spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
 		{
 			if (mnCount >= 4)
-				gpEngine->pfnCenterPrint(apActivator, "There are more to go...");
+				gpEngine->pfnAlertMessage(at_console, "There are more to go...");
 			else if (mnCount == 3)
-				gpEngine->pfnCenterPrint(apActivator, "Only 3 more to go...");
+				gpEngine->pfnAlertMessage(at_console, "Only 3 more to go...");
 			else if (mnCount == 2)
-				gpEngine->pfnCenterPrint(apActivator, "Only 2 more to go...");
+				gpEngine->pfnAlertMessage(at_console, "Only 2 more to go...");
 			else
-				gpEngine->pfnCenterPrint(apActivator, "Only 1 more to go...");
+				gpEngine->pfnAlertMessage(at_console, "Only 1 more to go...");
 		};
 		return;
 	};
 	
 	if (apActivator->GetClassName() == "player"
 	&& (self->spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
-		gpEngine->pfnCenterPrint(apActivator, "Sequence completed!");
+		gpEngine->pfnAlertMessage(at_console, "Sequence completed!");
 	
 	SetEnemy(apActivator);
-	ActivateMultiTrigger();
+	ActivateMultiTrigger(mhActivator);
 };
 
 void CBaseTrigger::MultiTouch(CBaseEntity *apOther)
@@ -101,7 +106,7 @@ void CBaseTrigger::MultiTouch(CBaseEntity *apOther)
 	if(GetMoveDir() != idVec3::Origin)
 	{
 		gpEngine->pfnMakeVectors(apOther->GetAngles());
-		if(v_forward * GetMoveDir() < 0)
+		if(idVec3(gpGlobals->v_forward) * GetMoveDir() < 0)
 			return; // not facing the right way
 	};
 	
@@ -111,11 +116,20 @@ void CBaseTrigger::MultiTouch(CBaseEntity *apOther)
 
 void CBaseTrigger::HurtTouch(CBaseEntity *apOther)
 {
-	if(apOther->takedamage)
+	if(apOther->IsDamageable())
 	{
 		SetSolidity(SOLID_NOT);
-		apOther->TakeDamage(self, self, self->dmg);
-		SetThinkCallback(hurt_on);
+		
+		int mnDmgBitSum = 0; // TODO
+		
+		float fDmg{self->dmg}; // TODO: multiply by 0.5
+		
+		if(fDmg < 0)
+			apOther->TakeHealth(-fDmg, mnDmgBitSum);
+		else
+			apOther->TakeDamage(/*self*/ *this, /*self*/ *this, fDmg, mnDmgBitSum);
+		
+		//SetThinkCallback(hurt_on);
 		SetNextThink(gpGlobals->time + 1);
 	};
 
@@ -136,41 +150,44 @@ void CBaseTrigger::TeleportTouch(CBaseEntity *apOther)
 	if(apOther->GetHealth() <= 0 || apOther->GetSolidity() != SOLID_SLIDEBOX)
 		return;
 
-	SUB_UseTargets();
+	//SUB_UseTargets();
 
 	// put a tfog where the player was
-	spawn_tfog(apOther->GetOrigin());
+	//spawn_tfog(apOther->GetOrigin());
 
-	edict_t *t = gpEngine->pfnFindEntityByString(world, "targetname", self->target);
-	if (!t)
-		objerror ("couldn't find target");
+	CBaseEntity *t{nullptr}; // For the first time it will be the world entity
+	t = mpGame->GetWorld()->FindEntityByString(t, "targetname", GetTarget());
+	if(!t)
+		objerror("couldn't find target");
 		
 	// spawn a tfog flash in front of the destination
-	gpEngine->pfnMakeVectors(t->mangle);
-	idVec3 org{t->GetOrigin() + 32 * gpGlobals->v_forward};
+	//gpEngine->pfnMakeVectors(t->mangle);
+	//idVec3 org{t->GetOrigin() + 32 * gpGlobals->v_forward};
 
-	spawn_tfog (org);
-	spawn_tdeath(t->GetOrigin(), apOther);
+	//spawn_tfog(org);
+	//spawn_tdeath(t->GetOrigin(), apOther);
 
-// move the player and lock him down for a little while
-	if (!apOther->GetHealth())
+	// move the player and lock him down for a little while
+	if(!apOther->GetHealth())
 	{
-		apOther->SetOrigin(t->origin);
-		apOther->velocity = (gpGlobals->v_forward * apOther->GetVelocity().x) + (gpGlobals->v_forward * apOther->GetVelocity().y);
+		apOther->SetOrigin(t->GetOrigin());
+		apOther->SetVelocity((idVec3(gpGlobals->v_forward) * apOther->GetVelocity().x) + (idVec3(gpGlobals->v_forward) * apOther->GetVelocity().y));
 		return;
 	};
 
 	apOther->SetOrigin(t->GetOrigin());
-	apOther->angles = t->mangle;
+	apOther->SetAngles(t->GetAngles() /*t->mangle*/);
+	
 	if (apOther->GetClassName() == "player")
 	{
-		apOther->fixangle = 1;		// turn this way immediately
-		apOther->teleport_time = gpGlobals->time + 0.7;
-		if(apOther->GetFlags() & FL_ONGROUND)
-			apOther->flags = apOther->flags - FL_ONGROUND;
-		apOther->SetVelocity(gpGlobals->v_forward * 300);
+		apOther->self->fixangle = 1; // turn this way immediately // TODO
+		apOther->self->teleport_time = gpGlobals->time + 0.7; // TODO
+		if(apOther->HasFlags(FL_ONGROUND))
+			apOther->RemoveFlags(FL_ONGROUND);
+		apOther->SetVelocity(idVec3(gpGlobals->v_forward) * 300);
 	};
-	apOther->flags = apOther->flags - apOther->flags & FL_ONGROUND;
+	
+	apOther->SetFlags(apOther->GetFlags() - apOther->GetFlags() & FL_ONGROUND);
 };
 
 void CBaseTrigger::CDAudioTouch(CBaseEntity *apOther)
@@ -213,7 +230,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity *apActivator)
 	{
 		// we can't just remove (self) here, because this is a touch function
 		// called while C code is looping through area links...
-		SetTouchCallback(SUB_Null);
+		SetTouchCallback(nullptr); // TODO: was SUB_Null but args are different
 		SetNextThink(gpGlobals->time + 0.1);
 		SetThinkCallback(CBaseTrigger::SUB_Remove);
 	};

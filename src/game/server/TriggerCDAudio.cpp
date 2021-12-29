@@ -43,7 +43,8 @@ void CTriggerCDAudio::Spawn()
 
 void CTriggerCDAudio::Touch(CBaseEntity *apOther)
 {
-	if(!apOther->IsPlayer())
+	//if(!apOther->IsPlayer())
+	if(apOther->GetClassName() != "player")
 		return;
 	
 	PlayTrack();
@@ -54,9 +55,14 @@ void CTriggerCDAudio::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseTy
 	PlayTrack();
 };
 
+void PlayCDTrack(int anTrack)
+{
+	// TODO
+};
+
 void CTriggerCDAudio::PlayTrack()
 {
-	PlayCDTrack(self->health);
+	PlayCDTrack((int)self->health);
 	
 	SetTouchCallback(nullptr);
 	mpWorld->RemoveEntity(this);

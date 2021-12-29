@@ -40,7 +40,8 @@ void CTriggerGravity::Spawn()
 
 void CTriggerGravity::Touch(CBaseEntity *apOther)
 {
-	if(!apOther->IsPlayer())
+	//if(!apOther->IsPlayer())
+	if(apOther->GetClassName() != "player")
 		return;
 	
 	apOther->SetGravity(GetGravity());
