@@ -65,6 +65,40 @@ void DestroyConsoleWindow()
 #endif
 };
 
+#ifdef _WIN32
+/*
+===================
+UpdateStatus
+
+Update the status line at the top of the console window if engine is running
+===================
+*/
+void UpdateStatus(bool abForce)
+{
+	static double fTimeLast = 0.0;
+	double fTimeCurrent{0.0};
+	
+	float fFPS{0.0f};
+	int nActivePlayers{0}, nMaxPlayers{0};
+	char sMap[32]{};
+	
+	fTimeCurrent = (float)(timeGetTime() / 1000.0f);
+	
+	gpEngine->UpdateStatus(&fFPS, &nActivePlayers, &nMaxPlayers, sMap); // TODO
+	
+	if(!abForce)
+		if((fTimeCurrent - fTimeLast) < 0.5f)
+			return;
+	
+	fTimeLast = fTimeCurrent;
+	
+	char sPrompt[256]{};
+	
+	snprintf(sPrompt, sizeof(sPrompt), "%.1f fps %2d/%2d on %16s", (float)fFPS, nActivePlayers, nMaxPlayers, sMap);
+	
+	WriteStatusText(sPrompt);
+};
+#endif
 char *Sys_ConsoleInput()
 {
 #ifdef _WIN32
