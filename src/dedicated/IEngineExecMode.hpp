@@ -93,6 +93,25 @@ private:
     IEngine *mpEngine{nullptr};
 };
 
+class CEngineExecMode_Dedicated final : public CEngineExecMode_Manual
+{
+public:
+    CEngineExecMode_Dedicated(IEngine *apEngine) : CEngineExecMode_Manual(apEngine){}
+private:
+    void PreFrame() override
+    {
+        // Check for commands typed to the host
+        Host_GetConsoleCommands();
+    };
+
+    void PostFrame() override
+    {
+#ifdef _WIN32		
+        UpdateStatus(0);
+#endif
+    };
+};
+
 class CEngineExecMode_Auto final : public IEngineExecMode
 {
 public:
