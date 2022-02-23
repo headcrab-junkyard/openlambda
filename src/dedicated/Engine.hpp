@@ -24,16 +24,13 @@
 
 #include "CommonTypes.hpp"
 
-interface IEngine;
+interface IEngineExecMode;
 struct IEngine::InitParams;
 
 class CEngine
 {
 public:
-	CEngine(IEngine *apEngine);
-	~CEngine();
-	
-	bool Frame();
+	CEngine(IEngineExecMode *apExecMode);
 
 	enum class Result
 	{
@@ -56,7 +53,5 @@ public:
 
 	void UpdateStatus(Status &aStatus);
 private:
-	bool Init(const IEngine::InitParams &aInitParams);
-private:
-	IEngine *mpEngine{nullptr};
+	IEngineExecMode *mpExecMode{nullptr};
 };

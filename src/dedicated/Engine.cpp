@@ -1,7 +1,6 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 1996-1997 Id Software, Inc.
  * Copyright (C) 2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
@@ -22,46 +21,11 @@
 
 #include "Engine.hpp"
 
-void Host_GetConsoleCommands();
-
-CEngine::CEngine(IEngine *apEngine) : mpEngine(apEngine)
-{
-    //gpEngine = this;
-};
-
-CEngine::~CEngine()
-{
-    mpEngine->Shutdown();
-    //gpEngine = nullptr;
-};
-
-bool CEngine::Frame()
-{
-    return mpEngine->Frame();
-};
+CEngine::CEngine(IEngineExecMode *apExecMode) : mpExecMode(apExecMode){}
 
 Result CEngine::Run(const InitParams &aInitParams)
 {
-    if(!Init(aInitParams))
-        return Result::None;
-        //return Result::UnsupportedVideo; // TODO
-
-    // Main loop
-    bool bRunning{true};
-    while(bRunning)
-    {
-        // Check for commands typed to the host
-        Host_GetConsoleCommands();
-        
-        bRunning = Frame();
-
-#ifdef _WIN32		
-        UpdateStatus(0);
-#endif
-    };
-
-    // TODO: handle Result::Restart
-    return Result::None;
+    return mpExecMode->Run(aInitParams);
 };
 
 void CEngine::AddConsoleText(const char *asText)
@@ -72,9 +36,4 @@ void CEngine::AddConsoleText(const char *asText)
 void CEngine::UpdateStatus(Status &aStatus)
 {
     // TODO
-};
-
-bool CEngine::Init(const InitParams &aInitParams)
-{
-    return pEngine->Init(aInitParams);
 };
