@@ -1,6 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
+ * Copyright (C) 1996-1997 Id Software, Inc.
  * Copyright (C) 2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
@@ -35,13 +36,15 @@ struct IEngine::InitParams;
 interface IEngine;
 interface IEngineAPI;
 
+void Host_GetConsoleCommands();
+
 interface IEngineExecMode
 {
     ///
     virtual CEngine::Result Run(const IEngine::InitParams &aInitParams) = 0;
 };
 
-class CEngineExecMode_Manual final : public IEngineExecMode
+class CEngineExecMode_Manual : public IEngineExecMode
 {
 public:
     CEngineExecMode_Manual(IEngine *apEngine) : mpEngine(apEngine){}
@@ -50,18 +53,23 @@ public:
     {
         if(!Init(aInitParams))
             return CEngine::Result::None;
-        
+            //return CEngine::Result::UnsupportedVideo; // TODO
+
+        // Main loop
         bool bRunning{true};
         while(bRunning)
         {
             PreFrame();
-
+            
             bRunning = Frame();
 
             PostFrame();
         };
 
         Shutdown();
+
+        // TODO: handle Result::Restart
+        return CEngine::Result::None;
     };
 protected:
     virtual void PreFrame(){}
@@ -81,6 +89,8 @@ private:
     {
         return mpEngine->Frame();
     };
+private:
+    IEngine *mpEngine{nullptr};
 };
 
 class CEngineExecMode_Auto final : public IEngineExecMode
