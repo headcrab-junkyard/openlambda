@@ -25,9 +25,10 @@
 #include <stdexcept>
 
 #include "next/engine/IEngine.hpp"
+
 #include "engine_hlds_api.h"
 
-class CLegacyEngine final : public IEngine
+class CEngineLegacy final : public IEngine
 {
 public:
     CEngineLegacy(CreateInterfaceFn afnEngineFactory, CreateInterfaceFn afnFSFactory) : mfnFSFactory(afnFSFactory)
@@ -41,7 +42,7 @@ public:
     bool Init(const InitParams &aInitParams) override
     {
         //char *basedir, char *cmdline, CreateInterfaceFn launcherFactory, CreateInterfaceFn filesystemFactory
-        return pEngine->Init(aInitParams.sGameDir, aInitParams.sCmdLine, aInitParams.fnLauncherFactory, pFSFactory);
+        return mpEngine->Init(aInitParams.sGameDir, aInitParams.sCmdLine, aInitParams.fnLauncherFactory, mfnFSFactory);
     };
 
     void Shutdown() override
@@ -51,8 +52,10 @@ public:
 
     bool Frame() override
     {
-        return mpEnine->RunFrame();
+        return mpEngine->RunFrame();
     };
 private:
-	IDedicatedServerAPI *mpEngine{nullptr};
+    CreateInterfaceFn mfnFSFactory{nullptr};
+
+    IDedicatedServerAPI *mpEngine{nullptr};
 };
