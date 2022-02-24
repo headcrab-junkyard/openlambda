@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,16 +29,36 @@
 	#include "win/conproc.h"
 #endif
 
-#include "engine_hlds_api.h"
-
 #include "tier1/interface.h"
+
+#include "Engine.hpp"
+#include "EngineLegacy.hpp"
+
+#include "filesystem/IFileSystem.hpp"
 
 #ifdef _WIN32
 static bool sc_return_on_enter{false};
 HANDLE hinput, houtput;
 #endif
 
-IDedicatedServerAPI *gpEngine{nullptr}; // TODO: hacky way to access the command buffer...
+void *gpFSLib{nullptr};
+CreateInterfaceFn gfnFSFactory{nullptr};
+
+void *gpEngineLib{nullptr};
+CreateInterfaceFn gfnEngineFactory{nullptr};
+
+CEngine *gpEngine{nullptr}; // TODO: hacky way to access the command buffer...
+
+
+IBaseInterface *LauncherFactory(const char *name, int *retval)
+{
+	// Filesystem module factory
+	if(!strcmp(name, OGS_FILESYSTEM_INTERFACE_VERSION))
+		return gfnFSFactory(name, retval);
+	
+	auto fnThisFactory{Sys_GetFactoryThis()};
+	return fnThisFactory(name, retval);
+};
 
 int CreateConsoleWindow()
 {
@@ -283,55 +303,82 @@ void Host_GetConsoleCommands()
 	};
 };
 
-int RunServer() // void?
+void LoadFileSystemModule(const char *asName)
 {
-	constexpr auto FILESYSTEM_MODULE_NAME{"filesystem_stdio"};
-	
-	auto pFSLib{Sys_LoadModule(FILESYSTEM_MODULE_NAME)};
+	auto pFSLib{Sys_LoadModule(asName)};
 	
 	if(!pFSLib)
-		throw std::runtime_error(std::string("Failed to load the filesystem module (") + FILESYSTEM_MODULE_NAME + ")!");
+		throw std::runtime_error(std::string("Failed to load the filesystem module (") + asName + ")!");
 	
+	gpFSLib = pFSLib;
+
 	auto pFSFactory{Sys_GetFactory(pFSLib)};
 	
 	if(!pFSFactory)
-		return EXIT_FAILURE;
+		throw std::runtime_error(std::string("Failed to get the filesystem module factory (") + asName + ")!");
 	
-	constexpr auto ENGINE_MODULE_NAME{"swds"};
+	gfnFSFactory = pFSFactory;
+};
+
 	
-	auto pEngineLib{Sys_LoadModule(ENGINE_MODULE_NAME)};
-	
+
+void LoadEngineModule(const char *asName)
+{
+	auto pEngineLib{Sys_LoadModule(asName)};
+
 	if(!pEngineLib)
-		throw std::runtime_error(std::string("Failed to load the engine module (") + ENGINE_MODULE_NAME + ")!");
+		throw std::runtime_error(std::string("Failed to load the engine module (") + asName + ")!");
+	
+	gpEngineLib = pEngineLib;
 	
 	auto pEngineFactory{Sys_GetFactory(pEngineLib)};
 	
 	if(!pEngineFactory)
-		return EXIT_FAILURE;
+		throw std::runtime_error(std::string("Failed to get the engine module factory (") + asName + ")!");
 	
-	auto pEngine{(IDedicatedServerAPI*)pEngineFactory(VENGINE_HLDS_API_VERSION, nullptr)};
-	
-	if(!pEngine)
-		return EXIT_FAILURE;
-	
-	gpEngine = pEngine;
-	
-	//char *basedir, char *cmdline, CreateInterfaceFn launcherFactory, CreateInterfaceFn filesystemFactory
-	if(!pEngine->Init(".", "TODO", Sys_GetFactoryThis(), pFSFactory))
-		return EXIT_FAILURE;
-	
-	// main loop
-	bool bRunning{true};
-	while(bRunning)
+	gfnEngineFactory = pEngineFactory;
+};
+
 	{
-		// check for commands typed to the host
-		Host_GetConsoleCommands();
-		
-		bRunning = pEngine->RunFrame();
 	};
 	
-	pEngine->Shutdown();
-	
+
+/*
+===================
+RunServer
+===================
+*/
+int RunServer() // void?
+{
+		// File system module name to load
+		const char *sFSModuleName{Config::Defaults::FSModuleName};
+
+		LoadFileSystemModule(sFSModuleName);
+
+		// Engine module name to load
+		const char *sEngineModuleName{ChooseEngineModuleName()};
+
+		LoadEngineModule(sEngineModuleName);
+		
+		auto pEngine{CreateEngine(gfnEngineFactory)};
+
+		gpEngine = pEngine;
+
+		IEngine::InitParams InitParams{};
+		
+		InitParams.fnLauncherFactory = Sys_GetFactoryThis();
+		InitParams.sGameDir = "."; // TODO: goldsrctest?
+		InitParams.sCmdLine = "TODO";
+		InitParams.bDedicated = true;
+		
+		/*
+		if(!pEngine->Init(InitParams))
+			return EXIT_FAILURE;
+		*/
+
+		auto eResult{pEngine->Run(InitParams)};
+
+
 	return EXIT_SUCCESS;
 };
 
