@@ -60,6 +60,11 @@ IBaseInterface *LauncherFactory(const char *name, int *retval)
 	return fnThisFactory(name, retval);
 };
 
+/*
+===================
+CreateConsoleWindow
+===================
+*/
 int CreateConsoleWindow()
 {
 #ifdef _WIN32
@@ -75,6 +80,11 @@ int CreateConsoleWindow()
 	return 1;
 };
 
+/*
+===================
+DestroyConsoleWindow
+===================
+*/
 void DestroyConsoleWindow()
 {
 #ifdef _WIN32
@@ -98,13 +108,11 @@ void UpdateStatus(bool abForce)
 	static double fTimeLast = 0.0;
 	double fTimeCurrent{0.0};
 	
-	float fFPS{0.0f};
-	int nActivePlayers{0}, nMaxPlayers{0};
-	char sMap[32]{};
-	
+	CEngine::Status Status{};
+
 	fTimeCurrent = (float)(timeGetTime() / 1000.0f);
-	
-	gpEngine->UpdateStatus(&fFPS, &nActivePlayers, &nMaxPlayers, sMap); // TODO
+
+	gpEngine->UpdateStatus(Status)); // TODO
 	
 	if(!abForce)
 		if((fTimeCurrent - fTimeLast) < 0.5f)
@@ -114,11 +122,19 @@ void UpdateStatus(bool abForce)
 	
 	char sPrompt[256]{};
 	
-	snprintf(sPrompt, sizeof(sPrompt), "%.1f fps %2d/%2d on %16s", (float)fFPS, nActivePlayers, nMaxPlayers, sMap);
+	snprintf(sPrompt, sizeof(sPrompt), "%.1f fps %2d/%2d on %16s",
+		(float)Status.mfFPS, Status.mnActivePlayers, Status.mnMaxPlayers, Status.msMap
+	);
 	
 	WriteStatusText(sPrompt);
 };
 #endif
+
+/*
+===================
+Sys_ConsoleInput
+===================
+*/
 char *Sys_ConsoleInput()
 {
 #ifdef _WIN32
@@ -245,8 +261,10 @@ char *Sys_ConsoleInput()
 
 	FD_ZERO(&fdset);
 	FD_SET(0, &fdset); // stdin
+
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
+
 	if(select(1, &fdset, nullptr, nullptr, &timeout) == -1 || !FD_ISSET(0, &fdset))
 		return nullptr;
 
@@ -265,8 +283,10 @@ char *Sys_ConsoleInput()
 
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
+
 	FD_ZERO(&readfds);
 	FD_SET(0, &readfds);
+
 	ready = select(1, &readfds, 0, 0, &timeout);
 
 	if(ready > 0)
@@ -294,7 +314,7 @@ void Host_GetConsoleCommands()
 {
 	char *cmd{nullptr};
 
-	while(1)
+	while(true)
 	{
 		cmd = Sys_ConsoleInput();
 		if(!cmd)
@@ -385,7 +405,6 @@ int RunServer() // void?
 /*
 ==================
 main
-
 ==================
 */
 //char *newargv[256]; // TODO: unused?
@@ -401,6 +420,6 @@ int main(int argc, char **argv)
 	
 	DestroyConsoleWindow();
 
-	// return success of application
+	// Return success of application
 	return EXIT_SUCCESS;
 };

@@ -48,7 +48,7 @@ public:
 		float mfFPS{0.0f};
 		int mnActivePlayers{0};
 		int mnMaxPlayers{0};
-		const char *sMap{""};
+		char msMap[32]{};
 	};
 
 	void UpdateStatus(Status &aStatus);
