@@ -1,7 +1,6 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 1996-1997 Id Software, Inc.
  * Copyright (C) 2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
@@ -29,6 +28,8 @@
 
 #include "engine_launcher_api.h"
 
+#include "IEngineHooks.hpp"
+
 enum class CEngine::Result;
 
 struct IEngine::InitParams;
@@ -36,18 +37,16 @@ struct IEngine::InitParams;
 interface IEngine;
 interface IEngineAPI;
 
-void Host_GetConsoleCommands();
-
 interface IEngineExecMode
 {
     ///
     virtual CEngine::Result Run(const IEngine::InitParams &aInitParams) = 0;
 };
 
-class CEngineExecMode_Manual : public IEngineExecMode
+class CEngineExecMode_Manual final : public IEngineExecMode
 {
 public:
-    CEngineExecMode_Manual(IEngine *apEngine) : mpEngine(apEngine){}
+    CEngineExecMode_Manual(IEngine *apEngine, IEngineHooks *apHooks) : mpEngine(apEngine), mpHooks(apHooks){}
 
     CEngine::Result Run(const IEngine::InitParams &aInitParams) override
     {
@@ -71,9 +70,6 @@ public:
         // TODO: handle Result::Restart
         return CEngine::Result::None;
     };
-protected:
-    virtual void PreFrame(){}
-    virtual void PostFrame(){}
 private:
     bool Init(const IEngine::InitParams &aInitParams)
     {
@@ -85,31 +81,25 @@ private:
         mpEngine->Shutdown();
     };
 
+    void PreFrame()
+    {
+        if(mpHooks)
+            mpHooks->PreFrame();
+    };
+
     bool Frame()
     {
         return mpEngine->Frame();
     };
+
+    void PostFrame()
+    {
+        if(mpHooks)
+            mpHooks->PostFrame();
+    };
 private:
     IEngine *mpEngine{nullptr};
-};
-
-class CEngineExecMode_Dedicated final : public CEngineExecMode_Manual
-{
-public:
-    CEngineExecMode_Dedicated(IEngine *apEngine) : CEngineExecMode_Manual(apEngine){}
-private:
-    void PreFrame() override
-    {
-        // Check for commands typed to the host
-        Host_GetConsoleCommands();
-    };
-
-    void PostFrame() override
-    {
-#ifdef _WIN32		
-        UpdateStatus(0);
-#endif
-    };
+    IEngineHooks *mpHooks{nullptr};
 };
 
 class CEngineExecMode_Auto final : public IEngineExecMode
