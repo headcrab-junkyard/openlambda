@@ -36,16 +36,12 @@
 
 #include "filesystem/IFileSystem.hpp"
 
+#include "SystemModule.hpp"
+
 #ifdef _WIN32
 static bool sc_return_on_enter{false};
 HANDLE hinput, houtput;
 #endif
-
-void *gpFSLib{nullptr};
-CreateInterfaceFn gfnFSFactory{nullptr};
-
-void *gpEngineLib{nullptr};
-CreateInterfaceFn gfnEngineFactory{nullptr};
 
 CEngine *gpEngine{nullptr}; // TODO: hacky way to access the command buffer...
 
@@ -323,41 +319,7 @@ void Host_GetConsoleCommands()
 	};
 };
 
-void LoadFileSystemModule(const char *asName)
 {
-	auto pFSLib{Sys_LoadModule(asName)};
-	
-	if(!pFSLib)
-		throw std::runtime_error(std::string("Failed to load the filesystem module (") + asName + ")!");
-	
-	gpFSLib = pFSLib;
-
-	auto pFSFactory{Sys_GetFactory(pFSLib)};
-	
-	if(!pFSFactory)
-		throw std::runtime_error(std::string("Failed to get the filesystem module factory (") + asName + ")!");
-	
-	gfnFSFactory = pFSFactory;
-};
-
-	
-
-void LoadEngineModule(const char *asName)
-{
-	auto pEngineLib{Sys_LoadModule(asName)};
-
-	if(!pEngineLib)
-		throw std::runtime_error(std::string("Failed to load the engine module (") + asName + ")!");
-	
-	gpEngineLib = pEngineLib;
-	
-	auto pEngineFactory{Sys_GetFactory(pEngineLib)};
-	
-	if(!pEngineFactory)
-		throw std::runtime_error(std::string("Failed to get the engine module factory (") + asName + ")!");
-	
-	gfnEngineFactory = pEngineFactory;
-};
 
 	{
 	};
@@ -373,14 +335,14 @@ int RunServer() // void?
 		// File system module name to load
 		const char *sFSModuleName{Config::Defaults::FSModuleName};
 
-		LoadFileSystemModule(sFSModuleName);
+		CSystemModule FSModule(sFSModuleName);
 
 		// Engine module name to load
 		const char *sEngineModuleName{ChooseEngineModuleName()};
 
-		LoadEngineModule(sEngineModuleName);
+		CSystemModule EngineModule(sEngineModuleName);
 		
-		auto pEngine{CreateEngine(gfnEngineFactory)};
+		auto pEngine{CreateEngine(EngineModule.GetFactory())};
 
 		gpEngine = pEngine;
 
