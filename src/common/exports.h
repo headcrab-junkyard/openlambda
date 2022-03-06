@@ -22,9 +22,9 @@
 #pragma once
 
 #ifdef _WIN32
-	#define EXPORT [[dllexport]]
+	#define EXPORT [[gnu::dllexport]]
 #else
-	#define EXPORT [[visibility("default")]]
+	#define EXPORT [[gnu::visibility("default")]]
 #endif
 
 #define C_EXPORT extern "C" EXPORT
