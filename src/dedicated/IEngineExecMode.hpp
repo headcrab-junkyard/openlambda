@@ -109,8 +109,9 @@ public:
 
     CEngine::Result Run(const IEngine::InitParams &aInitParams) override
     {
-        // TODO
-        return mpEngine->Run();
+        //void *instance, const char *basedir, const char *cmdline, char *postRestartCmdLineArgs, CreateInterfaceFn launcherFactory, CreateInterfaceFn filesystemFactory
+        // TODO: hinstance support?
+        return mpEngine->Run(nullptr, aInitParams.sGameDir, aInitParams.sCmdLine, aInitParams.sPostRestartCmdLine, aInitParams.fnLauncherFactory, mfnFSFactory);
     };
 private:
     IEngineAPI *mpEngine{nullptr};
