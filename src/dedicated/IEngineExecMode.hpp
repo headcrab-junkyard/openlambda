@@ -39,6 +39,8 @@ interface IEngineAPI;
 
 interface IEngineExecMode
 {
+    //virtual ~IEngineExecMode() = default;
+
     ///
     virtual CEngine::Result Run(const IEngine::InitParams &aInitParams) = 0;
 };

@@ -26,9 +26,12 @@
 #include "CommonTypes.hpp"
 
 void Host_GetConsoleCommands();
+void UpdateStatus(bool abForce);
 
 interface IEngineHooks
 {
+    //virtual ~IEngineHooks() = default;
+
     ///
     virtual void PreFrame(){}
 
