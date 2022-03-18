@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -392,3 +392,24 @@ BOOL SetConsoleCXCY(HANDLE hStdout, int cx, int cy)
 	return TRUE;
 }
      
+void WriteStatusText(const char *asText)
+{
+	char sFullLine[81]{};
+	COORD Coord{};
+	DWORD dwWritten{0};
+	WORD wAttrib[80]{};
+
+	int i{0};
+
+	for(i = 0; i < 80; ++i)
+		wAttrib[i] = FOREGROUND_RED | FOREGROUND_INTENSITY;
+	
+	memset(sFullLine, 0, sizeof(sFullLine));
+	snprintf(sFullLine, sizeof(sFullLine), "%s", asText);
+
+	Coord.X = 0;
+	Coord.Y = 0;
+
+	WriteConsoleOutputAttribute(houtput, wAttrib, 80, Coord, &dwWritten);
+	WriteConsoleOutputCharacter(houtput, sFullLine, 80, Coord, &dwWritten);
+};
