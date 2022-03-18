@@ -24,7 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "interface.h"
+#include "tier1/interface.h"
 #include "engine_launcher_api.h"
 
 class CApplication

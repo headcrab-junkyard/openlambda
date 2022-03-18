@@ -21,13 +21,9 @@
 
 // Prefer dedicated graphics cards if present
 // NOTE: This needs to be placed in the executable, it won’t work in a dll
-extern "C"
-{
 
 // https://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
-EXPORT unsigned long NvOptimusEnablement = 0x00000001;
+C_EXPORT unsigned long NvOptimusEnablement{0x00000001};
 
 // https://community.amd.com/thread/169965
-EXPORT int AmdPowerXpressRequestHighPerformance = 1;
-
-};
+C_EXPORT int AmdPowerXpressRequestHighPerformance{1};

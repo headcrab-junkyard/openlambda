@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2019, 2021 BlackPhrase
+ * Copyright (C) 2018-2019, 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ int CApplication::Run()
 		if(!Init())
 			return EXIT_FAILURE;
 		
-		int eEngineResult{mpEngine->Run(mhInstance, ".", msCmdLine, &msCmdLinePostRestart, Sys_GetFactoryThis(), mfnFSFactory)};
+		int eEngineResult{mpEngine->Run(mhInstance, ".", msCmdLine, msCmdLinePostRestart, Sys_GetFactoryThis(), mfnFSFactory)};
 		mbRestart = false;
 		
 		Shutdown();
@@ -46,9 +46,12 @@ int CApplication::Run()
 			return EXIT_FAILURE;
 		case ENGINE_RESULT_RESTART:
 			mbRestart = true;
+			//strncpy(msCmdLine, msCmdLinePostRestart, sizeof(msCmdLine)); // Re-init the cmdline string with new args // TODO
 		};
 	}
 	while(mbRestart);
+	
+	setenv("OGS_LAST_INIT_OK", "1", 1); // TODO: use IRegistry or something
 	
 	// return success of application
 	return EXIT_SUCCESS;
@@ -65,7 +68,7 @@ bool CApplication::Init()
 	const char *sEngineModuleName{Config::Defaults::EngineModuleName};
 
 	// Do we have an engine module name config var stored on the system?
-	char *sPrevEngineModule{getenv("OGS_ENGINE_MODULE")};
+	char *sPrevEngineModule{getenv("OGS_ENGINE_MODULE")}; // TODO: use IRegistry or something
 	
 	// Yes? Nice, then use it!
 	if(sPrevEngineModule && *sPrevEngineModule)
@@ -84,7 +87,7 @@ bool CApplication::Init()
 	LoadEngineModule(sEngineModuleName);
 	
 	// Engine module was successfully loaded, so store its name
-	setenv("OGS_ENGINE_MODULE", sEngineModuleName, 1);
+	setenv("OGS_ENGINE_MODULE", sEngineModuleName, 1); // TODO: use IRegistry or something
 	
 	mpEngine = static_cast<IEngineAPI*>(mfnEngineFactory(VENGINE_LAUNCHER_API_VERSION, nullptr));
 	
