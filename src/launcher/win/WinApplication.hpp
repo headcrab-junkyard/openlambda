@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <windefs.h>
+#include <windef.h>
 
 #include "Application.hpp"
 
@@ -32,4 +32,6 @@ public:
 	~CWinApplication();
 	
 	bool PostInit() override;
+private:
+	HINSTANCE mhInstance{nullptr};
 };
