@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2019, 2021 BlackPhrase
+ * Copyright (C) 2018-2019, 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,25 +20,6 @@
 /// @file
 
 #include "WinApplication.hpp"
-
-// Windows doesn't provide the setenv func impl
-int setenv(const char *name, const char *value, int overwrite)
-{
-	if(!overwrite)
-	{
-#ifdef MSVC
-		size_t envsize{0};
-		auto errcode{getenv_s(&envsize, nullptr, 0, name)};
-		if(errcode || envsize)
-			return errcode;
-#else
-		if(getenv(name) == nullptr)
-			return -1;
-#endif
-	};
-
-	return _putenv_s(name, value);
-};
 
 CWinApplication::CWinApplication(const char *cmdline, HINSTANCE ahInstance) : mhInstance(ahInstance)
 {

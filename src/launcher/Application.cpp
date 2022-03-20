@@ -23,8 +23,6 @@
 #include "Application.hpp"
 #include "AppConfig.hpp"
 
-int setenv(const char *name, const char *value, int overwrite);
-
 CApplication::CApplication() = default;
 CApplication::~CApplication() = default;
 
@@ -51,7 +49,7 @@ int CApplication::Run()
 	}
 	while(mbRestart);
 	
-	setenv("OGS_LAST_INIT_OK", "1", 1); // TODO: use IRegistry or something
+	//setenv("OGS_LAST_INIT_OK", "1", 1); // TODO: use IRegistry or something
 	
 	// return success of application
 	return EXIT_SUCCESS;
@@ -87,7 +85,7 @@ bool CApplication::Init()
 	LoadEngineModule(sEngineModuleName);
 	
 	// Engine module was successfully loaded, so store its name
-	setenv("OGS_ENGINE_MODULE", sEngineModuleName, 1); // TODO: use IRegistry or something
+	//setenv("OGS_ENGINE_MODULE", sEngineModuleName, 1); // TODO: use IRegistry or something
 	
 	mpEngine = static_cast<IEngineAPI*>(mfnEngineFactory(VENGINE_LAUNCHER_API_VERSION, nullptr));
 	
