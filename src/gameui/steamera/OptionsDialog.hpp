@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018 BlackPhrase
+ * Copyright (C) 2018, 2022 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,4 +25,16 @@ class COptionsDialog
 public:
 	COptionsDialog();
 	~COptionsDialog();
+	
+	/// Brings the dialog to the foreground
+	void Activate();
+	
+	/// Opens the dialog
+	void Run();
+	
+	/// Opens the gamma dialog directly
+	void OpenGammaDialog();
+	
+	/// Called when the game UI is hidden
+	void OnGameUIHidden();
 };

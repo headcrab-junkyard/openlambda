@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018, 2020-2021 BlackPhrase
+ * Copyright (C) 2018, 2020-2022 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ public:
 	void OnResetData() override;
 	void OnApplyChanges() override;
 protected:
+	// Sets background color & border
 	void ApplySchemeSettings(vgui2::IScheme *apScheme);
 private:
 	void UpdateSensitivityLabel();
@@ -56,20 +57,20 @@ private:
 		OnControlModified(panel);
 	};
 private:
-	CCvarNegateCheckButton *mpReverseMouseCheckButton;
+	CCvarNegateCheckButton *mpReverseMouseCheckButton{nullptr};
 	
-	CCvarToggleCheckButton *mpMouseFilterCheckButton;
-	CCvarToggleCheckButton *mpJoystickCheckButton;
-	CCvarToggleCheckButton *mpJoystickSouthpawCheckButton;
-	CCvarToggleCheckButton *mpQuickInfoCheckButton;
-	CCvarToggleCheckButton *mpReverseJoystickCheckButton;
+	CCvarToggleCheckButton *mpMouseFilterCheckButton{nullptr};
+	CCvarToggleCheckButton *mpJoystickCheckButton{nullptr};
+	CCvarToggleCheckButton *mpJoystickSouthpawCheckButton{nullptr};
+	CCvarToggleCheckButton *mpQuickInfoCheckButton{nullptr};
+	CCvarToggleCheckButton *mpReverseJoystickCheckButton{nullptr};
 	
-	CCvarSlider *mpMouseSensitivitySlider;
-	vgui::TextEntry *mpMouseSensitivityLabel;
+	CCvarSlider *mpMouseSensitivitySlider{nullptr};
+	vgui::TextEntry *mpMouseSensitivityLabel{nullptr};
 	
-	CCvarSlider *mpJoyYawSensitivitySlider;
-	vgui::Label *mpJoyYawSensitivityPreLabel;
+	CCvarSlider *mpJoyYawSensitivitySlider{nullptr};
+	vgui::Label *mpJoyYawSensitivityPreLabel{nullptr};
 	
-	CCvarSlider *mpJoyPitchSensitivitySlider;
-	vgui::Label *mpJoyPitchSensitivityPreLabel;
+	CCvarSlider *mpJoyPitchSensitivitySlider{nullptr};
+	vgui::Label *mpJoyPitchSensitivityPreLabel{nullptr};
 };
