@@ -1,36 +1,30 @@
 /*
-	weapons.qc
-
-	weapon and weapon hit functions
-
-	Copyright (C) 1996-1997  Id Software, Inc.
-
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
-	of the License, or (at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-	See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to:
-
-		Free Software Foundation, Inc.
-		59 Temple Place - Suite 330
-		Boston, MA  02111-1307, USA
-
+ * This file is part of OpenLambda Project
+ *
+ * Copyright (C) 1996-1997 Id Software, Inc.
+ * Copyright (C) 2018-2022 BlackPhrase
+ *
+ * OpenLambda Project is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenLambda Project is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenLambda Project. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /// @file
+/// @brief weapon and weapon hit functions
 
-void player_run();
-void T_RadiusDamage(entvars_t bomb, entvars_t attacker, float rad, entvars_t ignore, string dtype);
-void SpawnBlood(vec3_t org, float damage);
-void SuperDamageSound();
+//void player_run();
+//void T_RadiusDamage(entvars_t bomb, entvars_t attacker, float rad, entvars_t ignore, string dtype);
+//void SpawnBlood(vec3_t org, float damage);
+//void SuperDamageSound();
 
 // called by worldspawn
 void W_Precache()
@@ -59,6 +53,7 @@ float crandom()
 W_FireAxe
 ================
 */
+/*
 void W_FireAxe()
 {
 	vector  source;
@@ -95,9 +90,7 @@ void W_FireAxe()
 	}
 };
 
-
 //============================================================================
-
 
 vec3_t wall_velocity()
 {
@@ -110,49 +103,50 @@ vec3_t wall_velocity()
 	
 	return vel;
 };
-
+*/
 
 /*
 ================
 SpawnMeatSpray
 ================
 */
-void SpawnMeatSpray(vec3_t org, vec3_t vel)
+/*
+void SpawnMeatSpray(const idVec3 &org, const idVec3 &vel)
 {
-	entity missile;
-	vec3_t org;
-
-	missile = spawn ();
+	CBaseEntity *missile = gpEngine->pfnSpawn();
 	missile->SetOwner(self);
 	missile->SetMoveType(MOVETYPE_BOUNCE);
-	missile.solid = SOLID_NOT;
+	missile->SetSolidity(SOLID_NOT);
 
-	makevectors (self.angles);
+	gpEngine->pfnMakeVectors(self->angles);
 
-	missile.velocity = vel;
-	missile.velocity_z = missile.velocity_z + 250 + 50*random();
+	missile->SetVelocity(vel);
+	missile->velocity_z = missile->GetVelocity().z + 250 + 50*random();
 
-	missile.avelocity = '3000 1000 2000';
+	missile->SetAngularVelocity(3000.0f, 1000.0f, 2000.0f);
 	
-// set missile duration
-	missile.nextthink = time + 1;
-	missile.think = SUB_Remove;
+	// set missile duration
+	missile->SetNextThink(gpGlobals->time + 1);
+	missile->SetThinkCallback(SUB_Remove);
 
 	missile->SetModel("models/zom_gib.mdl");
 	missile->SetSize('0 0 0', '0 0 0');            
 	missile->SetOrigin(org);
 };
+*/
 
 /*
 ================
 spawn_touchblood
 ================
 */
+/*
 void spawn_touchblood(float damage)
 {
-	idVec3 vel = wall_velocity () * 0.2;
-	mpWorld->SpawnBlood (self->GetOrigin() + vel * 0.01, damage);
+	idVec3 vel{wall_velocity () * 0.2};
+	mpWorld->SpawnBlood(self->GetOrigin() + vel * 0.01, damage);
 };
+*/
 
 /*
 ==============================================================================
@@ -164,73 +158,81 @@ Collects multiple small damages into a single damage
 ==============================================================================
 */
 
-entity  multi_ent;
-float   multi_damage;
-int multi_damage_type;
+//struct SMultiDamageVars
+//{
+CBaseEntity *multi_ent{nullptr};
+float multi_damage{0.0f};
+int multi_damage_type{0};
+//};
 
-vec3_t  blood_org;
-float   blood_count;
+//extern SMultiDamageVars gMultiDamage;
 
-vec3_t  puff_org;
-float   puff_count;
+//idVec3 blood_org;
+//float blood_count;
+
+//idVec3 puff_org;
+//float puff_count;
 
 void ClearMultiDamage()
 {
-	multi_ent = world;
-	multi_damage = 0;
+	multi_ent = nullptr;
+	multi_damage = 0.0f;
 	multi_damage_type = 0;
-	blood_count = 0;
-	puff_count = 0;
+	
+	//blood_count = 0;
+	//puff_count = 0;
 };
 
 void ApplyMultiDamage(CBaseEntity *apInflictor, CBaseEntity *apAttacker)
 {
-	if (!multi_ent)
+	if(!multi_ent)
 		return;
-	multi_ent->TakeDamage (apInflictor, apAttacker, multi_damage, multi_damage_type);
+	multi_ent->TakeDamage(apInflictor, apAttacker, multi_damage, multi_damage_type);
 };
 
-void AddMultiDamage(CBaseEntity *hit, float damage, int anDmgType)
+void AddMultiDamage(CBaseEntity *apInflictor, CBaseEntity *hit, float damage, int anDmgType)
 {
-	if (!hit)
+	if(!hit)
 		return;
 	
 	multi_damage_type |= anDmgType;
 	
-	if (hit != multi_ent)
+	if(hit != multi_ent)
 	{
-		ApplyMultiDamage();
-		multi_damage = 0;
+		ApplyMultiDamage(apInflictor, apInflictor);
+		multi_damage = 0.0f;
 		multi_ent = hit;
 	}
 	else
 		multi_damage += damage;
 };
 
+/*
 void Multi_Finish()
 {
-	if (puff_count)
+	if(puff_count)
 	{
-		WriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
-		WriteByte (MSG_MULTICAST, TE_GUNSHOT);
-		WriteByte (MSG_MULTICAST, puff_count);
-		WriteCoord (MSG_MULTICAST, puff_org_x);
-		WriteCoord (MSG_MULTICAST, puff_org_y);
-		WriteCoord (MSG_MULTICAST, puff_org_z);
-		multicast (puff_org, MULTICAST_PVS);
-	}
+		gpEngine->pfnWriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
+		gpEngine->pfnWriteByte (MSG_MULTICAST, TE_GUNSHOT);
+		gpEngine->pfnWriteByte (MSG_MULTICAST, puff_count);
+		gpEngine->pfnWriteCoord (MSG_MULTICAST, puff_org_x);
+		gpEngine->pfnWriteCoord (MSG_MULTICAST, puff_org_y);
+		gpEngine->pfnWriteCoord (MSG_MULTICAST, puff_org_z);
+		multicast(puff_org, MULTICAST_PVS);
+	};
 
-	if (blood_count)
+	if(blood_count)
 	{
-		WriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
-		WriteByte (MSG_MULTICAST, TE_BLOOD);
-		WriteByte (MSG_MULTICAST, blood_count);
-		WriteCoord (MSG_MULTICAST, blood_org_x);
-		WriteCoord (MSG_MULTICAST, blood_org_y);
-		WriteCoord (MSG_MULTICAST, blood_org_z);
+		gpEngine->pfnWriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
+		gpEngine->pfnWriteByte (MSG_MULTICAST, TE_BLOOD);
+		gpEngine->pfnWriteByte (MSG_MULTICAST, blood_count);
+		gpEngine->pfnWriteCoord (MSG_MULTICAST, blood_org_x);
+		gpEngine->pfnWriteCoord (MSG_MULTICAST, blood_org_y);
+		gpEngine->pfnWriteCoord (MSG_MULTICAST, blood_org_z);
 		multicast (puff_org, MULTICAST_PVS);
-	}
+	};
 };
+*/
 
 /*
 ==============================================================================
@@ -240,6 +242,7 @@ ROCKETS
 ==============================================================================
 */
 
+/*
 class CMissile : public CBaseEntity
 {
 public:
@@ -250,20 +253,20 @@ public:
 
 void CMissile::Spawn()
 {
-	self->SetMoveType(MOVETYPE_FLYMISSILE);
-	self->SetSolidity(SOLID_BBOX);
+	SetMoveType(MOVETYPE_FLYMISSILE);
+	SetSolidity(SOLID_BBOX);
 
 	// set speed
 	
-	self->SetTouchCallback(CMissile::Touch);
+	SetTouchCallback(CMissile::Touch);
 	self->voided = 0;
 	
 	// set duration
-	self->SetNextThink(gpGlobals->time + 5);
-	self->SetThinkCallback(SUB_Remove);
+	SetNextThink(gpGlobals->time + 5);
+	SetThinkCallback(SUB_Remove);
 
-	self->SetModel("models/missile.mdl");
-	self->SetSize(idVec3::Origin, idVec3::Origin);             
+	SetModel("models/missile.mdl");
+	SetSize(idVec3::Origin, idVec3::Origin);             
 };
 
 void CMissile::Touch(CBaseEntity *other)
@@ -290,12 +293,12 @@ void CMissile::Touch(CBaseEntity *other)
 	if (other == self->GetOwner())
 		return;         // don't explode on owner
 
-	if (self.voided)
+	if (self->voided)
 		return;
 
-	self.voided = 1;
+	self->voided = 1;
 
-	if (mpWorld->GetPointContents(self->GetOrigin()) == CONTENT_SKY)
+	if(mpWorld->GetPointContents(GetOrigin()) == CONTENT_SKY)
 	{
 		gpEngine->pfnRemove(self);
 		return;
@@ -305,40 +308,41 @@ void CMissile::Touch(CBaseEntity *other)
 	
 	if (other->GetHealth())
 	{
-		other.deathtype = "rocket";
-		other->TakeDamage (self, self.owner, damg );
-	}
+		other->deathtype = "rocket";
+		other->TakeDamage(self, self->owner, damg );
+	};
 
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
 
+	mpWorld->RadiusDamage (self, self->owner, 120, other, "rocket");
 
-	mpWorld->RadiusDamage (self, self.owner, 120, other, "rocket");
+	//EmitSound(CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
+	SetOrigin(GetOrigin() - 8 * normalize(GetVelocity()));
 
-//  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
-	self.origin = self.origin - 8 * normalize(self.velocity);
+	gpEngine->pfnWriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
+	gpEngine->pfnWriteByte (MSG_MULTICAST, TE_EXPLOSION);
+	gpEngine->pfnWriteCoord (MSG_MULTICAST, self->GetOrigin().x);
+	gpEngine->pfnWriteCoord (MSG_MULTICAST, self->GetOrigin().y);
+	gpEngine->pfnWriteCoord (MSG_MULTICAST, self->GetOrigin().z);
+	multicast (self->GetOrigin(), MULTICAST_PHS);
 
-	WriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
-	WriteByte (MSG_MULTICAST, TE_EXPLOSION);
-	WriteCoord (MSG_MULTICAST, self.origin_x);
-	WriteCoord (MSG_MULTICAST, self.origin_y);
-	WriteCoord (MSG_MULTICAST, self.origin_z);
-	multicast (self.origin, MULTICAST_PHS);
-
-	remove(self);
+	gpEngine->pfnRemove(self);
 };
+*/
 
 /*
 ================
 W_FireRocket
 ================
 */
+/*
 void CWeaponRocketLauncher::PrimaryAttack()
 {
 	if (deathmatch != 4)
 		GetOwner()->currentammo = GetOwner()->ammo_rockets = GetOwner()->ammo_rockets - 1;
 	
-	self->EmitSound (CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
+	EmitSound (CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
 
 	msg_entity = self;
 	gpEngine->pfnWriteByte (MSG_ONE, SVC_SMALLKICK);
@@ -350,6 +354,7 @@ void CWeaponRocketLauncher::PrimaryAttack()
 	newmis->SetVelocity(newmis->GetVelocity() * 1000);
 	newmis->SetAngles(vectoangles(newmis->GetVelocity()));
 };
+*/
 
 /*
 ===============================================================================
@@ -357,6 +362,7 @@ LIGHTNING
 ===============================================================================
 */
 
+/*
 void LightningHit(CBaseEntity *hitme, CBaseEntity *from, float damage)
 {
 	WriteByte (MSG_MULTICAST, SVC_TEMPENTITY);
@@ -369,13 +375,15 @@ void LightningHit(CBaseEntity *hitme, CBaseEntity *from, float damage)
 	// NOTE: hitme = gpGlobals->trace_ent
 	hitme->T_Damage (from, from, damage);
 };
+*/
 
 /*
 =================
 LightningDamage
 =================
 */
-void LightningDamage(vector p1, vector p2, entity from, float damage)
+/*
+void LightningDamage(idVec3 p1, idVec3 p2, entity from, float damage)
 {
 	entity            e1, e2;
 	vector            f;
@@ -510,7 +518,7 @@ void GrenadeExplode()
 	remove (self);
 };
 
-void GrenadeTouch()
+void GrenadeTouch(CBaseEntity *other)
 {
 	if (other == self.owner)
 		return;         // don't explode on owner
@@ -523,12 +531,14 @@ void GrenadeTouch()
 	if (self.velocity == '0 0 0')
 		self.avelocity = '0 0 0';
 };
+*/
 
 /*
 ================
 W_FireGrenade
 ================
 */
+/*
 void W_FireGrenade()
 {       
 	if (deathmatch != 4)
@@ -586,9 +596,9 @@ void W_FireGrenade()
 
 //=============================================================================
 
-void spike_touch();
-void superspike_touch();
-
+void spike_touch(CBaseEntity *apOther);
+void superspike_touch(CBaseEntity *apOther);
+*/
 
 /*
 ===============
@@ -597,7 +607,8 @@ launch_spike
 Used for both the player and the ogre
 ===============
 */
-void launch_spike(vector org, vector dir)
+/*
+void launch_spike(const idVec3 &org, const idVec3 &dir)
 {
 	newmis = spawn ();
 	newmis.voided=0;
@@ -668,33 +679,33 @@ void W_FireSpikes(float ox)
 };
 
 .float hit_z;
-void spike_touch()
+void spike_touch(CBaseEntity *other)
 {
 	float rand;
 	
-	if (other == self.owner)
+	if (other == self->GetOwner())
 		return;
 
-	if (self.voided) {
+	if (self.voided)
 		return;
-	}
-	self.voided = 1;
 
-	if (other.solid == SOLID_TRIGGER)
+	self->voided = 1;
+
+	if (other->solid == SOLID_TRIGGER)
 		return; // trigger field, do nothing
 
-	if (pointcontents(self.origin) == CONTENT_SKY)
+	if(gpEngine->pfnPointContents(GetOrigin()) == CONTENT_SKY)
 	{
-		remove(self);
+		gpEngine->pfnRemove(self);
 		return;
-	}
+	};
 	
 // hit something that bleeds
-	if (other.takedamage)
+	if (other->takedamage)
 	{
 		spawn_touchblood (9);
-		other.deathtype = "nail";
-		T_Damage (other, self, self.owner, 9);
+		other->deathtype = "nail";
+		other->TakeDamage(self, self->owner, 9);
 	}
 	else
 	{
@@ -715,7 +726,7 @@ void spike_touch()
 
 };
 
-void superspike_touch()
+void superspike_touch(CBaseEntity *other)
 {
 	float rand;
 	
@@ -755,5 +766,5 @@ void superspike_touch()
 	}
 
 	remove(self);
-
 };
+*/
