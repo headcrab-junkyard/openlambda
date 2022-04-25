@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,22 @@
 extern globalvars_t *gpGlobals;
 
 class Bounds;
-class CGameWorld;
+class CBaseGame;
+//class IGameWorld;
 
 class CBaseEntity
 {
 public:
+/*
+	enum class SpawnFlags : int
+	{
+		NoMessage = 1,
+		NoTouch = 1,
+		DroidOnly = 4,
+		UseOnly = 1
+	};
+*/
+	
 	enum class UseType : int
 	{
 		Off = 0,
@@ -85,11 +96,11 @@ public:
 	
 	virtual void TraceAttack(CBaseEntity *apAttacker, float afDamage, const idVec3 &dir, TraceResult &aTraceResult, int anDmgBitSum);
 	
-	virtual int TakeDamage(const CBaseEntity &aInflictor, const CBaseEntity &aAttacker, float afDamage, int anDmgBitSum); // TODO: was T_Damage
+	virtual int TakeDamage(CBaseEntity *apInflictor, CBaseEntity *apAttacker, float afDamage, int anDmgBitSum); // TODO: was T_Damage
 	
 	virtual float TakeHealth(float afValue, float afIgnore);
 	
-	virtual void Killed(const CBaseEntity &aAttacker, const CBaseEntity &aLastInflictor, int anGib);
+	virtual void Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGibType);
 	
 	void FireBullets(float shotcount, const idVec3 &dir, const idVec3 &spread);
 	
@@ -127,6 +138,7 @@ public:
 	int GetIndex() const;
 	
 	void SetHealth(float afHealth){self->health = afHealth;}
+	void AddHealth(float afHealth){self->health += afHealth;}
 	float GetHealth() const {return self->health;}
 	
 	// TODO: should these be here?
@@ -182,11 +194,18 @@ public:
 		return mvAngles;
 	};
 	
-	void SetGravity(float afY){self->gravity = afY;}
+	void SetGravity(float afY){
+		self->gravity = afY;
+		//mvGravity.y = afY;
+	};
+	const float GetGravity() const {return self->gravity;}
 	//const idVec3 &GetGravity() const {return idVec3(0.0f, self->gravity, 0.0f);}
 	
 	void SetModel(const std::string &asName);
 	const std::string &GetModel() const;
+	
+	void SetModelInde(int anIndex){self->modelindex = anIndex;}
+	int GetModelIndex() const {return self->modelindex;}
 	
 	void SetOrigin(const idVec3 &avOrigin);
 	
@@ -273,10 +292,13 @@ public:
 	void SetDamageable(int anDamageable){self->takedamage = anDamageable;}
 	int GetDamageable() const {return self->takedamage;}
 	
+	// TODO: ShouldTakeDamage?
+	bool IsDamageable() const {return GetDamageable() > DAMAGE_NO;}
+	
 	const std::string &GetNoise() const;
 	
-	void SetTarget(string_t anTarget){self->target = anTarget;}
-	string_t GetTarget() const {return self->target;}
+	void SetTarget(const char *asTarget);
+	const char *GetTarget() const {return reinterpret_cast<const char *>(self->target);}
 	
 	void SetIdealYaw(float afValue){self->ideal_yaw = afValue;}
 	
@@ -289,6 +311,25 @@ public:
 	};
 	
 	virtual int GetObjectCaps() const {return 0;}
+	
+	enum class BloodType // TODO: BloodColor?
+	{
+		DontBleed = -1,
+	};
+	
+	virtual BloodType GetBloodType() const {return BloodType::DontBleed;}
+	
+	const idVec3 &GetAbsMin() /*const*/
+	{
+		mvAbsMin = self->absmin;
+		return mvAbsMin;
+	};
+	
+	const idVec3 &GetAbsMax() /*const*/
+	{
+		mvAbsMax = self->absmax;
+		return mvAbsMax;
+	};
 protected:
 	void SetClassName(const char *asName){/*self->classname = asName;*/} // TODO: gpEngine->pfnMakeString
 private:
@@ -299,9 +340,13 @@ private:
 	idVec3 mvVelocity{idVec3::Origin};
 	idVec3 mvAngularVelocity{idVec3::Origin};
 	idVec3 mvMoveDir{idVec3::Origin};
+	//idVec3 mvGravity{idVec3::Origin};
+	idVec3 mvAbsMin{idVec3::Origin};
+	idVec3 mvAbsMax{idVec3::Origin};
 public:
 	entvars_t *self{nullptr};
-	CGameWorld *mpWorld{nullptr};
+	CBaseGame *mpGame{nullptr};
+	//IGameWorld *mpWorld{nullptr};
 private:	
 	pfnThinkCallback mfnThinkCallback{nullptr};
 	pfnTouchCallback mfnTouchCallback{nullptr};

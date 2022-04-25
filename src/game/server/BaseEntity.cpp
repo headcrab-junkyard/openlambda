@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,10 @@
 /// @file
 
 #include "BaseEntity.hpp"
+#include "GameWorld.hpp"
 #include "engine.h"
+//#include "const.h"
+#include "weapons.hpp"
 
 enum class TargetEngineAPI : int
 {
@@ -62,9 +65,9 @@ void CBaseEntity::TraceAttack(CBaseEntity *apAttacker, float afDamage, const idV
 	{
 		//blood_count++; // TODO
 		//blood_org = org; // TODO
-		mpWorld->SpawnBlood(org, GetBloodColor(), afDamage);
+		mpWorld->SpawnBlood(org, GetBloodType(), afDamage);
 		
-		AddMultiDamage(apAttacker, aTraceResult.pHit, afDamage, anDmgBitSum);
+		AddMultiDamage(apAttacker, ToBaseEntity(aTraceResult.pHit), afDamage, anDmgBitSum);
 	}
 	//else
 		//puff_count++; // TODO
@@ -78,26 +81,20 @@ The damage is coming from inflictor, but get mad at attacker
 This should be the only function that ever reduces health.
 ============
 */
-void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float afDamage)
-//int CBaseEntity::TakeDamage(const CBaseEntity &aInflictor, const CBaseEntity &aAttacker, float afDamage, int anDmgBitSum)
+int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float afDamage, int anDmgBitSum)
 {
 	idVec3 dir;
-	CBaseEntity *oldself;
-	float   save; // TODO: int?
-	float   take; // TODO: int?
-	string_t  s;
-	char *attackerteam, *targteam;
 
-	if(!self->takedamage)
-		return;
+	if(!IsDamageable())
+		return 0;
 
 	//----(SA)	added
-	//if ( g_gametype.integer == GT_SINGLE_PLAYER && !targ->aiCharacter && targ->client && targ->client->cameraPortal )
+	//if( g_gametype.integer == GT_SINGLE_PLAYER && !targ->aiCharacter && targ->client && targ->client->cameraPortal )
 	{
 		// get out of damage in sp if in cutscene.
 		//return;
-	}
-//----(SA)	end
+	};
+	//----(SA)	end
 
 //	if (reloading || saveGamePending) {	// map transition is happening, don't do anything
 	//if ( g_reloading.integer || saveGamePending )
@@ -109,8 +106,9 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 		//return;
 	
 // used by buttons and triggers to set activator for target firing
-	damage_attacker = attacker;
+	//damage_attacker = attacker;
 
+/*
 // check for quad damage powerup on the attacker
 	if(attacker->super_damage_finished > gpGlobals->time && inflictor->GetClassName() != "door")
 	{
@@ -119,10 +117,12 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 		else
 			afDamage *= 4;
 	};
+*/
 
 // save damage based on the target's armor level
 
-	save = ceil(GetArmorType() * afDamage);
+	float save = ceil(GetArmorType() * afDamage); // TODO: int?
+/*
 	if (save >= GetArmorValue())
 	{
 		save = GetArmorValue();
@@ -131,8 +131,11 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 	};
 	
 	SetArmorValue(GetArmorValue() - save);
-	take = ceil(afDamage - save);
+*/
 
+	float take = ceil(afDamage - save); // TODO: int?
+
+/*
 // add to the damage total for clients, which will be sent as a single
 // message at the end of the frame
 // FIXME: remove after combining shotgun blasts?
@@ -144,31 +147,42 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 	};
 
 	damage_inflictor = inflictor;
+*/
 
-// figure momentum add
-	if ( (inflictor != world) && (GetMoveType() == MOVETYPE_WALK) )
+	// figure momentum add
+	if((inflictor != world) && (GetMoveType() == MOVETYPE_WALK))
 	{
-		dir = GetOrigin() - (inflictor->v.absmin + inflictor->v.absmax) * 0.5;
+		dir = GetOrigin() - (inflictor->GetAbsMin() + inflictor->GetAbsMax()) * 0.5;
 		dir = dir.Normalize();
+		
 		// Set kickback for smaller weapons
 //Zoid -- use normal NQ kickback
 //		// Read: only if it's not yourself doing the damage
 //		if ( (afDamage < 60) & ((attacker->v.classname == "player") & (self->v.classname == "player")) & ( attacker->v.netname != self->v.netname)) 
 //			self->v.velocity = self->v.velocity + dir * afDamage * 11;
-//		else                        
-		// Otherwise, these rules apply to rockets and grenades                        
-		// for blast velocity
-			SetVelocity(GetVelocity() + dir * afDamage * 8);
+//		else
+		{
+			// Otherwise, these rules apply to rockets and grenades                        
+			// for blast velocity
+			
+			float fForce{afDamage * 8};
+			
+			if(fForce > 1000.0f)
+				fForce = 1000.0f;
+			
+			SetVelocity(GetVelocity() + dir * fForce);
+		};
 		
 		// Rocket Jump modifiers
-		if ( (rj > 1) & ((attacker->GetClassName() == "player") & (GetClassName() == "player")) & ( attacker->v.netname == self->v.netname)) 
-			SetVelocity(GetVelocity() + dir * afDamage * rj);
+		//if ( (rj > 1) & ((attacker->GetClassName() == "player") & (GetClassName() == "player")) & ( attacker->v.netname == self->v.netname)) 
+			//SetVelocity(GetVelocity() + dir * afDamage * rj);
+	};
 
-	}
-
+/*
 	// check for godmode or invincibility
 	if(GetFlags() & FL_GODMODE)
-		return;
+		return 0;
+	
 	if(self->invincible_finished >= gpGlobals->time)
 	{
 		if(self->invincible_sound < gpGlobals->time)
@@ -176,35 +190,38 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 			EmitSound(CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM);
 			self->invincible_sound = gpGlobals->time + 2;
 		};
-		return;
+		return 0;
 	};
 
 // team play damage avoidance
 //ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-	attackerteam = gpEngine->pfnInfoKeyValue(gpEngine->pfnGetInfoKeyBuffer(attacker->ToEdict()), "team");
-	targteam = gpEngine->pfnInfoKeyValue(gpEngine->pfnGetInfoKeyBuffer(gpEngine->pfnEntOfEntVars(self)), "team");
+	char *attackerteam = gpEngine->pfnInfoKeyValue(gpEngine->pfnGetInfoKeyBuffer(attacker->ToEdict()), "team");
+	char *targteam = gpEngine->pfnInfoKeyValue(gpEngine->pfnGetInfoKeyBuffer(gpEngine->pfnEntOfEntVars(self)), "team");
 
 	if ((teamplay == 1) && (targteam == attackerteam) &&
 		(attacker->GetClassName() == "player") && (attackerteam != "") &&
 		inflictor->GetClassName() != "door")
-		return;
+		return 0;
 
 	if ((teamplay == 3) && (targteam == attackerteam) &&
 		(attacker->GetClassName() == "player") && (attackerteam != "") &&
 		(self != attacker)&& inflictor->GetClassName() != "door")
-		return;
-		
-// do the damage
-	SetHealth(GetHealth() - take);
+		return 0;
+*/
+	
+	// do the damage
+	AddHealth(-take);
 
 	if(GetHealth() <= 0)
 	{
-		Killed(attacker);
-		return;
+		Killed(attacker, inflictor, GIB_NORMAL); // TODO
+		return 0;
 	};
 
-// react to the damage
-	oldself = self;
+	// UNUSED
+	
+	// react to the damage
+	//CBaseEntity *oldself{self};
 
 /*SERVER
 	if ( (self.flags & FL_MONSTER) && attacker != world)
@@ -223,10 +240,11 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 		}
 	}
 */
-	if(self->th_pain)
-		self->th_pain(attacker, take);
+	//if(self->th_pain)
+		//self->th_pain(attacker, take);
 
-	self = oldself;
+	//self = oldself;
+	return 1;
 };
 
 /*
@@ -234,8 +252,7 @@ void CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, floa
 Killed
 ============
 */
-void CBaseEntity::Killed(CBaseEntity *apAttacker)
-//void CBaseEntity::Killed(const CBaseEntity &aAttacker, const CBaseEntity &aLastInflictor, int anGib)
+void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGib)
 {
 	//CBaseEntity *oself{self};
 
@@ -282,33 +299,39 @@ Used by shotgun, super shotgun, and enemy soldier firing
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void CBaseEntity::FireBullets(float shotcount, const idVec3 &dir, const idVec3 &spread, CBaseEntity *apAttacker)
+void CBaseEntity::FireBullets(float shotcount, const idVec3 &avDir, const idVec3 &avSpread, CBaseEntity *apAttacker)
 {
-	idVec3 direction;
+	if(apAttacker == nullptr)
+		apAttacker = this;
+	
+	ClearMultiDamage();
 	
 	gpEngine->pfnMakeVectors(self->v_angle);
 
 	idVec3 src{GetOrigin() + gpGlobals->v_forward * 10};
-	src[2] = self->absmin[2] + self->size[2] * 0.7;
-
-	ClearMultiDamage();
+	src.z = GetAbsMin().z + self->size[2] * 0.7;
 
 	TraceResult hit{};
-	mpWorld->TraceLine(src, src + dir * 2048, false, this, &hit);
-	puff_org = hit.vecEndPos - dir * 4;
+	mpWorld->TraceLine(src, src + avDir * 2048, false, this, &hit);
+	
+	puff_org = hit.vecEndPos - avDir * 4;
 
+	idVec3 direction;
+	
 	while(shotcount > 0)
 	{
-		direction = dir + crandom() * spread.x * gpGlobals->v_right + crandom() * spread.y * gpGlobals->v_up;
+		direction = avDir + crandom() * avSpread.x * gpGlobals->v_right + crandom() * avSpread.y * gpGlobals->v_up;
+		
 		TraceResult hit{};
 		mpWorld->TraceLine(src, src + direction * 2048, false, this, &hit);
+		
 		if(hit.flFraction != 1.0)
 			TraceAttack(apAttacker, 4, direction, hit);
 
-		shotcount--;
+		--shotcount;
 	};
+	
 	ApplyMultiDamage(self, apAttacker);
-	Multi_Finish();
 };
 	
 int CBaseEntity::GetIndex() const
@@ -366,7 +389,18 @@ void CBaseEntity::MakeStatic()
 
 const std::string &CBaseEntity::GetNoise() const
 {
-	return gpEngine->pfnSzFromIndex(self->noise);
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return "TODO"; // TODO
+	else
+		return gpEngine->pfnSzFromIndex(self->noise);
+};
+
+void CBaseEntity::SetTarget(const char *asTarget)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		self->target = gpEngine->pfnMakeString(asTarget);
 };
 
 void CBaseEntity::SUB_Remove()
@@ -376,5 +410,5 @@ void CBaseEntity::SUB_Remove()
 		SetHealth(0);
 	};
 	
-	gpEngine->pfnRemove(ToEdict());
+	gpEngine->pfnRemoveEntity(ToEdict()); // TODO: mpWorld->RemoveEntity(this);
 };
