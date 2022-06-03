@@ -25,6 +25,7 @@
 #include "engine.h"
 //#include "const.h"
 #include "weapons.hpp"
+#include "Util.hpp"
 
 enum class TargetEngineAPI : int
 {
@@ -59,13 +60,15 @@ TraceAttack
 */
 void CBaseEntity::TraceAttack(CBaseEntity *apAttacker, float afDamage, const idVec3 &avDir, /*const*/ TraceResult &aTraceResult, int anDmgBitSum)
 {
-	idVec3 org{aTraceResult.vecEndPos - avDir * 4};
+	idVec3 org{idVec3(aTraceResult.vecEndPos) - avDir * 4};
 
 	if(aTraceResult.pHit->v.takedamage)
 	{
 		//blood_count++; // TODO
 		//blood_org = org; // TODO
-		mpWorld->SpawnBlood(org, GetBloodType(), afDamage);
+		auto eBloodType{GetBloodType()};
+		if(eBloodType != BloodType::DontBleed)
+			mpWorld->SpawnBlood(org, eBloodType, afDamage);
 		
 		AddMultiDamage(apAttacker, ToBaseEntity(aTraceResult.pHit), afDamage, anDmgBitSum);
 	}
@@ -247,12 +250,28 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 	return 1;
 };
 
+int CBaseEntity::TakeHealth(float afValue, int anDmgBitSum)
+{
+	if(!IsDamageable())
+		return 0;
+	
+	if(GetHealth() >= GetMaxHealth())
+		return 0;
+	
+	AddHealth(afValue);
+	
+	if(GetHealth() > GetMaxHealth())
+		SetHealth(GetMaxHealth());
+	
+	return 1;
+};
+
 /*
 ============
 Killed
 ============
 */
-void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGib)
+void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGib) // TODO: no last inflictor in original hl code, only source sdk
 {
 	//CBaseEntity *oself{self};
 
@@ -282,6 +301,8 @@ void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, 
 	SetDamageable(DAMAGE_NO);
 	//SetTouchCallback(CBaseEntity::SUB_Null);
 	//SetEffects(0);
+	SetDeadFlag(DEAD_DEAD);
+	mpWorld->RemoveEntity(this);
 
 /*SERVER
 	monster_death_use();
@@ -308,13 +329,13 @@ void CBaseEntity::FireBullets(float shotcount, const idVec3 &avDir, const idVec3
 	
 	gpEngine->pfnMakeVectors(self->v_angle);
 
-	idVec3 src{GetOrigin() + gpGlobals->v_forward * 10};
+	idVec3 src{GetOrigin() + idVec3(gpGlobals->v_forward) * 10};
 	src.z = GetAbsMin().z + self->size[2] * 0.7;
 
 	TraceResult hit{};
 	mpWorld->TraceLine(src, src + avDir * 2048, false, this, &hit);
 	
-	puff_org = hit.vecEndPos - avDir * 4;
+	//puff_org = hit.vecEndPos - avDir * 4;
 
 	idVec3 direction;
 	
@@ -326,12 +347,12 @@ void CBaseEntity::FireBullets(float shotcount, const idVec3 &avDir, const idVec3
 		mpWorld->TraceLine(src, src + direction * 2048, false, this, &hit);
 		
 		if(hit.flFraction != 1.0)
-			TraceAttack(apAttacker, 4, direction, hit);
+			TraceAttack(apAttacker, 4, direction, hit, 0); // TODO
 
 		--shotcount;
 	};
 	
-	ApplyMultiDamage(self, apAttacker);
+	ApplyMultiDamage(this, apAttacker);
 };
 	
 int CBaseEntity::GetIndex() const
@@ -400,7 +421,7 @@ void CBaseEntity::SetTarget(const char *asTarget)
 	if constexpr(TargetAPI == TargetEngineAPI::Next)
 		; // TODO
 	else
-		self->target = gpEngine->pfnMakeString(asTarget);
+		self->target = gpEngine->pfnAllocString(asTarget); // TODO: pfnMakeString
 };
 
 void CBaseEntity::SUB_Remove()
@@ -410,5 +431,5 @@ void CBaseEntity::SUB_Remove()
 		SetHealth(0);
 	};
 	
-	gpEngine->pfnRemoveEntity(ToEdict()); // TODO: mpWorld->RemoveEntity(this);
+	mpWorld->RemoveEntity(this);
 };

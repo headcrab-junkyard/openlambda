@@ -18,16 +18,18 @@
 */
 
 /// @file
+/// @brief base entity class, all other entities derive from this one
 
 #pragma once
 
 #include <string>
 
-#include "eiface.h"
-#include "edict.h"
-#include "mathlib/vec3.h"
-#include "mathlib/bounds.h"
-#include "progdefs.h"
+#include <engine/eiface.h>
+#include <engine/edict.h>
+#include <engine/progdefs.h>
+
+#include <mathlib/vec3.h>
+#include <mathlib/bounds.h>
 
 //using edict_t = struct edict_s;
 
@@ -40,6 +42,8 @@ class CBaseGame;
 class CBaseEntity
 {
 public:
+	// Enums & public defs
+	
 /*
 	enum class SpawnFlags : int
 	{
@@ -58,6 +62,16 @@ public:
 		Toggle
 	};
 	
+	enum
+	{
+		FCAP_ACROSS_TRANSITION
+	};
+	
+	enum class BloodType // TODO: BloodColor?
+	{
+		DontBleed = -1,
+	};
+	
 	using pfnThinkCallback = void (CBaseEntity::*)();
 	using pfnTouchCallback = void (CBaseEntity::*)(CBaseEntity *apOther);
 	using pfnUseCallback = void (CBaseEntity::*)(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
@@ -66,43 +80,94 @@ public:
 	//CBaseEntity(entvars_t *apData);
 	virtual ~CBaseEntity() = default;
 	
-	edict_t *ToEdict() const; // TODO: GetDict()?
-	
-	virtual void Think()
-	{
-		if(mfnThinkCallback)
-			(this->*mfnThinkCallback)();
-	};
-	virtual void Touch(CBaseEntity *other)
-	{
-		if(mfnTouchCallback)
-			(this->*mfnTouchCallback)(other);
-	};
-	virtual void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
-	{
-		if(mfnUseCallback)
-			(this->*mfnUseCallback)(apActivator, apCaller, aeUseType, afValue);
-	};
-	virtual void Blocked(CBaseEntity *other)
-	{
-		if(mfnBlockedCallback)
-			(this->*mfnBlockedCallback)(other);
-	};
+	// Init methods
 	
 	/// @return false if the entity shouldn't be spawned at all (instead of deleting itself on spawn)
 	virtual bool PreSpawn() const {return true;} // TODO: should this be const?
 	
 	virtual void Spawn(){}
 	
+	// TODO: virtual void Precache(){}?
+	
+	// Activation methods
+	
+	// TODO
+	//virtual void Activate(){}
+	
+	// Save & Load methods
+	
+	virtual int Save(CGameSave &aGameSave); // TODO: CSave &aSave in original
+	virtual int Restore(const CGameSave &aGameSave); // TODO: CRestore &aRestore in original
+	
+	// Callback methods
+	
+	virtual void Think()
+	{
+		if(mfnThinkCallback)
+			(this->*mfnThinkCallback)();
+	};
+	
+	virtual void Touch(CBaseEntity *pOther)
+	{
+		if(mfnTouchCallback)
+			(this->*mfnTouchCallback)(pOther);
+	};
+	
+	virtual void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
+	{
+		if(mfnUseCallback)
+			(this->*mfnUseCallback)(apActivator, apCaller, aeUseType, afValue);
+	};
+	
+	virtual void Blocked(CBaseEntity *pOther)
+	{
+		if(mfnBlockedCallback)
+			(this->*mfnBlockedCallback)(pOther);
+	};
+	
+	//
+	
 	virtual void TraceAttack(CBaseEntity *apAttacker, float afDamage, const idVec3 &dir, TraceResult &aTraceResult, int anDmgBitSum);
 	
+	/// Called when the entity receives damage
 	virtual int TakeDamage(CBaseEntity *apInflictor, CBaseEntity *apAttacker, float afDamage, int anDmgBitSum); // TODO: was T_Damage
 	
+	/// Called when the entity receives health
 	virtual float TakeHealth(float afValue, float afIgnore);
 	
+	/// Called when the entity gets killed/destroyed
 	virtual void Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGibType);
 	
-	void FireBullets(float shotcount, const idVec3 &dir, const idVec3 &spread);
+	/// Used to make entity shoot in specified direction (like a turret)
+	void FireBullets(float shotcount, const idVec3 &dir, const idVec3 &spread, CBaseEntity *apAttacker);
+	
+	/// Used to make entity emit various sounds with specified properties
+	void EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags = 0, int anPitch = PITCH_NORM);
+	
+	/// Used to mark the entity for deletion (use this instead of deleting the entity)
+	void MarkForDeletion()
+	{
+		self->flags |= FL_KILLME;
+	};
+	
+	/// Make the entity static
+	void MakeStatic();
+	
+	/// Make the entity dormant
+	void MakeDormant();
+	
+	/// Remove this entity
+	void SUB_Remove();
+	
+	/// Does nothing
+	void SUB_Null(){}
+	
+	///
+	virtual bool HandleKeyValue(const std::string &asKey, const std::string &asValue){return false;}
+	
+	// Setter & getter (+ checks & conversion) methods
+	
+	edict_t *ToEdict() const; // TODO: GetDict()?
 	
 	void SetName(const std::string &asName);
 	const std::string &GetName() const;
@@ -131,7 +196,6 @@ public:
 	
 	//void SetKeyValue(const std::string &asKey, const std::string &asValue);
 	//const std::string &GetKeyValue(const std::string &asKey) const;
-	virtual bool HandleKeyValue(const std::string &asKey, const std::string &asValue){return false;}
 	
 	bool IsValid() const {return (!ToEdict() || ToEdict()->free || MarkedForDeletion()) ? false : true;}
 	
@@ -204,7 +268,7 @@ public:
 	void SetModel(const std::string &asName);
 	const std::string &GetModel() const;
 	
-	void SetModelInde(int anIndex){self->modelindex = anIndex;}
+	void SetModelIndex(int anIndex){self->modelindex = anIndex;}
 	int GetModelIndex() const {return self->modelindex;}
 	
 	void SetOrigin(const idVec3 &avOrigin);
@@ -246,16 +310,8 @@ public:
 	void SetSkin(int anSkin){self->skin = anSkin;}
 	int GetSkin() const {return self->skin;}
 	
-	void EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags = 0, int anPitch = PITCH_NORM);
-	
-	void MarkForDeletion()
-	{
-		self->flags |= FL_KILLME;
-	};
-	
+	// TODO: IsMarkedForDeletion?
 	bool MarkedForDeletion() const {return self->flags & FL_KILLME;}
-
-	void MakeStatic();
 
 	int GetWaterType() const {return self->watertype;}
 	int GetWaterLevel() const {return self->waterlevel;}
@@ -295,6 +351,8 @@ public:
 	// TODO: ShouldTakeDamage?
 	bool IsDamageable() const {return GetDamageable() > DAMAGE_NO;}
 	
+	bool IsDormant() const {return self->flags & FL_DORMANT;}
+	
 	const std::string &GetNoise() const;
 	
 	void SetTarget(const char *asTarget);
@@ -302,20 +360,7 @@ public:
 	
 	void SetIdealYaw(float afValue){self->ideal_yaw = afValue;}
 	
-	void SUB_Remove();
-	void SUB_Null(){}
-	
-	enum
-	{
-		FCAP_ACROSS_TRANSITION
-	};
-	
-	virtual int GetObjectCaps() const {return 0;}
-	
-	enum class BloodType // TODO: BloodColor?
-	{
-		DontBleed = -1,
-	};
+	virtual int GetObjectCaps() const {return FCAP_ACROSS_TRANSITION;}
 	
 	virtual BloodType GetBloodType() const {return BloodType::DontBleed;}
 	
