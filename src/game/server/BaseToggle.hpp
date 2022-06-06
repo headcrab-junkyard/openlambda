@@ -21,6 +21,7 @@
 /// @file
 
 #include "BaseAnimated.hpp"
+#include "EntityHandle.hpp"
 
 class CBaseToggle : public CBaseAnimated
 {
@@ -47,6 +48,8 @@ public:
 protected:
 	void SetDelay(float afTime){mfWaitTime = afTime;}
 protected:
+	tEntityHandle mhActivator; // TODO: mhActivator?
+	
 	idVec3 mvPos1{idVec3::Origin};
 	idVec3 mvPos2{idVec3::Origin};
 	
