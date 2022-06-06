@@ -49,7 +49,21 @@ public:
 	
 	void UpdateClientData(){}
 	
+	void ShowMessage(const char *asMsg); // UTIL_ShowMessage
+	
+	void ScreenFade(const idVec3 &avColor, float afFadeTime, float afHoldTime, int anAlpha, int anFlags); // UTIL_ScreenFade
+	
 	bool ShouldFadeOnDeath() const {return false;}
+	
+	void SetViewEnt(CBaseEntity *apEntity);
+	
+	void FadeVolume(int anFadePercent, int anFadeOutSecs, int anHoldTime, int anFadeInSecs);
+	
+	void SetMaxSpeed(float afSpeed);
+	
+	int GetUserID() const;
+	const char *GetAuthID() const;
+	uint GetWONID() const;
 	
 	const idVec3 &GetGunPosition() const {return {};} // TODO: return by ref?
 protected:

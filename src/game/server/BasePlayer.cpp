@@ -219,3 +219,18 @@ void CBasePlayer::ItemPostFrame()
 	if(mpActiveItem)
 		mpActiveItem->ItemPostFrame();
 };
+
+void CBasePlayer::SetViewEnt(CBaseEntity *apEntity)
+{
+	gpEngine->pfnSetView(ToEdict(), apEntity->ToEdict());
+};
+
+void CBasePlayer::FadeVolume(int anFadePercent, int anFadeOutSecs, int anHoldTime, int anFadeInSecs)
+{
+	gpEngine->pfnFadeClientVolume(ToEdict(), anFadePercent, anFadeOutSecs, anHoldTime, anFadeInSecs);
+};
+
+void CBasePlayer::SetMaxSpeed(float afSpeed)
+{
+	gpEngine->pfnSetClientMaxspeed(ToEdict(), afSpeed);
+};
