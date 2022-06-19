@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-2001 Id Software, Inc.
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,94 @@
 #include "BaseItem.hpp"
 
 unsigned long modelindex_player{0};
+
+
+/*
+============
+SelectSpawnPoint
+
+Returns the entity to spawn at
+============
+*/
+// TODO: CGameWorld::SelectSpawnPoint?
+// TODO: CGameRules::SelectSpawnPoint?
+CBaseEntity *SelectSpawnPoint()
+{
+	int numspots{0}, totalspots{0};
+	CBaseEntity *world{ToBaseEntity(gpWorld->GetEntity(0))};
+
+	// testinfo_player_start is only found in regioned levels
+	CBaseEntity *spot{gpWorld->FindEntityByString(world, "classname", "testplayerstart")};
+	if(spot)
+		return spot;
+		
+	// choose a info_player_deathmatch point
+
+	// ok, find all spots that don't have players nearby
+
+	CBaseEntity *spots{world};
+	spot = gpWorld->FindEntityByString(world, "classname", "info_player_deathmatch");       
+	while(spot)
+	{
+		totalspots++;
+
+		CBaseEntity *thing{nullptr};
+		thing = gpWorld->FindEntityInSphere(thing, spot->GetOrigin(), 84);
+		int pcount{0};               
+		while(thing)
+		{
+			if(thing->GetClassName() == "player")
+				pcount++;                      
+			thing = gpWorld->FindEntityInSphere(thing, spot->GetOrigin(), 84);
+		};
+		if(pcount == 0)
+		{
+			spot->SetGoal(spots);
+			spots = spot;
+			numspots++;
+		};
+
+		// Get the next spot in the chain
+		spot = gpWorld->FindEntityByString(spot, "classname", "info_player_deathmatch");                
+	};
+	
+	totalspots--;
+	if(!numspots)
+	{
+		// ack, they are all full, just pick one at random
+//		bprint (PRINT_HIGH, "Ackk! All spots are full. Selecting random spawn spot\n");
+		totalspots = rint((random() * totalspots));
+		spot = gpWorld->FindEntityByString(world, "classname", "info_player_deathmatch");       
+		while(totalspots > 0)
+		{
+			totalspots--;
+			spot = gpWorld->FindEntityByString(spot, "classname", "info_player_deathmatch");
+		};
+		return spot;
+	};
+	
+	// TODO: info_player_start support
+	
+	// We now have the number of spots available on the map in numspots
+
+	// Generate a random number between 1 and numspots
+
+	numspots--;
+	
+	numspots = rint((random() * numspots));
+
+	spot = spots;
+	while(numspots > 0)
+	{
+		spot = spot->GetGoalEntity();
+		numspots--;
+	};
+	
+	if(!spot)
+		return world;
+	
+	return spot;
+};
 
 CBasePlayer::CBasePlayer() : mpGame(gpGame){}
 
@@ -83,6 +171,13 @@ void CBasePlayer::Spawn()
 	SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
 	
 	mpGame->GetRules()->OnPlayerSpawn(this);
+	
+	// TODO: Probably should be part of the game rules
+	
+	CBaseEntity *pSpawnSpot{SelectSpawnPoint()};
+	
+	pClientEnt->SetOrigin(pSpawnSpot->GetOrigin() + idVec3(0, 0, 1));
+	pClientEnt->SetAngles(pSpawnSpot->GetAngles());
 };
 
 int CBasePlayer::TakeDamage(const CBaseEntity &aInflictor, const CBaseEntity &aAttacker, float afDamage, int anDmgTypeBitSum)
