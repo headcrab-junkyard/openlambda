@@ -72,6 +72,47 @@ public:
 		DontBleed = -1,
 	};
 	
+	enum class MoveType : int
+	{
+		None = MOVETYPE_NONE,
+		
+		Walk = MOVETYPE_WALK,
+		Step,
+		Fly,
+		Toss,
+		Push,
+		NoClip,
+		FlyMissile,
+		Bounce,
+		BounceMissile,
+		Follow,
+		PushStep
+	};
+	
+	enum class Solidity : int
+	{
+		None = SOLID_NOT,
+		Trigger,
+		BoundingBox,
+		SlideBox,
+		BSP
+	};
+	
+	enum class Damageable : int
+	{
+		No = DAMAGE_NO,
+		Yes,
+		Aim
+	};
+	
+	
+	enum class GibType : int
+	{
+		Normal = 0, ///< Gib if entity was overkilled
+		Never, ///< Never gib, no matter how much dmg is done (used for freezing and such)
+		Always ///< Always gib (Houndeye Shock, Barnacle Bite and such)
+	};
+	
 	using pfnThinkCallback = void (CBaseEntity::*)();
 	using pfnTouchCallback = void (CBaseEntity::*)(CBaseEntity *apOther);
 	using pfnUseCallback = void (CBaseEntity::*)(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
