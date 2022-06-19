@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019, 2021 BlackPhrase
+ * Copyright (C) 2019, 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,16 +38,16 @@ void CBaseAmmo::Spawn()
 
 void CBaseAmmo::Respawn()
 {
-	// remove it in single player, or setup for respawning in deathmatch
-	self->effects |= EF_NODRAW; // TODO: was SetModel(string_null);
+	// Remove it in single player, or setup for respawning in deathmatch
+	AddEffects(EF_NODRAW); // TODO: was SetModel(string_null);
 	SetSolidity(SOLID_NOT);
 
-	//if(deathmatch != 2)
+	//if(gpGlobals->deathmatch != 2)
 		//SetNextThink(gpGlobals->time + 30);
 
 // Xian -- If playing in DM 3.0 mode, halve the time ammo respawns        
 
-	//if(deathmatch == 3 || deathmatch == 5)        
+	//if(gpGlobals->deathmatch == 3 || gpGlobals->deathmatch == 5)        
 		//SetNextThink(gpGlobals->time + 15);
 	
 	SetNextThink(gpGame->GetRules()->GetAmmoRespawnTime(this));

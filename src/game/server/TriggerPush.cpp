@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,6 @@ void CTriggerPush::Touch(CBaseEntity *apOther)
 		};
 	};
 	
-	if(self->spawnflags & PUSH_ONCE)
+	if(GetSpawnFlags() & PUSH_ONCE)
 		gpEngine->pfnRemoveEntity(ToEdict());
 };

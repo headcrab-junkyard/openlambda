@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019-2021 BlackPhrase
+ * Copyright (C) 2019-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ void CBaseTrigger::InitTrigger()
 {
 	// trigger angles are used for one-way touches.  An angle of 0 is assumed
 	// to mean no restrictions, so use a yaw of 360 instead.
-	if (GetAngles() != idVec3::Origin)
+	if(GetAngles() != idVec3::Origin)
 		SetMovedir(self);
 	SetSolidity(SOLID_TRIGGER);
 	SetModel(GetModel()); // set size and link into world
@@ -125,9 +125,9 @@ void CBaseTrigger::HurtTouch(CBaseEntity *apOther)
 		float fDmg{self->dmg}; // TODO: multiply by 0.5
 		
 		if(fDmg < 0)
-			apOther->TakeHealth(-fDmg, mnDmgBitSum);
+			apOther->TakeHealth(-fDmg, 0.0f, mnDmgBitSum); // TODO
 		else
-			apOther->TakeDamage(/*self*/ *this, /*self*/ *this, fDmg, mnDmgBitSum);
+			apOther->TakeDamage(/*self*/ this, /*self*/ this, fDmg, mnDmgBitSum);
 		
 		//SetThinkCallback(hurt_on);
 		SetNextThink(gpGlobals->time + 1);

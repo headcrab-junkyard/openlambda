@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 
 #include "BaseDelay.hpp"
 #include "Util.hpp"
+
+constexpr auto SF_AUTO_FIREONCE{0x0001};
 
 class CTriggerAuto : public CBaseDelay
 {
@@ -83,7 +85,7 @@ void CTriggerAuto::Think()
 	if(!mnGlobalState || gGlobalState.EntityGetState(mnGlobalState) == GLOBAL_ON)
 	{
 		SUB_UseTargets(this, meTriggerType, 0);
-		if(self->spawnflags & SF_AUTO_FIREONCE)
+		if(GetSpawnFlags() & SF_AUTO_FIREONCE)
 			mpWorld->RemoveEntity(this);
 	};
 };
