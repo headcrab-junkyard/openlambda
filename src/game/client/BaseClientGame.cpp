@@ -19,7 +19,7 @@
 
 /// @file
 
-#include "ClientGame.hpp"
+#include "BaseClientGame.hpp"
 
 #include <next/filesystem/IFileSystem.hpp>
 //#include <next/inputsystem/IInputSystem.hpp>
@@ -28,7 +28,7 @@
 
 void InitInput();
 
-bool CClientGame::Init(CreateInterfaceFn afnEngineFactory)
+bool CBaseClientGame::Init(CreateInterfaceFn afnEngineFactory)
 {
 	if(!afnEngineFactory)
 		return false;
@@ -60,12 +60,12 @@ bool CClientGame::Init(CreateInterfaceFn afnEngineFactory)
 	return true;
 };
 
-void CClientGame::Shutdown()
+void CBaseClientGame::Shutdown()
 {
 	// TODO
 };
 
-void CClientGame::Update(/*double afTime*/)
+void CBaseClientGame::Update(/*double afTime*/)
 {
 	// TODO
 };

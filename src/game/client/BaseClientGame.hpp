@@ -30,10 +30,10 @@ interface IScriptSystem;
 
 class CGameWorld;
 
-class CClientGame : public IClientGame
+class CBaseClientGame : public IClientGame
 {
 public: // IClientGame interface methods
-	virtual ~CClientGame() = default;
+	virtual ~CBaseClientGame() = default;
 	
 	virtual bool Init(CreateInterfaceFn afnEngineFactory /*, cldll_func_t *pcl_funcs*/) override;
 	virtual void Shutdown() override;
