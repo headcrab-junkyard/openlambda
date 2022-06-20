@@ -53,5 +53,5 @@ private:
 	IPhysicsSystem *mpPhysicsSystem{nullptr};
 	IScriptSystem *mpScriptSystem{nullptr};
 	
-	CGameWorld mpWorld{nullptr};
+	CGameWorld *mpWorld{nullptr};
 };
