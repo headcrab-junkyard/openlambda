@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2020 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,37 @@
 
 #pragma once
 
-#include "next/game/client/IClientGame.hpp"
+#include <next/game/client/IClientGame.hpp>
 
-class CClientGame /*final*/ : public IClientGame
+interface IFileSystem;
+interface IInputSystem;
+interface IPhysicsSystem;
+interface IScriptSystem;
+
+class CGameWorld;
+
+class CClientGame : public IClientGame
 {
-public:
-	bool Init(CreateInterfaceFn afnEngineFactory /*, cldll_func_t *pcl_funcs*/) override;
-	void Shutdown() override;
+public: // IClientGame interface methods
+	virtual ~CClientGame() = default;
 	
-	void Update(double afTime) override;
+	virtual bool Init(CreateInterfaceFn afnEngineFactory /*, cldll_func_t *pcl_funcs*/) override;
+	virtual void Shutdown() override;
+	
+	virtual void Update(/*double afTime*/) override;
+public: // Other public methods
+	IFileSystem *GetFileSystem() const {return mpFileSystem;}
+	IInputSystem *GetInputSystem() const {return mpInputSystem;}
+	IPhysicsSystem *GetPhysicsSystem() const {return mpPhysicsSystem;}
+	IScriptSystem *GetScriptSystem() const {return mpScriptSystem;}
+	
+	CGameWorld *GetWorld() const {return mpWorld;}
+	//IGameRules *GetRules() const {return mpRules;}
+private:
+	IFileSystem *mpFileSystem{nullptr};
+	IInputSystem *mpInputSystem{nullptr};
+	IPhysicsSystem *mpPhysicsSystem{nullptr};
+	IScriptSystem *mpScriptSystem{nullptr};
+	
+	CGameWorld mpWorld{nullptr};
 };

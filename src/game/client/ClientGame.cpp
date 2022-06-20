@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019-2020 BlackPhrase
+ * Copyright (C) 2018-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,44 @@
 
 #include "ClientGame.hpp"
 
+#include <next/filesystem/IFileSystem.hpp>
+//#include <next/inputsystem/IInputSystem.hpp>
+//#include <next/physics/IPhysicsSystem.hpp>
+//#include <next/scriptsystem/IScriptSystem.hpp>
 CClientGame gClientGame;
 IClientGame *gpClientGame{&gClientGame};
 
+void InitInput();
 #if OPENLAMBDA_TARGET_ENGINE == OPENLAMBDA_TARGET_ENGINE_NEXT
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CClientGame, IClientGame, OGS_CLIENTGAME_INTERFACE_VERSION, gClientGame)
 #endif
 
 bool CClientGame::Init(CreateInterfaceFn afnEngineFactory)
 {
+	if(!afnEngineFactory)
+		return false;
+	
+	//auto pVGui{(vgui2::IVGui*)afnEngineFactory(VGUI_IVGUI_INTERFACE_VERSION, nullptr)};
+	//mpFileSystem = reinterpret_cast<IFileSystem*>(afnEngineFactory(OGS_FILESYSTEM_INTERFACE_VERSION, nullptr));
+	//mpInputSystem = reinterpret_cast<IInputSystem*>(afnEngineFactory(OGS_INPUTSYSTEM_INTERFACE_VERSION, nullptr));
+	//mpPhysicsSystem = reinterpret_cast<IPhysicsSystem*>(afnEngineFactory(OGS_PHYSICSSYSTEM_INTERFACE_VERSION, nullptr));
+	//mpScriptSystem = reinterpret_cast<IScriptSystem*>(afnEngineFactory(OGS_SCRIPTSYSTEM_INTERFACE_VERSION, nullptr));
+	
+	//if(!pVGui)
+		//return false;
+	
+	//if(!mpFileSystem)
+		//return false;
+	
+	//if(!mpInputSystem)
+		//return false;
+	
+	//if(!mpPhysicsSystem)
+		//return false;
+	
+	//if(!mpScriptSystem)
+		//return false;
+	
 	InitInput();
 	
 	// TODO
@@ -41,7 +70,7 @@ void CClientGame::Shutdown()
 	// TODO
 };
 
-void CClientGame::Update(double afTime)
+void CClientGame::Update(/*double afTime*/)
 {
 	// TODO
 };
