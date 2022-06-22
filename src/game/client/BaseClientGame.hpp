@@ -39,6 +39,8 @@ public: // IClientGame interface methods
 	virtual void Shutdown() override;
 	
 	virtual void Update(/*double afTime*/) override;
+protected:
+	virtual void HookEvents(){}
 public: // Other public methods
 	IFileSystem *GetFileSystem() const {return mpFileSystem;}
 	IInputSystem *GetInputSystem() const {return mpInputSystem;}

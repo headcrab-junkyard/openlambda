@@ -54,6 +54,7 @@ bool CBaseClientGame::Init(CreateInterfaceFn afnEngineFactory)
 	//if(!mpScriptSystem)
 		//return false;
 	
+	HookEvents();
 	InitInput();
 	
 	// TODO
