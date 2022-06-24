@@ -43,6 +43,7 @@ bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 	//if(!mpPhysics)
 		//return false;
 	
+	RegisterEvents();
 	//if(!mpScript)
 		//return false;
 	

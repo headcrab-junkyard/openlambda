@@ -52,6 +52,8 @@ public: // Public methods
 	IGameRules *GetRules() const {return mpRules;}
 	
 	IGameWorld *GetWorld() const {return mpWorld;}
+protected:
+	virtual void RegisterEvents(){}
 private:
 	IFileSystem *mpFileSystem{nullptr};
 	IVoiceServer *mpVoiceServer{nullptr};
