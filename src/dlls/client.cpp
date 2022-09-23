@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2019, 2021 BlackPhrase
+ * Copyright (C) 2018-2019, 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,25 @@
 #include "progdefs.h"
 #include "mathlib.h"
 #include "edict.h"
+
+#include <next/engine/IGameClientEventListener.hpp>
+
 #include "Game.hpp"
 #include "IGameRules.hpp"
 #include "Util.hpp"
 #include "BaseEntity.hpp"
 
 void set_suicide_frame(entvars_t *self);
+
+
+CGameClientEventListener gGameClientEventListener;
+CGameClientEventListener /*IGameClientEventListener*/ *gpGameClientEventListener{&gGameClientEventListener}; // TODO: can't use the IGameClientEventListener here as we need to access the OnClientKill method of the CGameClientEventListener class
+
+
+int ToClientID(edict_t *apEntDict)
+{
+	return 0; // TODO: get entity id, check that it's > 0 and less than maxplayers count, return it
+};
 
 /*
 ===========
@@ -42,7 +55,7 @@ called when a player connects to a server
 */
 qboolean ClientConnect(edict_t *pEntity, const char *name, const char *adr, char sRejectReason[128])
 {
-	return gpGame->GetRules()->HandleClientConnect(ToBaseEntity(pEntity), name, adr, sRejectReason);
+	return gpGameClientEventListener->OnClientConnect(ToClientID(pEntity), name, adr, sRejectReason);
 };
 
 /*
@@ -54,7 +67,7 @@ called when a player disconnects from a server
 */
 void ClientDisconnect(edict_t *self)
 {
-	gpGame->GetRules()->HandleClientDisconnect(ToBaseEntity(self));
+	gpGameClientEventListener->OnClientDisconnect(ToClientID(self));
 };
 
 // called by ClientKill and DeadThink
@@ -81,17 +94,7 @@ Player entered the suicide command
 */
 void ClientKill(edict_t *self)
 {
-/*
-	bprint (PRINT_MEDIUM, self->v.netname);
-	bprint (PRINT_MEDIUM, " suicides\n");
-	
-	set_suicide_frame (self->v);
-	
-	//self->v.modelindex = modelindex_player;
-	//logfrag(self, self);
-	//self->v.frags -= 2; // extra penalty
-	//respawn(&self->v);
-*/
+	gpGameClientEventListener->OnClientKill(ToClientID(self));
 };
 
 /*
@@ -103,99 +106,21 @@ called each time a player enters a new level
 */
 void ClientPutInServer(edict_t *client)
 {
-	//string_t s;
-	
-	auto pClientEnt{ToBaseEntity(client)};
-	
-	pBasePlayer->Spawn();
-	
-	//CBaseEntity *spot = SelectSpawnPoint();
-
-	pClientEnt->SetOrigin(idVec3::Origin);
-	idVec3 vAdd{0.0f};
-	vAdd[2] = 1.0f;
-	pClientEnt->SetOrigin(pClientEnt->GetOrigin() + vAdd);
-	//pClientEnt->SetOrigin(spot->GetOrigin() + idVec3(0, 0, 1));
-	//pClientEnt->SetAngles(spot->GetAngles());
-	client->v.fixangle = 1; // turn this way immediately
-	
-	idVec3 view_ofs{0.0f};
-	view_ofs[2] = 22;
-	VectorCopy(view_ofs, client->v.view_ofs);
-
-// Mod - Xian (May.20.97)
-// Bug where player would have velocity from their last kill
-
-	pClientEnt->SetVelocity(idVec3::Origin);
-
-	//player_stand1 ();
-	
-	//makevectors(pClientEnt->GetAngles());
-	//spawn_tfog(pClientEnt->GetOrigin() + v_forward * 20);
-
-	//spawn_tdeath (client->v.origin, client->v);
-
-	// Set Rocket Jump Modifiers
-	//if (stof(infokey(world, "rj")) != 0)           
-		//rj = stof(infokey(world, "rj"));
-
-/*
-	if (deathmatch == 4)
-	{
-		client->v.ammo_shells = 0;
-		if (stof(infokey(world, "axe")) == 0)
-		{
-			client->v.ammo_nails = 255;
-			client->v.ammo_shells = 255;
-			client->v.ammo_rockets = 255;
-			client->v.ammo_cells = 255;
-			client->v.items = client->v.items | IT_NAILGUN;
-			client->v.items = client->v.items | IT_SUPER_NAILGUN;
-			client->v.items = client->v.items | IT_SUPER_SHOTGUN;
-			client->v.items = client->v.items | IT_ROCKET_LAUNCHER;
-//		client->v.items = client->v.items | IT_GRENADE_LAUNCHER;
-			client->v.items = client->v.items | IT_LIGHTNING;
-		};
-		client->v.items = client->v.items - (client->v.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + IT_ARMOR3;
-		client->v.armorvalue = 200;
-		client->v.armortype = 0.8;
-		client->v.health = 250;
-		client->v.items = client->v.items | IT_INVULNERABILITY;
-		client->v.invincible_time = 1;
-		client->v.invincible_finished = time + 3;
-	};
-
-	if (deathmatch == 5)
-	{
-		client->v.ammo_nails = 80;
-		client->v.ammo_shells = 30;
-		client->v.ammo_rockets = 10;
-		client->v.ammo_cells = 30;
-		client->v.items = client->v.items | IT_NAILGUN;
-		client->v.items = client->v.items | IT_SUPER_NAILGUN;
-		client->v.items = client->v.items | IT_SUPER_SHOTGUN;
-		client->v.items = client->v.items | IT_ROCKET_LAUNCHER;
-		client->v.items = client->v.items | IT_GRENADE_LAUNCHER;
-		client->v.items = client->v.items | IT_LIGHTNING;
-		client->v.items = client->v.items - (client->v.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + IT_ARMOR3;
-		client->v.armorvalue = 200;
-		client->v.armortype = 0.8;
-		client->v.health = 200;
-		client->v.items = client->v.items | IT_INVULNERABILITY;
-		client->v.invincible_time = 1;
-		client->v.invincible_finished = time + 3;
-	};
-*/
+	gpGameClientEventListener->OnClientPutInServer(ToClientID(client));
 };
 
+/*
+*/
 void ClientCommand(edict_t *pclent)
 {
-	// TODO
+	CCmdArgs CmdArgs;
+	// TODO: cmd args
+	gpGameClientEventListener->OnClientCommand(ToClientID(pclent), CmdArgs);
 };
 
 void ClientUserInfoChanged(edict_t *pclent, char *userinfo)
 {
-	// TODO
+	gpGameClientEventListener->OnClientUserInfoChanged(ToClientID(pclent), userinfo);
 };
 
 void ServerActivate(edict_t *edicts, int edictcount, int maxclients)
@@ -410,7 +335,7 @@ void CreateInstancedBaselines(){};
 
 int InconsistentFile(const edict_t *player, const char *filename, char *disconnectmsg)
 {
-	return 0;
+	return gpGameClientEventListener->InconsistentFileFound(ToClientID(player), filename, disconnectmsg);
 };
 
 int AllowLagCompensation()
