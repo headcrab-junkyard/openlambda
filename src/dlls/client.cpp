@@ -77,17 +77,23 @@ respawn
 
 called by ClientKill and DeadThink
 ================
-	// make a copy of the dead body for appearances sake
-	CopyToBodyQue (self);
-	
-	// set default spawn parms
-	SetNewParms (self);
-	
-	// respawn              
-	ClientPutInServer (self);
 */
 void respawn(entvars_t *self)
 {
+	if(gpGlobals->coop || gpGlobals->deathmatch)
+	{
+		// make a copy of the dead body for appearances sake
+		CopyToBodyQue(self);
+		
+		// set default spawn parms
+		//SetNewParms (self);
+		
+		// respawn              
+		//ClientPutInServer(self);
+		ToBaseEntity(self)->Spawn();
+	}
+	else
+		gpEngine->pfnServerCommand("reload\n");
 };
 
 /*
