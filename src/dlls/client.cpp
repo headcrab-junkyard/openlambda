@@ -249,7 +249,7 @@ Sys_Error_Game
 */
 void Sys_Error_Game(const char *error)
 {
-	// Nothing
+	gpSystemEventListener->OnError(error);
 };
 
 /*
