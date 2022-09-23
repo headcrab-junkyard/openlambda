@@ -443,9 +443,35 @@ int ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char
 	return 0;
 };
 
+/*
+================
+GetHullBounds
+================
+*/
 int GetHullBounds(int hullnumber, float *mins, float *maxs)
 {
-	return 0;
+	int nResult{0};
+	
+	switch(hullnumber)
+	{
+	case 0: // Normal player hull
+		mins = VEC_HULL_MIN;
+		maxs = VEC_HULL_MAX;
+		nResult = 1;
+		break;
+	case 1: // Crouched player hull
+		mins = VEC_DUCK_HULL_MIN;
+		maxs = VEC_DUCK_HULL_MAX;
+		nResult = 1;
+		break;
+	case 2: // Point based hull
+		mins = vec3_origin; // TODO: idVec3::Origin?
+		maxs = vec3_origin; // TODO: idVec3::Origin?
+		nResult = 1;
+		break;
+	};
+	
+	return nResult;
 };
 
 /*
