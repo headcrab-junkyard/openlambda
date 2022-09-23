@@ -28,7 +28,8 @@
 #include <common/mathlib.h>
 #include <engine/edict.h>
 
-#include <next/engine/IGameClientEventListener.hpp>
+#include <SystemEventListener_Game.hpp>
+#include <GameClientEventListener.hpp>
 
 #include "Game.hpp"
 #include "IGameRules.hpp"
@@ -37,6 +38,9 @@
 
 void set_suicide_frame(entvars_t *self);
 
+
+CSystemEventListener_Game gSystemEventListener;
+ISystemEventListener *gpSystemEventListener{&gSystemEventListener};
 
 CGameClientEventListener gGameClientEventListener;
 CGameClientEventListener /*IGameClientEventListener*/ *gpGameClientEventListener{&gGameClientEventListener}; // TODO: can't use the IGameClientEventListener here as we need to access the OnClientKill method of the CGameClientEventListener class
