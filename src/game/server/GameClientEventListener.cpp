@@ -36,6 +36,8 @@ called when a player connects to a server
 */
 bool CGameClientEventListener::OnClientConnect(int anClientID /*edict_t *self*/, const char *asName, const char *asNetAdr, char asRejectReason[128])
 {
+	return gpGame->GetRules()->HandleClientConnect(ToBaseEntity(pEntity), asName, asNetAdr, asRejectReason);
+/*
 	if(!gEntities[anClientID])
 		return;
 	
@@ -47,6 +49,7 @@ bool CGameClientEventListener::OnClientConnect(int anClientID /*edict_t *self*/,
 	//GotoNextMap();
 
 	return true;
+*/
 };
 
 /*
@@ -59,6 +62,17 @@ Will not be called between levels
 */
 void CGameClientEventListener::OnClientDisconnect(int anClientID /*edict_t *self*/)
 {
+	auto pClientEnt{ToBaseEntity(self)};
+	
+	if(!pClientEnt)
+		return;
+	
+	pClientEnt->SetDamageable(CBaseEntity::Damageable::No);
+	pClientEnt->SetSolidity(CBaseEntity::Solidity::None);
+	pClientEnt->SetOrigin(pClientEnt->GetOrigin());
+	
+	gpGame->GetRules()->HandleClientDisconnect(pClientEnt);
+/*
 	if(!gEntities[anClientID])
 		return;
 	
@@ -69,6 +83,7 @@ void CGameClientEventListener::OnClientDisconnect(int anClientID /*edict_t *self
 	gpEngine->pfnEmitSound(gEntities[anClientID], CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
 	
 	set_suicide_frame(gEntities[anClientID]->v);
+*/
 };
 
 /*
@@ -83,67 +98,26 @@ void CGameClientEventListener::OnClientPutInServer(int anClientID /*edict_t *cli
 	if(!gEntities[anClientID])
 		return;
 	
-	CBasePlayer *pPlayer{ToBasePlayer(gEntities[anClientID])};
+	//string_t s;
 	
-	string s;
-
-	// clear entity values
-	pPlayer->SetClassName("player");
-	pPlayer->SetHealth(100);
-	pPlayer->SetMaxHealth(100);
-	pPlayer->v.deadflag = DEAD_NO;
-	pPlayer->v.takedamage = DAMAGE_AIM;
-	pPlayer->SetSolidType(SOLID_SLIDEBOX);
-	pPlayer->SetMoveType(MOVETYPE_WALK);
-	pPlayer->v.show_hostile = 0;
-	pPlayer->SetFlags(FL_CLIENT);
-	pPlayer->v.dmg = 2; // initial water damage
+	auto pClientEnt{ToBaseEntity(gEntities[anClientID])};
 	
-	pPlayer->v.air_finished = /*level.*/time + 12;
-	pPlayer->v.super_damage_finished = 0;
-	pPlayer->v.radsuit_finished = 0;
-	pPlayer->v.invisible_finished = 0;
-	pPlayer->v.invincible_finished = 0;
+	if(!pClientEnt)
+		return;
 	
-	pPlayer->SetEffects(0);
-	pPlayer->v.invincible_time = 0;
-
-	DecodeLevelParms();
-
-	pPlayer->SetCurrentAmmo();
-
-	pPlayer->v.attack_finished = time;
+	auto pBasePlayer{ToBasePlayer(pClientEnt)};
 	
-	pPlayer->v.th_pain = CPlayer::Pain;
-	pPlayer->v.th_die = CPlayer::Die;
+	if(!pBasePlayer)
+		return;
 	
-	// paustime is set by teleporters to keep the player from moving a while
-	pPlayer->v.pausetime = 0;
-
-	// oh, this is a hack!
-	pPlayer->SetModel("models/eyes.mdl");
-	modelindex_eyes = pPlayer->v.modelindex;
-
-	pPlayer->SetModel("models/player.mdl");
-	modelindex_player = pPlayer->v.modelindex;
-
-	pPlayer->SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
-
-	pPlayer->v.view_ofs = idVec3(0, 0, 22);
-
-	// Mod - Xian (May.20.97)
-	// Bug where player would have velocity from their last kill
-
-	pPlayer->SetVelocity(0.0f, 0.0f, 0.0f);
-
-	player_stand1();
-
-	gpEngine->pfnMakeVectors(pPlayer->v.angles);
-	spawn_tfog(pPlayer->GetOrigin() + gpGlobals->v_forward * 20);
+	pBasePlayer->Spawn();
 	
-	spawn_tdeath(pPlayer->v.origin, pPlayer->v);
+	pBasePlayer->AddEffects(EF_NOINTERP);
 	
-	mpGame->GetRules()->OnClientPutInServer(anClientID);
+	pBasePlayer->self->iuser1 = 0;
+	pBasePlayer->self->iuser2 = 0;
+	
+	//mpGame->GetRules()->OnClientPutInServer(anClientID);
 };
 
 /*
@@ -156,6 +130,23 @@ void CGameClientEventListener::OnClientCommand(int anClientID, const ICmdArgs &a
 	if(!gEntities[anClientID])
 		return;
 	
+	auto sCmd{gpEngine->Cmd_Argv(0)};
+	auto pClientEnt{ToBaseEntity(pclent)};
+	
+	if(!pClientEnt)
+		return;
+	
+	auto pBasePlayer{ToBasePlayer(pClientEnt)};
+	
+	if(!strcmp(sCmd, "drop"))
+		pBasePlayer->DropItem(gpEngine->Cmd_Argv(1));
+	else if(!strcmp(sCmd, "lastinv"))
+		pBasePlayer->SelectLastItem();
+	else if(!Q_stricmp(cmd, "kill"))
+		OnClientKill(anClientID);
+	// TODO
+
+/*
 	// not fully in game yet
 	//if(!gEntities[anClientID]->client)
 		//return;
@@ -239,10 +230,9 @@ void CGameClientEventListener::OnClientCommand(int anClientID, const ICmdArgs &a
 		Cmd_Wave_f (gEntities[anClientID]);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(gEntities[anClientID]);
-	else if(Q_stricmp(cmd, "kill") == 0)
-		OnClientKill(anClientID);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (gEntities[anClientID], false, true);
+*/
 };
 
 void CGameClientEventListener::OnClientUserInfoChanged(int anClientID, char *asUserInfo)
@@ -270,10 +260,30 @@ void CGameClientEventListener::OnClientKill(int anClientID /*edict_t *self*/) //
 	if(!gEntities[anClientID])
 		return;
 	
+	auto pBaseEntity{ToBaseEntity(self)};
+	
+	if(!pBaseEntity)
+		return;
+	
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)};
+	
+	if(!pBasePlayer)
+		return;
+	
+	pBasePlayer->SetHealth(0);
+	pBasePlayer->Killed(self, CBaseEntity::GibType::Never);
+	
+/*
 	bprint(PRINT_MEDIUM, gEntities[anClientID]->v.netname);
 	bprint(PRINT_MEDIUM, " suicides\n");
-
+	
 	set_suicide_frame(gEntities[anClientID]->v);
+	
+	//self->v.modelindex = modelindex_player;
+	//logfrag(self, self);
+	//self->v.frags -= 2; // extra penalty
+	//respawn(&self->v);
+*/
 
 	//gEntities[anClientID]->v.modelindex = modelindex_player;
 	//logfrag(gEntities[anClientID], gEntities[anClientID]);
