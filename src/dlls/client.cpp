@@ -22,10 +22,11 @@
 /// @brief client functions
 
 #include "exports.h"
-#include "custom.h" // TODO: temp?
-#include "progdefs.h"
-#include "mathlib.h"
-#include "edict.h"
+
+#include <engine/custom.h> // TODO: temp?
+#include <engine/progdefs.h>
+#include <common/mathlib.h>
+#include <engine/edict.h>
 
 #include <next/engine/IGameClientEventListener.hpp>
 
@@ -70,10 +71,12 @@ void ClientDisconnect(edict_t *self)
 	gpGameClientEventListener->OnClientDisconnect(ToClientID(self));
 };
 
-// called by ClientKill and DeadThink
-void respawn(entvars_t *self)
-{
 /*
+================
+respawn
+
+called by ClientKill and DeadThink
+================
 	// make a copy of the dead body for appearances sake
 	CopyToBodyQue (self);
 	
@@ -83,6 +86,8 @@ void respawn(entvars_t *self)
 	// respawn              
 	ClientPutInServer (self);
 */
+void respawn(entvars_t *self)
+{
 };
 
 /*
@@ -110,6 +115,9 @@ void ClientPutInServer(edict_t *client)
 };
 
 /*
+================
+ClientCommand
+================
 */
 void ClientCommand(edict_t *pclent)
 {
@@ -118,16 +126,31 @@ void ClientCommand(edict_t *pclent)
 	gpGameClientEventListener->OnClientCommand(ToClientID(pclent), CmdArgs);
 };
 
+/*
+================
+ClientUserInfoChanged
+================
+*/
 void ClientUserInfoChanged(edict_t *pclent, char *userinfo)
 {
 	gpGameClientEventListener->OnClientUserInfoChanged(ToClientID(pclent), userinfo);
 };
 
+/*
+================
+ServerActivate
+================
+*/
 void ServerActivate(edict_t *edicts, int edictcount, int maxclients)
 {
 	// TODO
 };
 
+/*
+================
+ServerDeactivate
+================
+*/
 void ServerDeactivate()
 {
 	// TODO
@@ -173,31 +196,61 @@ void PlayerPostThink(edict_t *self)
 		pBasePlayer->PostThink();
 };
 
+/*
+================
+ParmsNewLevel
+================
+*/
 void ParmsNewLevel() // TODO: SetNewParms?
 {
-	// Nothing
+	// Nothing, unused
 };
 
+/*
+================
+ParmsChangeLevel
+================
+*/
 void ParmsChangeLevel() // TODO: SetChangeParms?
 {
 	// TODO
 };
 
+/*
+================
+StartFrame
+================
+*/
 void StartFrame()
 {
 	gpGame->Frame();
 };
 
+/*
+================
+GetGameDescription
+================
+*/
 const char *GetGameDescription()
 {
 	return "Stub (Null)";
 };
 
+/*
+================
+Sys_Error_Game
+================
+*/
 void Sys_Error_Game(const char *error)
 {
 	// Nothing
 };
 
+/*
+================
+PlayerCustomization
+================
+*/
 void PlayerCustomization(edict_t *pPlayer, customization_t *pCustom)
 {
 	// TODO
@@ -299,28 +352,86 @@ void SpectatorThink(edict_t *self)
 		SpectatorImpulseCommand(self);
 };
 
-void SetupVisibility(edict_t *pViewEntity, edict_t *pClientEnt, byte **pvs, byte **pas){};
+/*
+================
+SetupVisibility
+================
+*/
+void SetupVisibility(edict_t *pViewEntity, edict_t *pClientEnt, byte **pvs, byte **pas)
+{
+	// TODO
+};
 
+/*
+================
+AddToFullPack
+================
+*/
 int AddToFullPack(struct entity_state_s *state, int e, edict_t *pent, edict_t *host_edict, int hostflags, int player, byte *pSet)
 {
 	return 0;
 };
 
-void CreateBaseline(int player, int entindex, struct entity_state_s *baseline, edict_t *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs){};
+/*
+================
+CreateBaseline
+================
+*/
+void CreateBaseline(int player, int entindex, struct entity_state_s *baseline, edict_t *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
+{
+	// TODO
+};
 
+/*
+================
+RegisterEncoders
+================
+*/
 void RegisterEncoders(){};
 
+/*
+================
+GetWeaponData
+================
+*/
 int GetWeaponData(edict_t *player, struct weapon_data_s *data)
 {
+	// TODO
 	return 0;
 };
 
+/*
+================
+UpdateClientData
+================
+*/
 void UpdateClientData(const edict_t *pent, int sendweapons, struct clientdata_s *pcd){};
 
-void CmdStart(const edict_t *player, const struct usercmd_s *cmd, uint random_seed){};
+/*
+================
+CmdStart
+================
+*/
+void CmdStart(const edict_t *player, const struct usercmd_s *cmd, uint random_seed)
+{
+	// TODO
+};
 
-void CmdEnd(const edict_t *player){};
+/*
+================
+CmdEnd
+================
+*/
+void CmdEnd(const edict_t *player)
+{
+	// TODO
+};
 
+/*
+================
+ConnectionlessPacket
+================
+*/
 int ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char *response_buffer, int *len)
 {
 	return 0;
@@ -331,13 +442,31 @@ int GetHullBounds(int hullnumber, float *mins, float *maxs)
 	return 0;
 };
 
-void CreateInstancedBaselines(){};
+/*
+================
+CreateInstancedBaselines
+================
+*/
+void CreateInstancedBaselines()
+{
+	// TODO
+};
 
+/*
+================
+InconsistentFile
+================
+*/
 int InconsistentFile(const edict_t *player, const char *filename, char *disconnectmsg)
 {
 	return gpGameClientEventListener->InconsistentFileFound(ToClientID(player), filename, disconnectmsg);
 };
 
+/*
+================
+AllowLagCompensation
+================
+*/
 int AllowLagCompensation()
 {
 	return 0;
