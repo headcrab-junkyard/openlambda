@@ -45,6 +45,10 @@ public: // IGame interface impl
 	void Shutdown() override;
 	
 	void Frame(double afFrameTime) override;
+	
+	virtual void HandleClientMessage(int anClientID, int anMsgID) override;
+	
+	virtual int GetNetProtocolVersion() const override {return 48;}
 public: // Public methods
 	virtual void InstallRules() = 0;
 	
