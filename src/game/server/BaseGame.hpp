@@ -46,7 +46,7 @@ public: // IGame interface impl
 	
 	void Frame(double afFrameTime) override;
 	
-	virtual void HandleClientMessage(int anClientID, int anMsgID) override;
+	virtual bool HandleClientMessage(int anClientID, int anMsgID, INetMsg *net_message) override;
 	
 	virtual int GetNetProtocolVersion() const override {return 48;}
 public: // Public methods

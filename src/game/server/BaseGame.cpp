@@ -71,7 +71,7 @@ void CBaseGame::Update()
 	framecount++;
 };
 
-bool CBaseGame::HandleClientMessage(int anClientID, int anMsgID, const INetMsg /*IReadBuffer*/ &net_message)
+bool CBaseGame::HandleClientMessage(int anClientID, int anMsgID, INetMsg /*IReadBuffer*/ *net_message)
 {
 	client_t *cl = TODO_GetClientByIndex(anClientID);
 	edict_t *sv_player = TODO_GetPlayerEntity(cl);
@@ -80,19 +80,18 @@ bool CBaseGame::HandleClientMessage(int anClientID, int anMsgID, const INetMsg /
 	{
 	default:
 		return false;
-		
-	case clc_delta:
-		cl->delta_sequence = net_message->ReadByte();
-		break;
 
 	case clc_move:
+		SV_ReadClientMove(cl, &cl->lastcmd); // TODO
+		// TODO: qw
+		/*
 		if(move_issued)
 			return; // someone is trying to cheat...
 
 		move_issued = true;
 
-		//checksumIndex = net_message->GetReadCount(); // TODO
-		checksum = (byte)net_message->ReadByte();
+		//int checksumIndex = net_message->GetReadCount(); // TODO
+		byte checksum = (byte)net_message->ReadByte();
 
 		// read loss percentage
 		//cl->lossage = net_message->ReadByte(); // TODO
@@ -100,13 +99,15 @@ bool CBaseGame::HandleClientMessage(int anClientID, int anMsgID, const INetMsg /
 		//net_message->ReadDeltaUsercmd(&nullcmd, &oldest); // TODO
 		net_message->ReadDeltaUsercmd(&oldest, &oldcmd);
 		net_message->ReadDeltaUsercmd(&oldcmd, &newcmd);
-
+		*/
+		
 		if(!cl->spawned)
 			break;
-
+		
+		/*
 		// if the checksum fails, ignore the rest of the packet
 		// TODO
-		//calculatedChecksum = COM_BlockSequenceCRCByte(
+		//byte calculatedChecksum = COM_BlockSequenceCRCByte(
 			//net_message->data + checksumIndex + 1,
 			//net_message->GetReadCount() - checksumIndex - 1,
 			//seq_hash);
@@ -114,13 +115,14 @@ bool CBaseGame::HandleClientMessage(int anClientID, int anMsgID, const INetMsg /
 		if(calculatedChecksum != checksum)
 		{
 			mpSystem->DevPrintf("Failed command checksum for %s(%d) (%d != %d)\n", 
-				cl->name, cl->netchan.incoming_sequence, checksum, calculatedChecksum);
+				cl->GetName(), cl->GetNetChan()->incoming_sequence, checksum, calculatedChecksum);
 			return;
 		};
+		*/
 
 		if(!sv.paused)
 		{
-			SV_PreRunCmd();
+			SV_PreRunCmd(cl->edict, &cl->lastcmd, 0); // TODO: get random seed
 
 			if(net_drop < 20)
 			{
@@ -144,25 +146,55 @@ bool CBaseGame::HandleClientMessage(int anClientID, int anMsgID, const INetMsg /
 		break;
 
 	case clc_stringcmd:
-		s = net_message->ReadString();
+		SV_ParseStringCommand(cl);
+		//char *s = net_message->ReadString();
 		//SV_ExecuteUserCommand(s); // TODO
 		break;
 
+	case clc_delta:
+		SV_ParseDelta(cl);
+		//cl->delta_sequence = net_message->ReadByte();
+		break;
+
+	case clc_resourcelist:
+		SV_ParseResourceList(cl);
+		//SV_NextUpload();
+		break;
+
 	case clc_tmove:
-		o[0] = net_message->ReadCoord();
-		o[1] = net_message->ReadCoord();
-		o[2] = net_message->ReadCoord();
 		// only allowed by spectators
 		//if(cl->spectator) // TODO
 		{
+			vec3_t o;
+			
+			o[0] = net_message->ReadCoord();
+			o[1] = net_message->ReadCoord();
+			o[2] = net_message->ReadCoord();
+			
 			VectorCopy(o, sv_player->v.origin);
 			SV_LinkEdict(sv_player, false);
 		};
 		break;
 
-	//case clc_upload: // TODO
-		//SV_NextUpload();
-		//break;
+	case clc_fileconsistency:
+		SV_ParseConsistencyResponse(cl);
+		break;
+
+	case clc_voicedata:
+		SV_ParseVoiceData(cl);
+		break;
+
+	case clc_hltv:
+		SV_ParseHLTV(cl);
+		break;
+
+	case clc_cvarvalue:
+		SV_ParseCvarValueResponse(cl);
+		break;
+
+	case clc_cvarvalue2:
+		SV_ParseCvarValueResponseEx(cl);
+		break;
 	};
 	
 	return true;
