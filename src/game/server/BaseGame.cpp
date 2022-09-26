@@ -91,10 +91,6 @@ bool CBaseGame::HandleClientMessage(int anClientID, const INetMsg /*IReadBuffer*
 		CCLC_MoveMsgHandler handler;
 		break;
 
-	case clc_stringcmd: // TODO: make internal again?
-		CCLC_StringCmdMsgHandler handler;
-		break;
-
 	case clc_delta:
 		CCLC_DeltaMsgHandler handler;
 		break;
@@ -105,10 +101,6 @@ bool CBaseGame::HandleClientMessage(int anClientID, const INetMsg /*IReadBuffer*
 
 	case clc_tmove:
 		CCLC_TeleportMoveMsgHandler handler;
-		break;
-
-	case clc_fileconsistency:
-		CCLC_FileConsistencyMsgHandler handler;
 		break;
 
 	case clc_voicedata:

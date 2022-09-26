@@ -133,52 +133,10 @@ public:
 		
 		return true;
 	};
-};
-
-class CCLC_StringCmdMsg final : public CBaseNetMsg
-{
-public:
-	CCLC_StringCmdMsg() : CBaseNetMsg(clc_stringcmd, "clc_stringcmd"){}
-	
-	void ReadFrom(const IReadBuffer &aBuffer) override
+private:
 	{
-		msCmd = aBuffer.ReadString();
-	};
-	
-	void WriteTo(IWriteBuffer &aBuffer) override
-	{
-		aBuffer.WriteString(msCmd);
 	};
 private:
-	const char *msCmd{nullptr};
-};
-
-class CCLC_StringCmdMsgHandler final : public INetMsgHandler
-{
-public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
-	{
-		SV_ParseStringCommand(cl, net_message);
-		//char *s = net_message->ReadString();
-		//SV_ExecuteUserCommand(s); // TODO
-		
-		return true;
-	};
-private:
-	void SV_ParseStringCommand(client_t *cl, INetMsg *net_message)
-	{
-		char *s = MSG_ReadString();
-		
-		Cmd_TokenizeString(s);
-		
-		host_client = cl; // TODO: hack to let SV_New_f work properly
-		sv_player = cl->edict;
-		
-		if(Cmd_Exists(Cmd_Argv(0)))
-			Cmd_ExecuteString(s, src_client); // TODO: this allows players to call any cmd on the server??????????????
-		else
-			gEntityInterface.pfnClientCommand(sv_player);
-	};
 };
 
 class CCLC_DeltaMsgHandler final : public INetMsgHandler
@@ -233,22 +191,6 @@ public:
 		};
 		
 		return true;
-	};
-};
-
-class CCLC_FileConsistencyMsgHandler final : public INetMsgHandler
-{
-public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
-	{
-		SV_ParseConsistencyResponse(cl, net_message);
-		
-		return true;
-	};
-private:
-	void SV_ParseConsistencyResponse(client_t *cl)
-	{
-		// TODO
 	};
 };
 
