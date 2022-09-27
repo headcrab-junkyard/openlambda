@@ -31,7 +31,7 @@ interface INetMsg
 	virtual void WriteTo(IWriteBuffer &aBuffer) = 0;
 	
 	///
-	virtual void SetHandler(INetMsgHandler *apHandler) = 0;
+	//virtual void SetHandler(INetMsgHandler *apHandler) = 0;
 	
 	///
 	//virtual const char *GetName() const = 0;
@@ -45,12 +45,12 @@ class CBaseNetMsg : public INetMsg
 public:
 	CBaseNetMsg(int anID, const char *asName) : mnID(anID), msName(asName){}
 	
-	void SetHandler(INetMsgHandler *apHandler) override final {mpHandler = apHandler;}
+	//void SetHandler(INetMsgHandler *apHandler) override final {mpHandler = apHandler;}
 	
 	const char *GetName() const {return msName;}
 	int GetID() const {return mnID;}
 private:
-	INetMsgHandler *mpHandler{nullptr};
+	//INetMsgHandler *mpHandler{nullptr};
 	
 	const char *msName{nullptr};
 	
@@ -61,15 +61,15 @@ private:
 interface INetMsgHandler
 {
 	///
-	virtual bool Handle(INetClient *cl, INetMsg *net_message) = 0;
+	virtual bool Handle(IGameClient *cl, INetMsg *net_message) = 0;
 };
 
 class CCLC_MoveMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
-		SV_ReadClientMove(cl, &cl->lastcmd); // TODO
+		SV_ReadClientMove(cl, net_message, &cl->lastcmd); // TODO
 		// TODO: qw
 		/*
 		if(move_issued)
@@ -134,21 +134,62 @@ public:
 		return true;
 	};
 private:
+	/*
+	===================
+	SV_ReadClientMove
+	===================
+	*/
+	void SV_ReadClientMove(IGameClient *host_client, INetMsg *net_message, usercmd_t *move)
 	{
+		int i;
+		vec3_t angle;
+		int bits;
+
+		// read ping time
+		host_client->ping_times[host_client->num_pings % NUM_PING_TIMES] = sv.time - net_message->ReadFloat();
+		host_client->num_pings++;
+
+		// read current angles
+		for(i = 0; i < 3; i++)
+			angle[i] = net_message->ReadAngle();
+
+		VectorCopy(angle, host_client->edict->v.v_angle);
+
+		// read movement
+		move->forwardmove = net_message->ReadShort();
+		move->sidemove = net_message->ReadShort();
+		move->upmove = net_message->ReadShort();
+
+		// read buttons
+		bits = net_message->ReadByte();
+		host_client->edict->v.button0 = bits & 1;
+		host_client->edict->v.button2 = (bits & 2) >> 1;
+
+		i = net_message->ReadByte();
+		if(i)
+			host_client->edict->v.impulse = i;
+
+	#ifdef QUAKE2
+		// read light level
+		host_client->edict->v.light_level = net_message->ReadByte();
+	#endif
 	};
 private:
+	usercmd_t oldest, oldcmd, newcmd; // TODO: was outside of while loop, check if still works properly
+	qboolean move_issued = false; // only allow one move command // TODO: was outside of while loop, check if still works properly
 };
 
+// BP: a separate protocol entry just for that?
 class CCLC_DeltaMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
 		SV_ParseDelta(cl, net_message);
 		return true;
 	};
 private:
-	void SV_ParseDelta(client_t *cl, INetMsg *net_message)
+	void SV_ParseDelta(IGameClient *cl, INetMsg *net_message)
 	{
 		cl->delta_sequence = net_message->ReadByte();
 	};
@@ -157,7 +198,7 @@ private:
 class CCLC_ResourceListMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
 		SV_ParseResourceList(cl, net_message);
 		//SV_NextUpload();
@@ -165,17 +206,18 @@ public:
 		return true;
 	};
 private:
-	void SV_ParseResourceList(client_t *cl, INetMsg *net_message)
+	void SV_ParseResourceList(IGameClient *cl, INetMsg *net_message)
 	{
 		// TODO
 		//SV_NextUpload();
 	};
 };
 
+// BP: clc_tmove entry handler, probably unused
 class CCLC_TeleportMoveMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
 		// only allowed by spectators
 		//if(cl->spectator) // TODO
@@ -197,7 +239,7 @@ public:
 class CCLC_VoiceDataMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
 		SV_ParseVoiceData(cl, net_message, TODO_SomeReadBuffer);
 		
@@ -229,7 +271,7 @@ private:
 			aBuffer.WriteByte(mpData[i]);
 	};
 	
-	void SV_ParseVoiceData(client_t *cl, const IReadBuffer &aBuffer)
+	void SV_ParseVoiceData(IGameClient *cl, const IReadBuffer &aBuffer)
 	{
 		ReadFrom(SomeBuffer);
 		
@@ -252,31 +294,32 @@ private:
 class CCLC_HLTVMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
 		SV_ParseHLTV(cl, net_message);
 		
 		return true;
 	};
 private:
-	// TODO: SV_IgnoreHLTV?
-	void SV_ParseHLTV(client_t *cl)
+	// BP: Looks like it should actually be called SV_IgnoreHLTV (and that indicates that it most likely does nothing, at least in case of hw(/sw) module(s), but swds might actually do/parse something there)
+	void SV_ParseHLTV(IGameClient *cl)
 	{
 		// TODO
 	};
 };
 
+// BP: clc_cvarvalue entry handler, probably deprecated and unused even in original GS
 class CCLC_CVarValueMsgHandler final : public INetMsgHandler
 {
 public:
-	bool Handle(INetClient *cl, INetMsg *net_message) override
+	bool Handle(IGameClient *cl, INetMsg *net_message) override
 	{
 		SV_ParseCvarValueResponse(cl, net_message);
 		
 		return true;
 	};
 private:
-	void SV_ParseCvarValueResponse(client_t *cl)
+	void SV_ParseCvarValueResponse(IGameClient *cl)
 	{
 		const char *sCvarValue = MSG_ReadString();
 		
