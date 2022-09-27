@@ -114,10 +114,6 @@ bool CBaseGame::HandleClientMessage(int anClientID, const INetMsg /*IReadBuffer*
 	case clc_cvarvalue:
 		CCLC_CVarValueMsgHandler handler;
 		break;
-
-	case clc_cvarvalue2:
-		CCLC_CVarValue2MsgHandler handler;
-		break;
 	};
 	*/
 	
