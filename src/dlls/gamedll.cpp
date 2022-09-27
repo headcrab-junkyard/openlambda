@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2019, 2021 BlackPhrase
+ * Copyright (C) 2018-2019, 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,14 +171,4 @@ void GameShutdown()
 int ShouldCollide(edict_t *pent, edict_t *pother)
 {
 	return gpGame->GetRules()->ShouldCollide(*ToBaseEntity(pent), *ToBaseEntity(pother));
-};
-
-void CvarValue(const edict_t *pent, const char *value)
-{
-	// TODO
-};
-
-void CvarValue2(const edict_t *pent, int requestid, const char *cvarname, const char *value)
-{
-	// TODO
 };

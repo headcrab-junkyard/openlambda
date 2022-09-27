@@ -266,6 +266,27 @@ void PlayerCustomization(edict_t *pPlayer, customization_t *pCustom)
 	// TODO
 };
 
+/*
+================
+CvarValue
+================
+*/
+void CvarValue(const edict_t *pent, const char *value)
+{
+	// TODO: how to handle that?
+	//gpGameClientEventListener->OnClientCvarValueReceived(ToClientID(pent), 0, "TODO", value);
+};
+
+/*
+================
+CvarValue2
+================
+*/
+void CvarValue2(const edict_t *pent, int requestid, const char *cvarname, const char *value)
+{
+	gpGameClientEventListener->OnClientCvarValueReceived(ToClientID(pent), requestid, cvarname, value);
+};
+
 // Spectator functions (unused)
 
 // Added Aug11'97 by Zoid <zoid@idsoftware.com>
