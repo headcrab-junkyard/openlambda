@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-2001 Id Software, Inc.
- * Copyright (C) 2018, 2020-2021 BlackPhrase
+ * Copyright (C) 2018, 2020-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,28 @@
 
 class CBaseCharacter : public CBaseToggle
 {
-public:
+public: // CBaseEntity public overrides
 	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
 	
 	/*virtual*/ int TakeHealth(float afValue, int anDmgTypeBits);
 	/*virtual*/ int TakeDamage();
 	
 	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
-	
+public: // The rest of the public methods
 	/*virtual*/ int GetBloodColor() const {return mnBloodColor;}
 	
 	Task_t *GetTask() const;
+
+	enum class Sex : int
+	{
+		Unknown = -1,
+		Male = 0,
+		Female
+	};
+	
+	Sex GetSex() const {return meSex;}
+private:
+	Sex meSex{Sex::Unknown};
 private:
 	typedef struct
 	{
