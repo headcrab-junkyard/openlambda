@@ -208,6 +208,8 @@ void CBasePlayer::Killed(const CBaseEntity &aAttacker, const CBaseEntity &aLastI
 	
 	DeathSound();
 	
+	// TODO: broadcast the player killed event here to let HEV suit emit its sounds, for example
+	
 	SetThinkCallback(CBasePlayer::DeathThink);
 	SetNextThink(gpGlobals->time + 0.1);
 };
@@ -328,4 +330,16 @@ void CBasePlayer::FadeVolume(int anFadePercent, int anFadeOutSecs, int anHoldTim
 void CBasePlayer::SetMaxSpeed(float afSpeed)
 {
 	gpEngine->pfnSetClientMaxspeed(ToEdict(), afSpeed);
+};
+
+void CBasePlayer::DeathSound()
+{
+	auto sSoundPrefix{""}; // TODO: make internal?
+	
+	if(GetSex() == CBaseCharacter::Sex::Female)
+		sSoundPrefix = "f_";
+	
+	auto nRandomSound{gpEngine->pfnRandomLong(1, 3)};
+	
+	EmitSound(CHAN_VOICE, va("player/%sdie%d.wav", sSoundPrefix, nRandomSound), 1, ATTN_NORM);
 };
