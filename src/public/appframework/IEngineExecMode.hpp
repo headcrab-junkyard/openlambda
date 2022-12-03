@@ -22,20 +22,11 @@
 
 #pragma once
 
-#include "CommonTypes.hpp"
-
-#include "next/engine/IEngine.hpp"
-
-#include "engine_launcher_api.h"
-
-#include "IEngineHooks.hpp"
+#include <CommonTypes.hpp>
 
 enum class CEngine::Result;
 
 struct IEngine::InitParams;
-
-interface IEngine;
-interface IEngineAPI;
 
 interface IEngineExecMode
 {
@@ -43,78 +34,4 @@ interface IEngineExecMode
 
     ///
     virtual CEngine::Result Run(const IEngine::InitParams &aInitParams) = 0;
-};
-
-class CEngineExecMode_Manual final : public IEngineExecMode
-{
-public:
-    CEngineExecMode_Manual(IEngine *apEngine, IEngineHooks *apHooks) : mpEngine(apEngine), mpHooks(apHooks){}
-
-    CEngine::Result Run(const IEngine::InitParams &aInitParams) override
-    {
-        if(!Init(aInitParams))
-            return CEngine::Result::None;
-            //return CEngine::Result::UnsupportedVideo; // TODO
-
-        // Main loop
-        bool bRunning{true};
-        while(bRunning)
-        {
-            PreFrame();
-            
-            bRunning = Frame();
-
-            PostFrame();
-        };
-
-        Shutdown();
-
-        // TODO: handle Result::Restart
-        return CEngine::Result::None;
-    };
-private:
-    bool Init(const IEngine::InitParams &aInitParams)
-    {
-        return mpEngine->Init(aInitParams);
-    };
-
-    void Shutdown()
-    {
-        mpEngine->Shutdown();
-    };
-
-    void PreFrame()
-    {
-        if(mpHooks)
-            mpHooks->PreFrame();
-    };
-
-    bool Frame()
-    {
-        return mpEngine->Frame();
-    };
-
-    void PostFrame()
-    {
-        if(mpHooks)
-            mpHooks->PostFrame();
-    };
-private:
-    IEngine *mpEngine{nullptr};
-    IEngineHooks *mpHooks{nullptr};
-};
-
-class CEngineExecMode_Auto final : public IEngineExecMode
-{
-public:
-    CEngineExecMode_Auto(IEngineAPI *apEngine) : mpEngine(apEngine){}
-
-    CEngine::Result Run(const IEngine::InitParams &aInitParams) override
-    {
-        //void *instance, const char *basedir, const char *cmdline, char *postRestartCmdLineArgs, CreateInterfaceFn launcherFactory, CreateInterfaceFn filesystemFactory
-        // TODO: hinstance support?
-        return mpEngine->Run(nullptr, aInitParams.sGameDir, aInitParams.sCmdLine, aInitParams.sPostRestartCmdLine, aInitParams.fnLauncherFactory, mfnFSFactory);
-    };
-private:
-    IEngineAPI *mpEngine{nullptr};
 };
