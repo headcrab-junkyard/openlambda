@@ -1,6 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
+ * Copyright (C) 1996-1997 Id Software, Inc.
  * Copyright (C) 2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
@@ -18,19 +19,29 @@
 */
 
 /// @file
-/// @brief engine hooks interface
+/// @brief engine hooks interface implementations
 
 #pragma once
 
-#include <CommonTypes.hpp>
+#include "IEngineHooks.hpp"
 
-interface IEngineHooks
+void Host_GetConsoleCommands();
+void UpdateStatus(bool abForce);
+
+class CEngineHooks_DedicatedServer : public IEngineHooks
 {
-    //virtual ~IEngineHooks() = default;
+public:
+    void PreFrame() override
+    {
+        // Check for commands typed to the host
+        Host_GetConsoleCommands();
+    };
 
-    ///
-    virtual void PreFrame(){}
-
-    ///
-    virtual void PostFrame(){}
+    void PostFrame() override
+    {
+#ifdef _WIN32		
+        UpdateStatus(0);
+#endif
+    };
+private:
 };
