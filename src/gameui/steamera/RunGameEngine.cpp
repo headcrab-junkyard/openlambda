@@ -20,6 +20,8 @@
 
 #include "RunGameEngine.hpp"
 
+#include "igameuifuncs.h"
+
 EXPOSE_SINGLE_INTERFACE(CRunGameEngine, IRunGameEngine, RUNGAMEENGINE_INTERFACE_VERSION);
 
 CRunGameEngine::CRunGameEngine() = default;
@@ -27,7 +29,7 @@ CRunGameEngine::~CRunGameEngine() = default;
 
 bool CRunGameEngine::IsRunning()
 {
-	return true;
+	return true; // TODO: check for gpEngine?
 };
 
 bool CRunGameEngine::AddTextCommand(const char *text)
@@ -54,6 +56,12 @@ bool CRunGameEngine::GetGameInfo(char *infoBuffer, int bufferSize)
 
 void CRunGameEngine::SetTrackerUserID(int trackerID, const char *trackerName)
 {
+	gpGameUIFuncs->SetFriendsID(trackerID, trackerName);
+	
+	// Update the player's name if necessary
+	ConVarRef name("name");
+	if(name.IsValid() && trackerName && *trackerName && !Q_strcmp(name.GetString(), "unnamed"))
+		name.SetValue(trackerName);
 };
 
 int CRunGameEngine::GetPlayerCount()
@@ -73,6 +81,7 @@ unsigned int CRunGameEngine::GetPlayerFriendsID(int playerIndex)
 
 const char *CRunGameEngine::GetPlayerName(int friendsID)
 {
+	// Find the player by its tracker id
 	player_info_t PlayerInfo{};
 	
 	for(int i = 0; i < GetPlayerCount(); ++i)
@@ -85,6 +94,7 @@ const char *CRunGameEngine::GetPlayerName(int friendsID)
 
 const char *CRunGameEngine::GetPlayerFriendsName(int friendsID)
 {
+	// Find the player by its tracker id
 	player_info_t PlayerInfo{};
 	
 	for(int i = 0; i < GetPlayerCount(); ++i)

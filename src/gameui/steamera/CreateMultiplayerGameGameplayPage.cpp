@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018, 2021 BlackPhrase
+ * Copyright (C) 2018, 2021, 2023 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,33 @@
 
 #include "CreateMultiplayerGameGameplayPage.hpp"
 
+constexpr auto OPTIONS_DIR{"cfg"};
+constexpr auto DEFAULT_OPTIONS_FILE{OPTIONS_DIR + "/settings_default.scr"};
+constexpr auto OPTIONS_FILE{OPTIONS_DIR + "settings.scr"};
+
+class CServerDescription : public CDescription
+{
+public:
+	CServerDescription();
+};
+
 CCreateMultiplayerGameGameplayPage::CCreateMultiplayerGameGameplayPage(vgui::Panel *apParent, const char *asName)
 	: BaseClass(apParent, asName)
 {
+	mpOptionsList = new CPanelListPanel(this, "GameOptions");
 	
+	mpDescription = new CServerDescription(mpOptionsList);
+	mpDescription->InitFromFile(DEFAULT_OPTIONS_FILE);
+	mpDescription->InitFromFile(OPTIONS_FILE);
+	
+	LoadControlSettings("Resource/CreateMultiplayerGameGameplayPage.res");
+	
+	LoadGameOptionsList();
 };
 
 CCreateMultiplayerGameGameplayPage::~CCreateMultiplayerGameGameplayPage()
 {
+	delete mpDescription;
 };
 
 const char *CCreateMultiplayerGameGameplayPage::GetHostName() const

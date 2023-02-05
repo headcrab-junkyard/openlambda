@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018, 2021 BlackPhrase
+ * Copyright (C) 2018, 2021, 2023 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,34 +32,37 @@ public:
 	CCreateMultiplayerGameBotPage(vgui::Panel *apParent, const char *asName, KeyValues *apBotKeys);
 	~CCreateMultiplayerGameBotPage();
 protected:
+	// Reset values
 	/*virtual*/ void OnResetChanges();
+	
+	// Called to get data from the page
 	/*virtual*/ void OnApplyChanges();
 private:
-	void SetJoinTeamCombo(const char *asTeam);
+	void SetJoinTeamCombo(const char *asValue);
 	
-	void SetChatterCombo(const char *asTeam);
+	void SetChatterCombo(const char *asValue);
 private:
-	CCvarToggleCheckButton *mpJoinAfterPlayerCheckBox{nullptr};
+	KeyValues *mpSavedData{nullptr};
 	
 	CCvarToggleCheckButton *mpAllowRoguesCheckBox{nullptr};
 	
 	CCvarToggleCheckButton *mpAllowPistolsCheckBox{nullptr};
 	CCvarToggleCheckButton *mpAllowShotgunsCheckBox{nullptr};
 	CCvarToggleCheckButton *mpAllowSMGsCheckBox{nullptr};
-	CCvarToggleCheckButton *mpAllowMachineGunsCheckBox{nullptr};
 	CCvarToggleCheckButton *mpAllowRiflesCheckBox{nullptr};
+	CCvarToggleCheckButton *mpAllowSnipersCheckBox{nullptr};
+	CCvarToggleCheckButton *mpAllowMachineGunsCheckBox{nullptr};
 	CCvarToggleCheckButton *mpAllowGrenadesCheckBox{nullptr};
+	
 #ifdef OPENLAMBDA_CS_SHIELD_ENABLED
 	CCvarToggleCheckButton *mpAllowShieldsCheckBox{nullptr};
 #endif
-	CCvarToggleCheckButton *mpAllowSnipersCheckBox{nullptr};
 	
+	CCvarToggleCheckButton *mpJoinAfterPlayerCheckBox{nullptr};
 	CCvarToggleCheckButton *mpDeferToHumanCheckBox{nullptr};
 	
-	vgui::ComboBox *mpJoinTeamComboBox{nullptr};
-	vgui::ComboBox *mpChatterComboBox{nullptr};
+	vgui::ComboBox *mpJoinTeamCombo{nullptr};
+	vgui::ComboBox *mpChatterCombo{nullptr};
 	
 	vgui::TextEntry *mpPrefixEntry{nullptr};
-	
-	KeyValues *mpSavedData{nullptr};
 };

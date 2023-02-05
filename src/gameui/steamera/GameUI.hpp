@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018, 2020 BlackPhrase
+ * Copyright (C) 2018, 2020-2022 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,11 @@ public:
 	~CGameUI();
 	
 	void Initialize(CreateInterfaceFn *factories, int count) override;
+	
+	/// Called to setup the game UI
 	void Start(/*cl_enginefunc_t*/ struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, void /*IBaseSystem*/ *system) override;
+	
+	/// Called to shutdown the game UI system
 	void Shutdown() override;
 
 	int ActivateGameUI() override;
@@ -69,10 +73,25 @@ public:
 
 	void OnDisconnectFromServer(int eSteamLoginFailure, const char *username) override;
 private:
+	/// Searches for GameStartup*.mp3 files in the sound/ui folder and plays one
 	void PlayGameStartupSound();
+	
+	/// Return false if you don't need to use the game startup music (in case it's handled by the background menu movies)
+	bool ShouldUseGameStartupSound() const {return true;}
 	
 	void SendConnectedToGameMessage();
 private:
+	vgui2::IVGUI *mpVGUI{nullptr};
+	vgui2::ISurface *mpVGUISurface{nullptr};
+	
+	IFileSystem *mpFileSystem{nullptr};
+	
+	IEngineVGui *mpEngineVGui{nullptr};
+	
+	IGameUIFuncs *mpGameUIFuncs{nullptr};
+	
+	IGameClientExports *mpGameClientExports{nullptr};
+	
 	int mnPlayGameStartupSound{0};
 	
 	int mnGameIP{0};

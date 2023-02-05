@@ -1,6 +1,6 @@
 /*
  * This file is part of OGS Engine
- * Copyright (C) 2018, 2020-2021 BlackPhrase
+ * Copyright (C) 2018, 2020-2021, 2023 BlackPhrase
  *
  * OGS Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include <vgui2/controls/PropertyPage.h>
+#include <vgui/controls/PropertyPage.h>
 
 class CCvarSlider;
 class CLabeledCommandComboBox;
 
-class COptionsSubAudio : public vgui2::PropertyPage
+class COptionsSubAudio : public vgui::PropertyPage
 {
-	DECLARE_CLASS_SIMPLE(COptionsSubAudio, vgui2::PropertyPage);
+	DECLARE_CLASS_SIMPLE(COptionsSubAudio, vgui::PropertyPage);
 public:
-	COptionsSubAudio(vgui2::Panel *apParent);
+	COptionsSubAudio(vgui::Panel *apParent);
 	~COptionsSubAudio();
 	
 	/// Reloads data
@@ -56,9 +56,9 @@ private:
 	MESSAGE_FUNC(RunTestSpeakers, "RunTestSpeakers");
 	MESSAGE_FUNC(OpenThirdPartySoundCreditsDialog, "OpenThirdPartySoundCreditsDialog");
 private:
-	vgui2::ComboBox *mpSpeakerSetupCombo{nullptr};
-	vgui2::ComboBox *mpSoundQualityCombo{nullptr};
-	vgui2::ComboBox *mpCloseCaptionCombo{nullptr};
+	vgui::ComboBox *mpSpeakerSetupCombo{nullptr};
+	vgui::ComboBox *mpSoundQualityCombo{nullptr};
+	vgui::ComboBox *mpCloseCaptionCombo{nullptr};
 	
 	CCvarSlider *mpSFXSlider{nullptr};
 	CCvarSlider *mpMusicSlider{nullptr};
