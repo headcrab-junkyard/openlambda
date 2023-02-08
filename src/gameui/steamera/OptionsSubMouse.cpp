@@ -25,6 +25,23 @@
 #include "CvarToggleCheckButton.hpp"
 #include "CvarSlider.hpp"
 
+//#include "CommandCheckButton.hpp"
+
+//#include "KeyToggleCheckButton.hpp"
+
+//#include "EngineInterface.h"
+
+//#include <KeyValues.h>
+//#include <vgui/IScheme.h>
+//#include <tier1/convar.h>
+
+//#include <cstdio>
+
+//#include <vgui/controls/TextEntry.h>
+
+// NOTE: memdbgon must be the last include file in a cpp file!
+//#include <tier0/memdbgon.h>
+
 using namespace vgui;
 
 COptionsSubMouse::COptionsSubMouse(Panel *apParent) : PropertyPage(apParent, nullptr)

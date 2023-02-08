@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "vgui2/controls/Frame.h"
+#include <vgui2/controls/Frame.h>
 
 class CLoadingDialog : public vgui2::Frame
 {

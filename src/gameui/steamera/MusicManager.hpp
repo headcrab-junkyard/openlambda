@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "GameUI/IMusicManager.h"
+#include <GameUI/IMusicManager.h>
 
 class CMusicManager final : public IMusicManager
 {

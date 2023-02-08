@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "vgui2/controls/Slider.h"
+#include <vgui2/controls/Slider.h>
 
 class CCvarSlider : public vgui2::Slider
 {
@@ -30,14 +30,48 @@ public:
 	CCvarSlider(vgui2::Panel *apParent, const char *asPanelName);
 	CCvarSlider(vgui2::Panel *apParent, const char *asPanelName, const char *asCaption,
 	float afMinValue, float afMaxValue, const char *asCvarName, bool abAllowOutOfRange = false);
-	~CCvarSlider();
+	~CCvarSlider() = default;
+	
+	void SetupSlider(float afMinValue, float afMaxValue, const char *asName, bool abAllowOutOfRange);
+	
+	void Reset();
+	
+	/*virtual*/ void Paint();
+	
+	/*virtual*/ void ApplySettings(KeyValues *apData);
+	
+	/// Get control settings for editing
+	/*virtual*/ void GetSettings(KeyValues *apData);
+	
+	void ApplyChanges();
+	
+	void SetCvarName(const char *asName);
+	
+	void SetMinMaxValues(float afMinValue, float afMaxValue, bool abSetTickDisplay = true);
+	
+	void SetTickColor(Color aColor); // TODO: const Color &aColor?
+	
+	void SetSliderValue(float afValue);
+	float GetSliderValue() const;
+	
+	bool HasBeenModified() const;
+private:
+	MESSAGE_FUNC(OnSliderMoved, "SliderMoved");
+	MESSAGE_FUNC(OnApplyChanges, "ApplyChanges");
 private:
 	char msCvarName[64]{};
+	
+	float mfStartValue{0.0f};
 	
 	float mfMinValue{0.0f};
 	float mfMaxValue{0.0f};
 	
 	float mfCurrentValue{0.0f};
 	
+	int mnStartValue{0};
+	int mnLastSliderValue{0};
+	
 	bool mbAllowOutOfRange{false};
+	bool mbModifiedOnce{false};
+	bool mbCreatedInCode{false};
 };

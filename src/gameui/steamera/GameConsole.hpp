@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "GameUI/IGameConsole.h"
+#include <GameUI/IGameConsole.h>
 
 class CGameConsoleDialog;
 

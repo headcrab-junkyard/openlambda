@@ -21,11 +21,35 @@
 
 #pragma once
 
-#include "GameUI/ICareerUI.h"
+#include <GameUI/ICareerUI.h>
 
 class CCareerUI final : public ICareerUI
 {
 public:
 	CCareerUI();
 	~CCareerUI();
+	
+	bool IsPlayingMatch() override;
+	
+	ITaskVec *GetCurrentTaskVec() override;
+	
+	bool PlayAsCT() override;
+	
+	int GetReputationGained() override;
+	int GetNumMapsUnlocked() override;
+	
+	bool DoesWinUnlockAll() override;
+	
+	int GetRoundTimeLength() override;
+	int GetWinfastLength() override;
+	
+	CareerDifficultyType GetDifficulty() const override;
+	
+	int GetCurrentMapTriplet(MapInfo *apMaps) override;
+	
+	void OnRoundEndMenuOpen(bool abDidWin) override;
+	void OnMatchEndMenuOpen(bool abDidWin) override;
+	
+	void OnRoundEndMenuClose(bool abStillPlaying) override;
+	void OnMatchEndMenuClose(bool abStillPlaying) override;
 };

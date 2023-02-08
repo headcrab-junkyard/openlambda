@@ -18,7 +18,7 @@
 */
 
 /// @file
-/// @brief Mouse Details, Part of OptionsDialog
+/// @brief Mouse details, part of OptionsDialog
 
 #pragma once
 

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "vgui2/controls/TextEntry.h"
+#include <vgui2/controls/TextEntry.h>
 
 class CCvarTextEntry : public vgui2::TextEntry
 {

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "vgui2/controls/CheckButton.h"
+#include <vgui2/controls/CheckButton.h>
 
 class CCvarToggleCheckButton : public vgui2::CheckButton
 {

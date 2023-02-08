@@ -20,6 +20,7 @@
 /// @file
 
 #include <cstdlib>
+
 #include "GameUI.hpp"
 
 IEngineVGui *gpEngineVGui{nullptr};
