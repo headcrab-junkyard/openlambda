@@ -155,7 +155,7 @@ const char *CModInfo::GetGameDLL() const
 
 bool CModInfo::IsSecure() const
 {
-	return mpModData->GetString("secure", "0") == 0;
+	return (stricmp(mpModData->GetString("secure", "0"), "1") == 0);
 };
 
 CModInfo &ModInfo()

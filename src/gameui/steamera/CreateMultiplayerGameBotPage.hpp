@@ -25,6 +25,9 @@
 #include <vgui_controls/PropertyPage.h>
 
 class CCvarToggleCheckButton;
+//class CPanelListPanel;
+//class CDescription;
+//class mpcontrol_t;
 
 class CCreateMultiplayerGameBotPage : public vgui::PropertyPage
 {

@@ -18,6 +18,7 @@
 */
 
 /// @file
+/// @brief VGui implementation of the game/dev console
 
 #pragma once
 
@@ -32,9 +33,10 @@ public:
 	~CGameConsole();
 
 	void Activate() override;
-
+	
+	// Sets up the console for use
 	void Initialize() override;
-
+	
 	void Hide() override;
 
 	void Clear() override;
@@ -45,8 +47,15 @@ public:
 	void DPrintf(const char *format, ...) override;
 
 	void SetParent(int /*vgui2::VPANEL*/ parent) override;
+public:
+	// Activates the console after a delay
+	void ActivateDelayed(float afTime);
+	
+	//static void OnCmdCondump();
 private:
 	CGameConsoleDialog *mpConsole{nullptr};
 	
 	bool mbInitialized{false};
 };
+
+CGameConsole &GameConsole();

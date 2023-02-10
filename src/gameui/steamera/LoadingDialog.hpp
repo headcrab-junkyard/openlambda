@@ -18,6 +18,7 @@
 */
 
 /// @file
+/// @brief Dialog for displaying level loading status
 
 #pragma once
 
@@ -29,6 +30,21 @@ class CLoadingDialog : public vgui2::Frame
 public:
 	CLoadingDialog(vgui2::Panel *apParent);
 	~CLoadingDialog();
+	
+	void Open();
+	
+	void DisplayGenericError(const char *asFailureReason, const char *asExtendedReason = nullptr);
+	void DisplayVACBannedError();
+	void DisplayNoSteamConnectionError();
+	void DisplayLoggedInElsewhereError();
+	
+	bool SetProgressPoint(float afFraction);
+	void SetStatusText(const char *asText);
+	
+	void SetSecondaryProgress(float afProgress);
+	void SetSecondaryProgressText(const char *asText);
+	
+	bool SetShowProgressText(bool abState);
 protected:
 	virtual void OnThink();
 	virtual void OnKeyCodePressed(vgui2::KeyCode);
@@ -38,4 +54,9 @@ protected:
 	virtual void PerformLayout();
 	virtual void PaintBackground();
 private:
+	
+private:
 };
+
+// Singleton accessor
+CLoadingDialog *LoadingDialog();

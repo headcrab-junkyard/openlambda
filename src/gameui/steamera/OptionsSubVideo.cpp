@@ -60,6 +60,31 @@ void COptionsSubVideo::OnResetData()
 
 void COptionsSubVideo::OnApplyChanges()
 {
+	int nVidLvl{0};
+	int nUseAddonsFolder{0};
+	int nUseHDModels{0};
+	int nRenderer{0};
+	const char *sRenderer{""};
+	
+	if(nRenderer = 0)
+		sRenderer = "d3d";
+	else if(nRenderer == 1)
+		sRenderer = "gl";
+	else if(nRenderer == 2)
+		sRenderer = "software";
+	
+	if()
+		nUseAddonsFolder = 1;
+	
+	if()
+		nUseHDModels = 1;
+	
+	("_set_vid_level %d", nVidLvl)
+	("_set_addons_folder %d", nUseAddonsFolder);
+	("_sethdmodels %d", nUseHDModels);
+	
+	("_setrenderer %s %s", nRenderer, !bWindowed ? "fullscreen" : "windowed");
+	("_setvideomode %d %d %d", nWidth, nHeight, nBPP?)
 };
 
 void COptionsSubVideo::PerformLayout()

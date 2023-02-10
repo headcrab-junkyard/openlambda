@@ -24,6 +24,13 @@
 
 #include <vgui_controls/ConsoleDialog.h>
 
+//#include <vgui/controls/Frame.h>
+
+//#include <Color.h>
+//#include <tier1/UtlVector.h>
+
+//#include "EngineInterface.h"
+
 class CGameConsoleDialog : public vgui::CConsoleDialog
 {
 	DECLARE_CLASS_SIMPLE(CGameConsoleDialog, vgui::CConsoleDialog);
