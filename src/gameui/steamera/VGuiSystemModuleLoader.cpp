@@ -19,7 +19,7 @@
 
 /// @file
 
-#include "VGuiModuleLoader.hpp"
+#include "VGuiSystemModuleLoader.hpp"
 
 //#include <tier0/memdbgon.h>
 

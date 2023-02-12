@@ -22,6 +22,22 @@
 #include "VControlsListPanel.hpp"
 #include "InlineEditPanel.hpp"
 
+//#include "GameUI_Interface.hpp"
+//#include "EngineInterface.hpp"
+
+//#include <vgui/IInput.h>
+//#include <vgui/IScheme.h>
+//#include <vgui/ISurface.h>
+//#include <vgui/IVGui.h>
+//#include <vgui/Cursor.h>
+
+//#include <KeyValues.h>
+
+// NOTE: memdbgon must be the last include file in a .cpp file!
+//#include <tier0/memdbgon.h>
+
+//using namespace vgui;
+
 VControlsListPanel::VControlsListPanel(vgui2::Panel *apParent, const char *asListName) : BaseClass(apParent, asListName)
 {
 	mpInlineEditPanel = new CInlineEditPanel();
