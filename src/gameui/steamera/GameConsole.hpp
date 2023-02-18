@@ -34,7 +34,7 @@ public:
 
 	void Activate() override;
 	
-	// Sets up the console for use
+	/// Sets up the console for use
 	void Initialize() override;
 	
 	void Hide() override;
@@ -48,14 +48,16 @@ public:
 
 	void SetParent(int /*vgui2::VPANEL*/ parent) override;
 public:
-	// Activates the console after a delay
+	/// Activates the console after a delay
 	void ActivateDelayed(float afTime);
 	
-	//static void OnCmdCondump();
+	/// Static command handler
+	static void OnCmdCondump();
 private:
 	CGameConsoleDialog *mpConsole{nullptr};
 	
 	bool mbInitialized{false};
 };
 
+/// Singleton accessor
 CGameConsole &GameConsole();

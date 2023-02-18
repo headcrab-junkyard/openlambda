@@ -18,10 +18,11 @@
 */
 
 /// @file
+/// @brief Voice details, part of options dialog
 
 #pragma once
 
-#include "vgui2/controls/PropertyPage.h"
+#include <vgui2/controls/PropertyPage.h>
 
 using IVoiceTweak = struct IVoiceTweak_s;
 
@@ -30,6 +31,7 @@ class CCvarToggleCheckButton;
 
 class COptionsSubVoice : public vgui2::PropertyPage
 {
+	DECLARE_CLASS_SIMPLE(COptionsSubVoice, vgui2::PropertyPage);
 public:
 	COptionsSubVoice(vgui2::Panel *apParent);
 	~COptionsSubVoice();
@@ -37,8 +39,14 @@ public:
 	void OnResetData() override;
 	void OnApplyChanges() override;
 protected:
-	void OnThink();
+	/// Called every frame before painting, but only if panel is visible
+	/*virtual*/ void OnThink();
 private:
+	MESSAGE_FUNC(OnPageHide, "PageHide");
+	MESSAGE_FUNC_INT(OnSliderMoved, "SliderMoved", position);
+	MESSAGE_FUNC_INT(OnCheckButtonChecked, "CheckButtonChecked", state);
+	MESSAGE_FUNC(OnControlModified, "ControlModified");
+	
 	void OnCommand(const char *asCmd);
 	
 	void StartMicTest();

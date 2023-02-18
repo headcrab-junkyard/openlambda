@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020, 2023 BlackPhrase
+ * Copyright (C) 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,5 @@
 
 /// @file
 
-#pragma once
+#include "PanelListPanel.hpp"
 
-#include <vgui2/controls/CheckButton.h>
-
-class CCvarToggleCheckButton : public vgui2::CheckButton
-{
-	DECLARE_CLASS_SIMPLE(CCvarToggleCheckButton, vgui2::CheckButton);
-public:
-	CCvarToggleCheckButton(vgui2::Panel *apParent, const char *asPanelName, const char *asText, const char *asCvarName);
-	~CCvarToggleCheckButton();
-	
-	void SetSelected(bool abState) override;
-	
-	void Paint() override;
-	
-	void Reset() override;
-	
-	void ApplyChanges() override;
-	void ApplySettings(KeyValues *apResourceData) override;
-	
-	bool HasBeenModified() override;
-private:
-	MESSAGE_FUNC(OnButtonChecked, "CheckButtonChecked");
-	
-	char *msCvarName{nullptr};
-	
-	bool mbStartValue{false};
-};

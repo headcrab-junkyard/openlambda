@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020, 2023 BlackPhrase
+ * Copyright (C) 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,29 +21,26 @@
 
 #pragma once
 
-#include <vgui2/controls/CheckButton.h>
+#include <vgui/controls/CheckButton.h>
 
-class CCvarToggleCheckButton : public vgui2::CheckButton
+class CKeyToggleCheckButton : public vgui::CheckButton
 {
-	DECLARE_CLASS_SIMPLE(CCvarToggleCheckButton, vgui2::CheckButton);
+	DECLARE_CLASS_SIMPLE(CKeyToggleCheckButton, vgui::CheckButton);
 public:
-	CCvarToggleCheckButton(vgui2::Panel *apParent, const char *asPanelName, const char *asText, const char *asCvarName);
-	~CCvarToggleCheckButton();
+	CKeyToggleCheckButton(vgui::Panel *apParent, const char *asPanelName, const char *asText, const char *asKeyName, const char *asCmdName);
+	~CKeyToggleCheckButton();
 	
-	void SetSelected(bool abState) override;
+	//virtual void SetSelected(bool abState);
 	
-	void Paint() override;
+	virtual void Paint();
 	
-	void Reset() override;
+	void Reset();
+	void ApplyChanges();
 	
-	void ApplyChanges() override;
-	void ApplySettings(KeyValues *apResourceData) override;
-	
-	bool HasBeenModified() override;
+	bool HasBeenModified() const;
 private:
-	MESSAGE_FUNC(OnButtonChecked, "CheckButtonChecked");
-	
-	char *msCvarName{nullptr};
+	char *msKeyName{nullptr};
+	char *msCmdName{nullptr};
 	
 	bool mbStartValue{false};
 };

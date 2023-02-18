@@ -18,17 +18,35 @@
 */
 
 /// @file
+/// @brief Holds all the game option pages
 
 #pragma once
 
-class COptionsDialog
+#include <vgui/controls/PropertyDialog.h>
+
+//struct OptionData_t;
+class COptionsSubAudio;
+class COptionsSubVideo;
+
+constexpr auto OPTIONS_MAX_NUM_ITEMS{15};
+
+enum class eOptionsDialogTabStyle : int
 {
+	AllTabs,
+	OnlyBindingTabs,
+	
+	SizeOf
+};
+
+class COptionsDialog : public vgui::PropertyDialog
+{
+	DECLARE_CLASS_SIMPLE(COptionsDialog, vgui::PropertyDialog);
 public:
-	COptionsDialog();
+	COptionsDialog(vgui::Panel *apParent, eOptionsDialogTabStyle aeTabStyle = eOptionsDialogTabStyle::AllTabs);
 	~COptionsDialog();
 	
 	/// Brings the dialog to the foreground
-	void Activate();
+	/*virtual*/ void Activate();
 	
 	/// Opens the dialog
 	void Run();
@@ -37,5 +55,9 @@ public:
 	void OpenGammaDialog();
 	
 	/// Called when the game UI is hidden
-	void OnGameUIHidden();
+	//void OnGameUIHidden();
+	MESSAGE_FUNC(OnGameUIHidden, "GameUIHidden");
+private:
+	COptionsSubAudio *mpOptionsSubAudio{nullptr};
+	COptionsSubVideo *mpOptionsSubVideo{nullptr};
 };

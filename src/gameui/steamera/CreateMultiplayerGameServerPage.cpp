@@ -21,8 +21,27 @@
 
 #include "CreateMultiplayerGameServerPage.hpp"
 #include "ModInfo.hpp"
+//#include "EngineInterface.hpp"
+//#include "CvarToggleCheckButton.hpp"
+
+//#include <KeyValues.h>
+
+//#include <vgui/controls/ComboBox.h>
+//#include <vgui/controls/RadioButton.h>
+//#include <vgui/controls/CheckButton.h>
+
+//#include <public/FileSystem.h>
+
+//#include <tier1/convar.h>
+
+//#include <vstdlib/random.h>
+
+// NOTE: memdbgon must be the last include file in a .cpp file!
+//#include <tier0/memdbgon.h>
 
 constexpr auto RANDOM_MAP{"#GameUI_RandomMap"};
+
+//using namespace vgui;
 
 CCreateMultiplayerGameServerPage::CCreateMultiplayerGameServerPage(vgui::Panel *apParent, const char *asName)
 	: BaseClass(apParent, asName)
@@ -184,6 +203,7 @@ void CCreateMultiplayerGameServerPage::LoadMapList()
 	mpMapList->AddItem(RANDOM_MAP, new KeyValues("data", "mapname", RANDOM_MAP));
 	
 	// Iterate the filesystem to get the list of all the files
+	// UNDONE: Steam wants this done in a special way, need to support that
 	const char *sPathID{"MOD"};
 	if(!stricmp(ModInfo().GetGameName(), "Half-Life"))
 		sPathID = nullptr; // "hl" is the base dir
