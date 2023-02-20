@@ -31,15 +31,15 @@ enum class eWindowType : int
 	SizeOf // NOTE: Must be last in the list!
 };
 
-class CBaseModPanel : public vgui::EditablePanel, public IMatchEventsSink
+class CBasePanel : public vgui::EditablePanel//, public IMatchEventsSink
 {
-	DECLARE_CLASS_SIMPLE(CBaseModPanel, vgui::EditablePanel);
+	DECLARE_CLASS_SIMPLE(CBasePanel, vgui::EditablePanel);
 public:
-	CBaseModPanel();
-	~CBaseModPanel();
+	CBasePanel();
+	~CBasePanel();
 	
-	static CBaseModPanel &GetSingleton();
-	static CBaseModPanel *GetSingletonPtr();
+	static CBasePanel &GetSingleton();
+	static CBasePanel *GetSingletonPtr();
 	
 	void ReloadScheme();
 	

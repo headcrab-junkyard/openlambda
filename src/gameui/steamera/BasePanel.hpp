@@ -25,13 +25,13 @@
 
 //namespace BaseModUI
 //{
-//class CBaseModPanel;
+//class CBasePanel;
 //};
-//BaseModUI::CBaseModPanel *BasePanel();
+//BaseModUI::CBasePanel *BasePanel();
 
-inline BaseModUI::CBaseModPanel *BasePanel()
+inline BaseModUI::CBasePanel *BasePanel()
 {
-	return &BaseModUI::CBaseModPanel::GetSingleton();
+	return &BaseModUI::CBasePanel::GetSingleton();
 };
 
 // TODO
