@@ -18,10 +18,38 @@
 */
 
 /// @file
+/// @brief Displays a game-specific list of options
 
 #pragma once
 
-class CMultiplayerAdvancedDialog
+#include <vgui/controls/Frame.h>
+
+#include "ScriptObject.hpp"
+
+//#include <vgui/KeyCode.h>
+
+class CMultiplayerAdvancedDialog : public vgui2::Frame
 {
+	DECLARE_CLASS_SIMPLE(CMultiplayerAdvancedDialog, vgui2::Frame);
 public:
+	CMultiplayerAdvancedDialog(vgui::Panel *apParent);
+	~CMultiplayerAdvancedDialog();
+	
+	virtual void Activate();
+private:
+	void CreateControls();
+	void DestroyControls();
+	
+	void GatherCurrentValues();
+	void SaveValues();
+	
+	virtual void OnCommand(const char *asCmd);
+	virtual void OnKeyCodeTyped(vgui2::KeyCode aeCode);
+	virtual void OnClose();
+private:
+	CInfoDescription *mpDescription{nullptr};
+	
+	mpcontrol_t *mpList{nullptr};
+	
+	CPanelListPanel *mpListPanel{nullptr};
 };

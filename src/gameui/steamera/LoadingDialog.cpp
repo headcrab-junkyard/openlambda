@@ -20,3 +20,131 @@
 /// @file
 
 #include "LoadingDialog.hpp"
+#include "EngineInterface.hpp"
+
+#include <IGameUIFuncs.h>
+
+//using namespace vgui;
+
+CLoadingDialog::CLoadingDialog(vgui2::Panel *apParent)
+{
+};
+
+CLoadingDialog::~CLoadingDialog() = default;
+
+void CLoadingDialog::Open()
+{
+};
+
+void CLoadingDialog::DisplayGenericError(const char *asFailureReason, const char *asExtendedReason)
+{
+};
+
+void CLoadingDialog::DisplayVACBannedError()
+{
+	if(mbConsoleStyle)
+		return;
+	
+	SetupControlSettingsForErrorDisplay("Resource/LoadingDialogErrorVACBanned.res");
+	SetTitle("#VAC_ConnectionRefusedTitle", true);
+};
+
+void CLoadingDialog::DisplayNoSteamConnectionError()
+{
+	if(mbConsoleStyle)
+		return;
+	
+	SetupControlSettingsForErrorDisplay("Resource/LoadingDialogErrorNoSteamConnection.res");
+};
+
+void CLoadingDialog::DisplayLoggedInElsewhereError()
+{
+	if(mbConsoleStyle)
+		return;
+	
+	SetupControlSettingsForErrorDisplay("Resource/LoadingDialogErrorLoggedInElsewhere.res");
+	mpCancelButton->SetText("#GameUI_RefreshLogin_Login");
+	mpCancelButton->SetCommand("Login");
+};
+
+bool CLoadingDialog::SetProgressPoint(float afFraction)
+{
+};
+
+void CLoadingDialog::SetStatusText(const char *asText)
+{
+	if(mbConsoleStyle)
+		return;
+	
+	mpInfoLabel->SetText(asText);
+};
+
+void CLoadingDialog::SetSecondaryProgress(float afProgress)
+{
+};
+
+void CLoadingDialog::SetSecondaryProgressText(const char *asText)
+{
+	if(mbConsoleStyle)
+		return;
+	
+	SetControlString("SecondaryProgressLabel", asText);
+};
+
+bool CLoadingDialog::SetShowProgressText(bool abState)
+{
+	if(mbConsoleStyle)
+		return false;
+	
+	bool bResult{mpInfoLabel->IsVisible()};
+	if(bResult != abState)
+	{
+		SetupControlSettings(abState);
+		mpInfoLabel->SetVisible(abState);
+	};
+	return bResult;
+};
+
+void CLoadingDialog::OnThink()
+{
+};
+
+void CLoadingDialog::OnKeyCodePressed(vgui2::KeyCode aeCode)
+{
+	if(mbConsoleStyle)
+		return;
+	
+	if(aeCode == KEY_ESCAPE)
+		OnCommand("Cancel");
+	else
+		BaseClass::OnKeyCodePressed(aeCode);
+};
+
+void CLoadingDialog::OnCommand(const char *asCmd)
+{
+	if(!stricmp(asCmd, "Cancel"))
+	{
+		// Disconnect from the server
+		gpEngine->ClientCmd_Unrestricted("disconnect\n");
+		
+		Close();
+	}
+	else
+		BaseClass::OnCommand(asCmd);
+};
+
+void CLoadingDialog::OnClose()
+{
+	// Remove any rendering restrictions
+	HideOtherDialogs(false);
+	
+	BaseClass::OnClose();
+};
+
+void CLoadingDialog::PerformLayout()
+{
+};
+
+void CLoadingDialog::PaintBackground()
+{
+};

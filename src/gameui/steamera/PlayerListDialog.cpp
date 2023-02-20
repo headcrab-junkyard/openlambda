@@ -20,6 +20,27 @@
 /// @file
 
 #include "PlayerListDialog.hpp"
+//#include "EngineInterface.hpp"
+//#include "GameUI_Interface.hpp"
+
+#include <KeyValues.h>
+
+//#include <vgui/ILocalize.h>
+//#include <vgui/ISurface.h>
+
+//#include <vgui/controls/ListPanel.h>
+//#include <vgui/controls/Label.h>
+//#include <vgui/controls/Button.h>
+//#include <vgui/controls/MessageBox.h>
+
+#include <cl_dll/IGameClientExports.h> //<game/client/IGameClientExports.h>
+
+//#include <steam/steam_api.h>
+
+// NOTE: memdbgon must be the last include file in a .cpp file!
+//#include <tier0/memdbgon.h>
+
+//using namespace vgui;
 
 CPlayerListDialog::CPlayerListDialog(vgui::Panel *apParent)
 	: BaseClass(apParent, "PlayerListDialog")
@@ -44,10 +65,44 @@ CPlayerListDialog::~CPlayerListDialog() = default;
 void CPlayerListDialog::Activate()
 {
 	BaseClass::Activate();
+	
+	// Refresh player list
+	mpPlayerList->DeleteAllItems();
+	auto nMaxClients{gpEngine->GetMaxClients()};
+	for(int i = 1; i <= nMaxClients; ++i)
+	{
+		// Get the player info from the engine
+		player_info_t PlayerInfo{};
+		
+		if(!gpEngine->GetPlayerInfo(i, &PlayerInfo))
+			continue;
+		
+		char sPlayerID[32]{};
+		Q_snprintf(sPlayerID, sizeof(sPlayerID), "%d", i);
+		
+		// Collate user data then add it to the table
+		auto pData{new KeyValues(sPlayerID)};
+		
+		data->SetString("Name", PlayerInfo.name);
+		data->SetInt("index", i);
+		
+		// Add to the list
+		mpPlayerList->AddItem(pData, 0, false, false);
+	};
+	
+	// Refresh player properties info
+	RefreshPlayerProperties();
+	
+	// Select the first item by default
+	mpPlayerList->SetSingleSelectedItem(mpPlayerList->GetItemIDFromRow(0));
+	
+	// Toggle button states
+	OnItemSelected();
 };
 
 void CPlayerListDialog::OnItemSelected()
 {
+	// Make sure the data is up-to-date
 	RefreshPlayerProperties();
 	
 	// Set the button state based on the selected item
@@ -55,6 +110,28 @@ void CPlayerListDialog::OnItemSelected()
 	
 	if(mpPlayerList->GetSelectedItemsCount() > 0)
 	{
+		auto pData{mpPlayerList->GetItem(mpPlayerList->GetSelectedItem(0))};
+		
+		// TODO: check for pData here?
+		
+		player_info_t PlayerInfo{};
+		
+		int nLocalPlayer{gpEngine->GetLocalPlayer()};
+		
+		int nPlayerID{pData->GetInt("index")};
+		bool bValidPlayer{gpEngine->GetPlayerInfo(nPlayerID, &PlayerInfo)};
+		
+		// Make sure the player is not a bot or the local player
+		if(PlayerInfo.fakeplayer || nPlayerID == nLocalPlayer) // || PlayerInfo.friendsID == gpFriendsUser->GetFriendsID())
+			bValidPlayer = false;
+		
+		if(bValidPlayer && GameClientExports() && GameClientExports()->IsPlayerGameVoiceMuted(nPlayerID))
+			mpMuteButton->SetText("#GameUI_UnmuteIngameVoice");
+		else
+			mpMuteButton->SetText("#GameUI_MuteIngameVoice");
+		
+		if(GameClientExports() && bValidPlayer)
+			bMuteButtonEnabled = true;
 	}
 	else
 		mpMuteButton->SetText("#GameUI_MuteIngameVoice");
@@ -77,6 +154,17 @@ void CPlayerListDialog::ToggleMuteStateOfSelectedUser()
 	
 	for(int nSelectedItem = 0; nSelectedItem < mpPlayerList->GetSelectedItemsCount(); ++nSelectedItem)
 	{
+		auto pData{mpPlayerList->GetItem(mpPlayerList->GetSelectedItem(nSelectedItem))};
+		if(!pData)
+			return;
+		
+		auto nPlayerID{pData->GetInt("index")};
+		Assert(nPlayerID);
+		
+		if(GameClientExports()->IsPlayerGameVoiceMuted(nPlayerID))
+			GameClientExports()->UnmutePlayerGameVoice(nPlayerID);
+		else
+			GameClientExports()->MutePlayerGameVoice(nPlayerID);
 	};
 	
 	RefreshPlayerProperties();
@@ -85,4 +173,45 @@ void CPlayerListDialog::ToggleMuteStateOfSelectedUser()
 
 void CPlayerListDialog::RefreshPlayerProperties()
 {
+	for(int i = 0; i <= mpPlayerList->GetItemCount(); ++i)
+	{
+		auto pData{mpPlayerList->GetItem(i)};
+		if(!pData)
+			continue;
+		
+		// Assemble properties
+		auto nPlayerID{pData->GetInt("index")};
+		player_info_t PlayerInfo{};
+		
+		if(!gpEngine->GetPlayerInfo(nPlayerID, &PlayerInfo))
+		{
+			// Disconnected
+			pData->SetString("properties", "Disconnected");
+			continue;
+		};
+		
+		pData->SetString("name", PlayerInfo.name);
+		
+		bool bMuted{false};
+		
+		if(GameClientExports() && GameClientExports()->IsPlayerGameVoiceMuted(nPlayerID))
+			bMuted = true;
+		
+		bool bFriends{false}; // TODO: always false
+		
+		bool bBot{PlayerInfo.fakeplayer};
+		
+		pData->SetString("properties", "");
+		
+		if(bBot)
+			pData->SetString("properties", "CPU Player");
+		else if(bMuted && bFriends)
+			pData->SetString("properties", "Friend; Muted");
+		else if(bMuted)
+			pData->SetString("properties", "Muted");
+		else if(bFriends)
+			pData->SetSting("properties", "Friend");
+	};
+	
+	mpPlayerList->RereadAllItems();
 };

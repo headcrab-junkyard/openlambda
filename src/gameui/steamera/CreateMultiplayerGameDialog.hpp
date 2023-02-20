@@ -35,6 +35,7 @@ public:
 	CCreateMultiplayerGameDialog(vgui::Panel *apParent);
 	~CCreateMultiplayerGameDialog();
 protected:
+	/// Runs the server when the Ok button is pressed
 	/*virtual*/ bool OnOK(bool abApplyOnly);
 private:
 	CCreateMultiplayerGameServerPage *mpServerPage{nullptr};

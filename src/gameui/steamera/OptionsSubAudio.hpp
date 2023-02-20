@@ -23,6 +23,11 @@
 #pragma once
 
 #include <vgui/controls/PropertyPage.h>
+//#include <vgui/controls/Frame.h>
+
+//#include <vgui/KeyCode.h>
+
+//#include <language.h>
 
 class CCvarSlider;
 class CLabeledCommandComboBox;
@@ -45,7 +50,7 @@ public:
 	/// @return true if the engine needs to be restarted
 	bool RequiresRestart() const;
 	
-	static char *GetUpdatedAudioLanguage() const {return m;}
+	//static char *GetUpdatedAudioLanguage() const {return m;} // TODO
 private:
 	/// Called on controls changing, enables the Apply button
 	MESSAGE_FUNC(OnControlModified, "ControlModified");

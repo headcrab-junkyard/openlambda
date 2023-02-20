@@ -47,7 +47,7 @@ public:
 	bool SetShowProgressText(bool abState);
 protected:
 	virtual void OnThink();
-	virtual void OnKeyCodePressed(vgui2::KeyCode);
+	virtual void OnKeyCodePressed(vgui2::KeyCode aeCode);
 	virtual void OnCommand(const char *asCmd);
 	virtual void OnClose();
 	

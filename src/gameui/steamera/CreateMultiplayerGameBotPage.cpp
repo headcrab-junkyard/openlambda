@@ -20,6 +20,24 @@
 /// @file
 
 #include "CreateMultiplayerGameBotPage.hpp"
+//#include "EngineInterface.hpp"
+//#include "CvarToggleCheckButton.hpp"
+//#include "PanelListPanel.hpp"
+//#include "ScriptObject.hpp"
+
+//#include <vgui/controls/ComboBox.h>
+//#include <vgui/controls/CheckButton.h>
+//#include <vgui/controls/Label.h>
+//#include <vgui/controls/TextEntry.h>
+
+//#include <FileSystem.h>
+
+#include <KeyValues.h>
+
+//#include <tier1/convar.h>
+
+// NOTE: memdbgon must be the last include file in a .cpp file!
+//#include <tier0/memdbgon.h>
 
 // For bot join team combo box
 enum class eBotGUITeamType : int
@@ -41,6 +59,8 @@ enum class eBotGUIChatterType : int
 // These must correlate with above enums
 static const char *gsJoinTeamArgs[] = {"any", "ct", "t", nullptr};
 static const char *gsChatterArgs[] = {"normal", "minimal", "radio", "off", nullptr};
+
+//extern void UTIL_StripInvalidCharacters(char *asInput);
 
 void UpdateValue(KeyValues *apData, const char *asCvarName, int anValue)
 {

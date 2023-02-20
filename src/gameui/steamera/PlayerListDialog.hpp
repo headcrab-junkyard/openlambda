@@ -35,9 +35,13 @@ public:
 private:
 	MESSAGE_FUNC(OnItemSelected, "ItemSelected");
 	
+	/// Handles the AddFriend command
 	/*virtual*/ void OnCommand(const char *asCmd);
 	
+	/// Toggles whether a user is muted or not
 	void ToggleMuteStateOfSelectedUser();
+	
+	/// Walks the players and sets their info display in the list
 	void RefreshPlayerProperties();
 private:
 	vgui::ListPanel *mpPlayerList{nullptr};
