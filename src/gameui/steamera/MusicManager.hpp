@@ -23,11 +23,11 @@
 
 #include <GameUI/IMusicManager.h>
 
-class CMusicManager final : public IMusicManager
+class MusicManager final : public IMusicManager
 {
 public:
-	CMusicManager();
-	~CMusicManager();
+	MusicManager();
+	~MusicManager();
 	
 	void StartTrack(TrackType track, bool looping) override;
 	void StopTrack() override;

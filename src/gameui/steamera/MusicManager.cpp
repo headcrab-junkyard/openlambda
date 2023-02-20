@@ -21,29 +21,29 @@
 
 #include "MusicManager.hpp"
 
-EXPOSE_SINGLE_INTERFACE(CMusicManager, IMusicManager, MUSICMANAGER_INTERFACE_VERSION);
+EXPOSE_SINGLE_INTERFACE(MusicManager, IMusicManager, MUSICMANAGER_INTERFACE_VERSION);
 
-CMusicManager::CMusicManager() = default;
-CMusicManager::~CMusicManager() = default;
+MusicManager::MusicManager() = default;
+MusicManager::~MusicManager() = default;
 
-void CMusicManager::StartTrack(TrackType track, bool looping)
+void MusicManager::StartTrack(TrackType track, bool looping)
 {
 };
 
-void CMusicManager::StopTrack()
+void MusicManager::StopTrack()
 {
 };
 
-void CMusicManager::FadeOutTrack()
+void MusicManager::FadeOutTrack()
 {
 };
 
-bool CMusicManager::IsPlayingTrack(TrackType track)
+bool MusicManager::IsPlayingTrack(TrackType track)
 {
 	return false;
 };
 
-bool CMusicManager::IsPlayingTrack()
+bool MusicManager::IsPlayingTrack()
 {
 	return false;
 };
