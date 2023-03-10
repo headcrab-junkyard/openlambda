@@ -22,7 +22,9 @@
 
 #pragma once
 
-#include <plugin/IEnginePlugin.hpp>
+#include <ext/IEnginePlugin.hpp>
+
+interface ISystem;
 
 class CSamplePlugin final : public IEnginePlugin
 {
@@ -34,4 +36,6 @@ public:
 	void Unload() override;
 	
 	void GetInfo(TPluginInfo &apInfo) override;
+private:
+	ISystem *mpSystem{nullptr};
 };

@@ -25,24 +25,28 @@
 //#include <core/IEngineCore.hpp>
 #include <engine/ISystem.hpp>
 
-CSamplePlugin gSamplePlugin;
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CSamplePlugin, IEnginePlugin, ENGINEPLUGINCALLBACKS_INTERFACE_VERSION, gSamplePlugin);
+EXPOSE_SINGLE_INTERFACE(CSamplePlugin, IEnginePlugin, ENGINEPLUGINCALLBACKS_INTERFACE_VERSION);
 
 bool CSamplePlugin::Load(CreateInterfaceFn afnModuleFactory)
 {
-	DevMsg(eMsgType::Info, "Hello from sample plugin! (afnModuleFactory is %d)\n", afnModuleFactory);
+	mpSystem = reinterpret_cast<ISystem*>(afnModuleFactory(OGS_SYSTEM_INTERFACE_VERSION, nullptr));
+	
+	if(!mpSystem)
+		return false;
+	
+	mpSystem->DevMsg(eMsgType::Info, "Hello from sample plugin! (afnModuleFactory is %d)\n", afnModuleFactory);
 	return true;
 };
 
 void CSamplePlugin::Unload()
 {
-	LogMsg(eMsgType::Info, "Goodbye from sample plugin!\n");
+	mpSystem->LogMsg(eMsgType::Info, "Goodbye from sample plugin!\n");
 };
 
 void CSamplePlugin::GetInfo(TPluginInfo &apInfo)
 {
-	apInfo.sName = "Sample Plugin";
-	apInfo.sVersion = "1.0";
-	apInfo.sAuthor = "Headcrab Garage";
-	apInfo.sDesc = "Sample engine plugin";
+	apInfo.msName = "Sample Plugin";
+	apInfo.msVersion = "1.0";
+	apInfo.msAuthor = "Headcrab Garage";
+	apInfo.msDesc = "Sample engine plugin";
 };
