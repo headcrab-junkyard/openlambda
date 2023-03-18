@@ -39,6 +39,8 @@ and client. This will ensure that prediction system behaves properly
 #include <pm_shared/pm_shared.h>
 #include <pm_shared/pm_movevars.h>
 //#include <pm_shared/pm_debug.h>
+#include <pm_shared/pm_materials.h>
+
 #include <common/com_model.h> // mathlib, const
 #include <common/in_buttons.h>
 //#include <common/bspfile.h>
@@ -240,7 +242,7 @@ void PM_InitTextureTypes()
 		grgchTextureType[gcTextures] = toupper(buffer[i++]);
 		
 		// Skip whitespace
-		while(buffer[i] && isspace[buffer[i]))
+		while(buffer[i] && isspace(buffer[i]))
 			++i;
 		
 		if(!buffer[i])
@@ -248,7 +250,7 @@ void PM_InitTextureTypes()
 		
 		// Get sentence name
 		j = i;
-		while(buffer[j] && !isspace[buffer[j]))
+		while(buffer[j] && !isspace(buffer[j]))
 			++j;
 		
 		if(!buffer[j])
@@ -333,8 +335,8 @@ void PM_PlayStepSound(int step, float vol)
 	// Used to alternate left and right foot
 	// TODO: move to player state
 	
-	const char *sSampleSuffix{""};
-	int nSample{1};
+	const char *sSampleSuffix = "";
+	int nSample = 1;
 	
 	switch(irand)
 	{
@@ -403,7 +405,7 @@ void PM_PlayStepSound(int step, float vol)
 		break;
 	};
 	
-	pmove->PM_PlaySound(CHAN_BODY, va("player/pl_%s%d.wav", sSampleSuffix, nSample), fvol, ATTN_NORM, 0, PITCH_NORM);
+	pmove->PM_PlaySound(CHAN_BODY, va("player/pl_%s%d.wav", sSampleSuffix, nSample), vol, ATTN_NORM, 0, PITCH_NORM);
 };
 
 /*
@@ -601,7 +603,7 @@ PM_AddToTouched
 Adds the trace result to touch list, if contact is not already in list
 ==================
 */
-qboolean PM_AddToTouched(pmtrace_t trace, vec3_t impactvelocity)
+qboolean PM_AddToTouched(pmtrace_t tr, vec3_t impactvelocity)
 {
 	int i;
 	
@@ -712,7 +714,7 @@ void PM_AddCorrectGravity()
 	if(pmove->waterjumptime)
 		return;
 	
-	float ent_gravity{1.0f};
+	float ent_gravity = 1.0f;
 	
 	if(pmove->gravity)
 		ent_gravity = pmove->gravity;
@@ -737,7 +739,7 @@ void PM_FixupGravityVelocity()
 	if(pmove->waterjumptime)
 		return;
 	
-	float ent_gravity{1.0f};
+	float ent_gravity = 1.0f;
 	
 	if(pmove->gravity)
 		ent_gravity = pmove->gravity;
@@ -1215,7 +1217,7 @@ void PM_Friction()
 		
 		stop[2] = start[2] - 34;
 		
-		trace = pmove->PM_PlayerTrace(stat, stop, PM_NORMAL, -1);
+		trace = pmove->PM_PlayerTrace(start, stop, PM_NORMAL, -1);
 		
 		friction = pmove->movevars->friction;
 		
@@ -1640,7 +1642,7 @@ When a player is stuck, it's costly to try and unstick them
 Grab a test offset for the player based on a passed in index
 ==================
 */
-void PM_GetRandomStuckOffsets(int nIndex, int server, vec3_t offset)
+int PM_GetRandomStuckOffsets(int nIndex, int server, vec3_t offset)
 {
 	// Last time we did a full
 	int idx = rgStuckLast[nIndex][server];
@@ -1678,7 +1680,7 @@ int PM_CheckStuck()
 	int hitent = pmove->PM_TestPlayerPosition(pmove->origin, &traceresult);
 	
 	// If position is ok, exit
-	if(hitent === -1)
+	if(hitent == -1)
 	{
 		PM_ResetStuckOffsets(pmove->player_index, pmove->server);
 		return 0;
@@ -1686,6 +1688,9 @@ int PM_CheckStuck()
 	
 	vec3_t base;
 	VectorCopy(pmove->origin, base);
+	
+	vec3_t offset;
+	vec3_t test;
 	
 	// Deal with precision error in network
 	if(!pmove->server)
@@ -1731,9 +1736,6 @@ int PM_CheckStuck()
 	rgStuckCheckTime[pmove->player_index][idx] = fTime;
 	
 	pmove->PM_StuckTouch(hitent, &traceresult);
-	
-	vec3_t offset;
-	vec3_t test;
 	
 	i = PM_GetRandomStuckOffsets(pmove->player_index, pmove->server, offset);
 	
@@ -1936,7 +1938,7 @@ float PM_SplineFraction(float value, float scale)
 {
 	value = value * scale;
 	
-	float fValueSquared{value * value};
+	float fValueSquared = value * value;
 	
 	// Nice little ease-in, ease-out spline-like curve
 	return 3 * fValueSquared - 2 * fValueSquared * value;
@@ -2040,7 +2042,7 @@ void PM_Duck()
 	if(pmove->flags & FL_DUCKING)
 	{
 		pmove->cmd.forwardmove *= PLAYER_DUCKING_MULTIPLIER;
-		pmove->cmd.sidemove *= PLAYER_DUCKING_MULTIPLIER
+		pmove->cmd.sidemove *= PLAYER_DUCKING_MULTIPLIER;
 		pmove->cmd.upmove *= PLAYER_DUCKING_MULTIPLIER;
 	};
 	
@@ -2516,7 +2518,7 @@ PM_AddGravity
 */
 void PM_AddGravity()
 {
-	float ent_gravity{1.0f};
+	float ent_gravity = 1.0f;
 	
 	if(pmove->gravity)
 		ent_gravity = pmove->gravity;
@@ -2934,7 +2936,7 @@ void PM_CheckFalling()
 {
 	if(pmove->onground != -1 && !pmove->dead && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHOLD)
 	{
-		float fvol{0.5f};
+		float fvol = 0.5f;
 		
 		if(pmove->waterlevel > 0)
 		{
@@ -2999,7 +3001,7 @@ void PM_PlayWaterSounds()
 	if((pmove->oldwaterlevel == 0 && pmove->waterlevel != 0) || 
 	   (pmove->oldwaterlevel != 0 && pmove->waterlevel == 0))
 	{
-		const char *sSampleToUse{""};
+		const char *sSampleToUse = "";
 		
 		// TODO: va()
 		
@@ -3053,7 +3055,7 @@ PM_DropPunchAngle
 */
 void PM_DropPunchAngle(vec3_t punchangle)
 {
-	float len{VectorNormalize(punchangle)};
+	float len = VectorNormalize(punchangle);
 	len -= (10.0 + len * 0.5) * pmove->frametime;
 	len = max(len, 0.0f);
 	VectorScale(punchangle, len, punchangle);
