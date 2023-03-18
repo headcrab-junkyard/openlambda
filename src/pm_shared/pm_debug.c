@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018(-2019?), 2020-2022 BlackPhrase
+ * Copyright (C) 2018(-2019?), 2020-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,15 @@
 
 /// @file
 
+//#include <string.h>
+
 #include <pm_shared/pm_defs.h>
 #include <pm_shared/pm_debug.h>
 #include <pm_shared/pm_shared.h>
 //#include <pm_shared/pm_movevars.h>
+
+//#pragma warning(disable : 4244)
+//#pragma warning(disable : 4305)
 
 extern playermove_t *pmove;
 
