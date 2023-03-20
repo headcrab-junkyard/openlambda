@@ -58,6 +58,9 @@ public: // Public methods
 	IGameWorld *GetWorld() const {return mpWorld;}
 protected:
 	virtual void RegisterEvents(){}
+	virtual void RegisterEncoders(){} // TODO: make public for legacy api
+	virtual void InitPlayerMovement(){} // TODO: make public for legacy api
+	
 private:
 	IFileSystem *mpFileSystem{nullptr};
 	IVoiceServer *mpVoiceServer{nullptr};

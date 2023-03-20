@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019-2022 BlackPhrase
+ * Copyright (C) 2019-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 /// @file
 
-#include "Game.hpp"
+#include "BaseGame.hpp"
 
 #include "next/filesystem/IFileSystem.hpp"
 #include "next/engine/IVoiceServer.hpp"
@@ -46,6 +46,16 @@ bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 	RegisterEvents();
 	//if(!mpScript)
 		//return false;
+	
+	
+	// Manually init some parts for new engine as legacy engine inits them individually
+	// TODO: if not manual initialization?
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+	{
+		RegisterEncoders();
+	
+		InitPlayerMovement(); // TODO: move sv pmove struct instance here
+	};
 	
 	return true;
 };
