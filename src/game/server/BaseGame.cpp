@@ -21,20 +21,35 @@
 /// @file
 
 #include "BaseGame.hpp"
+#include "SystemEventListener_Game.hpp"
+#include "GameServerEventListener.hpp"
+#include "GameClientEventListener.hpp"
 
-#include "next/filesystem/IFileSystem.hpp"
-#include "next/engine/IVoiceServer.hpp"
-//#include "next/physics/IPhysicsSystem.hpp"
-//#include "next/scriptsystem/IScriptSystem.hpp"
+#include <next/engine/ISystem.hpp>
+#include <next/engine/IGameServer.hpp>
+#include <next/engine/IVoiceServer.hpp>
+
+#include <next/filesystem/IFileSystem.hpp>
+
+//#include <next/physics/IPhysicsSystem.hpp>
+
+//#include <next/scriptsystem/IScriptSystem.hpp>
 
 bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 {
+	mpSystem = reinterpret_cast<ISystem*>(afnEngineFactory(OGS_SYSTEM_INTERFACE_VERSION, nullptr));
 	mpFileSystem = reinterpret_cast<IFileSystem*>(afnEngineFactory(OGS_FILESYSTEM_INTERFACE_VERSION, nullptr));
+	mpGameServer = reinterpret_cast<IGameServer*>(afnEngineFactory(OGS_GAMESERVER_INTERFACE_VERSION, nullptr));
 	mpVoiceServer = reinterpret_cast<IVoiceServer*>(afnEngineFactory(OGS_VOICESERVER_INTERFACE_VERSION, nullptr));
 	//mpPhysics = reinterpret_cast<IPhysicsSystem*>(afnEngineFactory(OGS_PHYSICSSYSTEM_INTERFACE_VERSION, nullptr));
 	//mpScript = reinterpret_cast<IScriptSystem*>(afnEngineFactory(OGS_SCRIPTSYSTEM_INTERFACE_VERSION, nullptr));
+	if(!mpSystem)
+		return false;
 	
 	if(!mpFileSystem)
+		return false;
+	
+	if(!mpGameServer)
 		return false;
 	
 	if(!mpVoiceServer)
@@ -43,10 +58,22 @@ bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 	//if(!mpPhysics)
 		//return false;
 	
-	RegisterEvents();
 	//if(!mpScript)
 		//return false;
 	
+	// Attach the system event listener
+	mpSystemEventListener = std::make_unique<CSystemEventListener_Game>();
+	mpSystem->AddListener(mpSystemEventListener.get());
+	
+	// Attach the game server event listener
+	mpGameServerEventListener = std::make_unique<CGameServerEventListener_Game>(this);
+	mpGameServer->AddListener(mpGameServerEventListener.get());
+	
+	// Attach the game client event listener
+	mpGameClientEventListener = std::make_unique<CGameClientEventListener>(this);
+	mpGameServer->AddClientListener(mpGameClientEventListener.get());
+	
+	RegisterEvents();
 	
 	// Manually init some parts for new engine as legacy engine inits them individually
 	// TODO: if not manual initialization?

@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019-2022 BlackPhrase
+ * Copyright (C) 2019-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,13 @@
 
 #pragma once
 
-#include "next/game/server/IGame.hpp"
+#include <memory>
 
+#include <next/game/server/IGame.hpp>
+
+interface ISystem;
 interface IFileSystem;
+interface IGameServer;
 interface IVoiceServer;
 interface IPhysicsSystem;
 interface IScriptSystem;
@@ -32,6 +36,10 @@ interface IScriptSystem;
 interface IGameRules;
 
 class IGameWorld;
+
+class CSystemEventListener_Game;
+class CGameServerEventListener;
+class CGameClientEventListener;
 
 class CBaseGame /*final*/ : public IGame
 {
@@ -62,7 +70,13 @@ protected:
 	virtual void InitPlayerMovement(){} // TODO: make public for legacy api
 	
 private:
+	std::unique_ptr<CSystemEventListener> mpSystemEventListener;
+	std::unique_ptr<CGameServerEventListener> mpGameServerEventListener;
+	std::unique_ptr<CGameClientEventListener> mpGameClientEventListener;
+	
+	ISystem *mpSystem{nullptr};
 	IFileSystem *mpFileSystem{nullptr};
+	IGameServer *mpGameServer{nullptr};
 	IVoiceServer *mpVoiceServer{nullptr};
 	IPhysicsSystem *mpPhysics{nullptr};
 	IScriptSystem *mpScript{nullptr};
