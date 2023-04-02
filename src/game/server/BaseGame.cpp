@@ -61,24 +61,27 @@ bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 	//if(!mpScript)
 		//return false;
 	
-	// Attach the system event listener
-	mpSystemEventListener = std::make_unique<CSystemEventListener_Game>();
-	mpSystem->AddListener(mpSystemEventListener.get());
-	
-	// Attach the game server event listener
-	mpGameServerEventListener = std::make_unique<CGameServerEventListener_Game>(this);
-	mpGameServer->AddListener(mpGameServerEventListener.get());
-	
-	// Attach the game client event listener
-	mpGameClientEventListener = std::make_unique<CGameClientEventListener>(this);
-	mpGameServer->AddClientListener(mpGameClientEventListener.get());
 	
 	RegisterEvents();
 	
-	// Manually init some parts for new engine as legacy engine inits them individually
+	// Manually init some parts here when running on the new engine as legacy engine initialized them on its side
 	// TODO: if not manual initialization?
 	if constexpr(TargetAPI == TargetEngineAPI::Next)
 	{
+		// TODO: either make the listeners only for Next or implement the system and the game server interfaces for legacy
+		
+		// Attach the system event listener
+		mpSystemEventListener = std::make_unique<CSystemEventListener_Game>();
+		mpSystem->AddListener(mpSystemEventListener.get());
+		
+		// Attach the game server event listener
+		mpGameServerEventListener = std::make_unique<CGameServerEventListener>(this);
+		mpGameServer->AddListener(mpGameServerEventListener.get());
+		
+		// Attach the game client event listener
+		mpGameClientEventListener = std::make_unique<CGameClientEventListener>(this);
+		mpGameServer->AddClientListener(mpGameClientEventListener.get());
+		
 		RegisterEncoders();
 	
 		InitPlayerMovement(); // TODO: move sv pmove struct instance here
