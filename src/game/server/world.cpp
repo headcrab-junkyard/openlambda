@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,10 @@
 /// @file
 /// @brief main/world setup functions
 
+#include <engine/edict.h>
+
 #include "exports.h"
 #include "engine.h"
-#include "edict.h"
 #include "BaseEntity.hpp"
 #include "Util.hpp"
 #include "World.hpp"
@@ -35,7 +36,14 @@ edict_t *bodyque_head{nullptr};
 
 CBaseEntity *lastspawn{nullptr};
 
-void InitBodyQue();
+extern int gbDisplayTitle;
+
+static void InitBodyQue();
+
+/// World spawn flags
+constexpr auto SF_WORLD_DARK{0x0001}; ///< Fade from black at startup
+constexpr auto SF_WORLD_TITLE{0x0002}; ///< Display game title at startup
+constexpr auto SF_WORLD_FORCETEAM{0x0004}; ///< Force teams
 
 //=======================
 /*QUAKED worldspawn (0 0 0) ?
@@ -53,204 +61,227 @@ LINK_ENTITY_TO_CLASS(worldspawn, CWorldSpawn);
 
 void CWorldSpawn::Spawn()
 {
-	lastspawn = nullptr; // nullptr = world entity
-
-// custom map attributes
-
-	gpEngine->pfnCVarSetString("sv_gravity", "800");
-	gpEngine->pfnCVarSetString("sv_stepsize", "18");
-	
-	gpEngine->pfnCVarSetString("room_type", "0");
-
-	InitBodyQue();
-
-// the area based ambient sounds MUST be the first precache_sounds
-
-// player precaches     
-	//W_Precache(); // get weapon precaches // TODO
-
-// sounds used from C physics code
-	gpEngine->pfnPrecacheSound ("demon/dland2.wav");            // landing thud
-	gpEngine->pfnPrecacheSound ("misc/h2ohit1.wav");            // landing splash
-
-// setup precaches allways needed
-	gpEngine->pfnPrecacheSound ("items/itembk2.wav");           // item respawn sound
-	gpEngine->pfnPrecacheSound ("player/plyrjmp8.wav");         // player jump
-	gpEngine->pfnPrecacheSound ("player/land.wav");                     // player landing
-	gpEngine->pfnPrecacheSound ("player/land2.wav");            // player hurt landing
-	gpEngine->pfnPrecacheSound ("player/drown1.wav");           // drowning pain
-	gpEngine->pfnPrecacheSound ("player/drown2.wav");           // drowning pain
-	gpEngine->pfnPrecacheSound ("player/gasp1.wav");            // gasping for air
-	gpEngine->pfnPrecacheSound ("player/gasp2.wav");            // taking breath
-	gpEngine->pfnPrecacheSound ("player/h2odeath.wav");         // drowning death
-
-	gpEngine->pfnPrecacheSound ("misc/talk.wav");                       // talk
-	gpEngine->pfnPrecacheSound ("player/teledth1.wav");         // telefrag
-	gpEngine->pfnPrecacheSound ("misc/r_tele1.wav");            // teleport sounds
-	gpEngine->pfnPrecacheSound ("misc/r_tele2.wav");
-	gpEngine->pfnPrecacheSound ("misc/r_tele3.wav");
-	gpEngine->pfnPrecacheSound ("misc/r_tele4.wav");
-	gpEngine->pfnPrecacheSound ("misc/r_tele5.wav");
-	gpEngine->pfnPrecacheSound ("weapons/lock4.wav");           // ammo pick up
-	gpEngine->pfnPrecacheSound ("weapons/pkup.wav");            // weapon up
-	gpEngine->pfnPrecacheSound ("items/armor1.wav");            // armor up
-	gpEngine->pfnPrecacheSound ("weapons/lhit.wav");            //lightning
-	gpEngine->pfnPrecacheSound ("weapons/lstart.wav");          //lightning start
-	gpEngine->pfnPrecacheSound ("items/damage3.wav");
-
-	gpEngine->pfnPrecacheSound ("misc/power.wav");                      //lightning for boss
-
-// player gib sounds
-	gpEngine->pfnPrecacheSound ("player/gib.wav");                      // player gib sound
-	gpEngine->pfnPrecacheSound ("player/udeath.wav");           // player gib sound
-	gpEngine->pfnPrecacheSound ("player/tornoff2.wav");         // gib sound
-
-// player pain sounds
-
-	gpEngine->pfnPrecacheSound ("player/pain1.wav");
-	gpEngine->pfnPrecacheSound ("player/pain2.wav");
-	gpEngine->pfnPrecacheSound ("player/pain3.wav");
-	gpEngine->pfnPrecacheSound ("player/pain4.wav");
-	gpEngine->pfnPrecacheSound ("player/pain5.wav");
-	gpEngine->pfnPrecacheSound ("player/pain6.wav");
-
-// player death sounds
-	gpEngine->pfnPrecacheSound ("player/death1.wav");
-	gpEngine->pfnPrecacheSound ("player/death2.wav");
-	gpEngine->pfnPrecacheSound ("player/death3.wav");
-	gpEngine->pfnPrecacheSound ("player/death4.wav");
-	gpEngine->pfnPrecacheSound ("player/death5.wav");
-
-	gpEngine->pfnPrecacheSound ("boss1/sight1.wav");
-
-// ax sounds    
-	gpEngine->pfnPrecacheSound ("weapons/ax1.wav");                     // ax swoosh
-	gpEngine->pfnPrecacheSound ("player/axhit1.wav");           // ax hit meat
-	gpEngine->pfnPrecacheSound ("player/axhit2.wav");           // ax hit world
-
-	gpEngine->pfnPrecacheSound ("player/h2ojump.wav");          // player jumping into water
-	gpEngine->pfnPrecacheSound ("player/slimbrn2.wav");         // player enter slime
-	gpEngine->pfnPrecacheSound ("player/inh2o.wav");            // player enter water
-	gpEngine->pfnPrecacheSound ("player/inlava.wav");           // player enter lava
-	gpEngine->pfnPrecacheSound ("misc/outwater.wav");           // leaving water sound
-
-	gpEngine->pfnPrecacheSound ("player/lburn1.wav");           // lava burn
-	gpEngine->pfnPrecacheSound ("player/lburn2.wav");           // lava burn
-
-	gpEngine->pfnPrecacheSound ("misc/water1.wav");                     // swimming
-	gpEngine->pfnPrecacheSound ("misc/water2.wav");                     // swimming
-
-// Invulnerability sounds
-	gpEngine->pfnPrecacheSound ("items/protect.wav");
-	gpEngine->pfnPrecacheSound ("items/protect2.wav");
-	gpEngine->pfnPrecacheSound ("items/protect3.wav");
-
-	/*
-	gpEngine->pfnPrecacheModel ("models/player.mdl");
-	gpEngine->pfnPrecacheModel ("models/eyes.mdl");
-	gpEngine->pfnPrecacheModel ("models/h_player.mdl");
-	gpEngine->pfnPrecacheModel ("models/gib1.mdl");
-	gpEngine->pfnPrecacheModel ("models/gib2.mdl");
-	gpEngine->pfnPrecacheModel ("models/gib3.mdl");
-
-	gpEngine->pfnPrecacheModel ("sprites/s_bubble.spr");  // drowning bubbles
-	gpEngine->pfnPrecacheModel ("sprites/s_explod.spr");  // sprite explosion
-
-	gpEngine->pfnPrecacheModel ("models/v_axe.mdl");
-	gpEngine->pfnPrecacheModel ("models/v_shot.mdl");
-	gpEngine->pfnPrecacheModel ("models/v_nail.mdl");
-
-	gpEngine->pfnPrecacheModel ("models/bolt.mdl");              // for lightning gun
-	gpEngine->pfnPrecacheModel ("models/bolt2.mdl");             // for lightning gun
-	gpEngine->pfnPrecacheModel ("models/bolt3.mdl");             // for boss shock
-	gpEngine->pfnPrecacheModel ("models/lavaball.mdl");  // for testing
-	
-	gpEngine->pfnPrecacheModel ("models/missile.mdl");
-	gpEngine->pfnPrecacheModel ("models/grenade.mdl");
-	gpEngine->pfnPrecacheModel ("models/spike.mdl");
-	gpEngine->pfnPrecacheModel ("models/s_spike.mdl");
-
-	gpEngine->pfnPrecacheModel ("models/backpack.mdl");
-
-	gpEngine->pfnPrecacheModel ("models/zom_gib.mdl");
-
-	gpEngine->pfnPrecacheModel ("models/v_light.mdl");
-	*/
-
-//
-// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
-//
-
-	// 0 normal
-	gpEngine->pfnLightStyle(0, "m");
-	
-	// 1 FLICKER (first variety)
-	gpEngine->pfnLightStyle(1, "mmnmmommommnonmmonqnmmo");
-	
-	// 2 SLOW STRONG PULSE
-	gpEngine->pfnLightStyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-	
-	// 3 CANDLE (first variety)
-	gpEngine->pfnLightStyle(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-	
-	// 4 FAST STROBE
-	gpEngine->pfnLightStyle(4, "mamamamamama");
-	
-	// 5 GENTLE PULSE 1
-	gpEngine->pfnLightStyle(5,"jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-	
-	// 6 FLICKER (second variety)
-	gpEngine->pfnLightStyle(6, "nmonqnmomnmomomno");
-	
-	// 7 CANDLE (second variety)
-	gpEngine->pfnLightStyle(7, "mmmaaaabcdefgmmmmaaaammmaamm");
-	
-	// 8 CANDLE (third variety)
-	gpEngine->pfnLightStyle(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-	
-	// 9 SLOW STROBE (fourth variety)
-	gpEngine->pfnLightStyle(9, "aaaaaaaazzzzzzzz");
-	
-	// 10 FLUORESCENT FLICKER
-	gpEngine->pfnLightStyle(10, "mmamammmmammamamaaamammma");
-
-	// 11 SLOW PULSE NOT FADE TO BLACK
-	gpEngine->pfnLightStyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-	
-	// styles 32-62 are assigned by the light program for switchable lights
-
-	// 63 testing
-	gpEngine->pfnLightStyle(63, "a");
-	
-	//
-	
-	gpEngine->pfnCVarSetFloat("sv_zmax", 4096);
-	
-	if(self->speed > 0)
-		gpEngine->pfnCVarSetFloat("sv_zmax", self->speed);
-	
-	if(self->netname)
+	//Precache();
 	{
-		auto pEntity{nullptr};
-		if(pEntity)
+		lastspawn = nullptr; // nullptr = world entity
+		
+		// Custom map attributes
+		
+		gpEngine->pfnCVarSetString("sv_gravity", "800"); // 67 ft/sec
+		//gpEngine->pfnCVarSetString("sv_stepsize", "18");
+		
+		gpEngine->pfnCVarSetString("room_type", "0"); // Clear DSP
+		
+		// Set up game rules
+		if(gpGameRules)
+			delete gpGameRules;
+		
+		gpGameRules = gpGame->InstallRules();
+		
+		//pSoundEnt->Spawn();
+		
+		InitBodyQue();
+		
+		// Init sentence group playback stuff from sentences.txt
+		// Ok to call this multiple times, calls after first will be ignored
+		//SENTENCEG_Init();
+		
+		// Init texture type array from materials.txt
+		//TEXTURETYPE_Init();
+		
+		// The area based ambient sounds MUST be the first precache_sounds
+		
+		// Player precaches     
+		//W_Precache(); // Get weapon precaches // TODO
+		
+		//ClientPrecache();
+		
+		// Sounds used from C physics code
+		gpEngine->pfnPrecacheSound("common/null.wav"); // Clears sound channels
+		
+		gpEngine->pfnPrecacheSound ("demon/dland2.wav");            // landing thud
+		gpEngine->pfnPrecacheSound ("misc/h2ohit1.wav");            // landing splash
+		
+		// Setup precaches always needed
+		gpEngine->pfnPrecacheSound ("items/itembk2.wav");           // item respawn sound
+		gpEngine->pfnPrecacheSound ("player/plyrjmp8.wav");         // player jump
+		gpEngine->pfnPrecacheSound ("player/land.wav");                     // player landing
+		gpEngine->pfnPrecacheSound ("player/land2.wav");            // player hurt landing
+		gpEngine->pfnPrecacheSound ("player/drown1.wav");           // drowning pain
+		gpEngine->pfnPrecacheSound ("player/drown2.wav");           // drowning pain
+		gpEngine->pfnPrecacheSound ("player/gasp1.wav");            // gasping for air
+		gpEngine->pfnPrecacheSound ("player/gasp2.wav");            // taking breath
+		gpEngine->pfnPrecacheSound ("player/h2odeath.wav");         // drowning death
+
+		gpEngine->pfnPrecacheSound ("misc/talk.wav");                       // talk
+		gpEngine->pfnPrecacheSound ("player/teledth1.wav");         // telefrag
+		
+		gpEngine->pfnPrecacheSound ("misc/r_tele1.wav");            // teleport sounds
+		gpEngine->pfnPrecacheSound ("misc/r_tele2.wav");
+		gpEngine->pfnPrecacheSound ("misc/r_tele3.wav");
+		gpEngine->pfnPrecacheSound ("misc/r_tele4.wav");
+		gpEngine->pfnPrecacheSound ("misc/r_tele5.wav");
+		
+		gpEngine->pfnPrecacheSound ("weapons/lock4.wav");           // ammo pick up
+		gpEngine->pfnPrecacheSound ("weapons/pkup.wav");            // weapon up
+		gpEngine->pfnPrecacheSound ("items/armor1.wav");            // armor up
+		gpEngine->pfnPrecacheSound ("weapons/lhit.wav");            //lightning
+		gpEngine->pfnPrecacheSound ("weapons/lstart.wav");          //lightning start
+		gpEngine->pfnPrecacheSound ("items/damage3.wav");
+
+		gpEngine->pfnPrecacheSound ("misc/power.wav");                      //lightning for boss
+
+		// player gib sounds
+		gpEngine->pfnPrecacheSound ("player/gib.wav");                      // player gib sound
+		gpEngine->pfnPrecacheSound ("player/udeath.wav");           // player gib sound
+		gpEngine->pfnPrecacheSound ("player/tornoff2.wav");         // gib sound
+
+		// player pain sounds
+		gpEngine->pfnPrecacheSound ("player/pain1.wav");
+		gpEngine->pfnPrecacheSound ("player/pain2.wav");
+		gpEngine->pfnPrecacheSound ("player/pain3.wav");
+		gpEngine->pfnPrecacheSound ("player/pain4.wav");
+		gpEngine->pfnPrecacheSound ("player/pain5.wav");
+		gpEngine->pfnPrecacheSound ("player/pain6.wav");
+
+		// player death sounds
+		gpEngine->pfnPrecacheSound ("player/death1.wav");
+		gpEngine->pfnPrecacheSound ("player/death2.wav");
+		gpEngine->pfnPrecacheSound ("player/death3.wav");
+		gpEngine->pfnPrecacheSound ("player/death4.wav");
+		gpEngine->pfnPrecacheSound ("player/death5.wav");
+
+		gpEngine->pfnPrecacheSound ("boss1/sight1.wav");
+
+		// axe sounds    
+		gpEngine->pfnPrecacheSound ("weapons/ax1.wav");                     // ax swoosh
+		gpEngine->pfnPrecacheSound ("player/axhit1.wav");           // ax hit meat
+		gpEngine->pfnPrecacheSound ("player/axhit2.wav");           // ax hit world
+
+		gpEngine->pfnPrecacheSound ("player/h2ojump.wav");          // player jumping into water
+		gpEngine->pfnPrecacheSound ("player/slimbrn2.wav");         // player enter slime
+		gpEngine->pfnPrecacheSound ("player/inh2o.wav");            // player enter water
+		gpEngine->pfnPrecacheSound ("player/inlava.wav");           // player enter lava
+		gpEngine->pfnPrecacheSound ("misc/outwater.wav");           // leaving water sound
+
+		gpEngine->pfnPrecacheSound ("player/lburn1.wav");           // lava burn
+		gpEngine->pfnPrecacheSound ("player/lburn2.wav");           // lava burn
+
+		gpEngine->pfnPrecacheSound ("misc/water1.wav");                     // swimming
+		gpEngine->pfnPrecacheSound ("misc/water2.wav");                     // swimming
+
+		// Invulnerability sounds
+		gpEngine->pfnPrecacheSound ("items/protect.wav");
+		gpEngine->pfnPrecacheSound ("items/protect2.wav");
+		gpEngine->pfnPrecacheSound ("items/protect3.wav");
+
+		//gpEngine->pfnPrecacheModel ("models/player.mdl"); // TODO: studio models are not supported yet...
+		/*
+		gpEngine->pfnPrecacheModel ("models/eyes.mdl");
+		gpEngine->pfnPrecacheModel ("models/h_player.mdl");
+		gpEngine->pfnPrecacheModel ("models/gib1.mdl");
+		gpEngine->pfnPrecacheModel ("models/gib2.mdl");
+		gpEngine->pfnPrecacheModel ("models/gib3.mdl");
+
+		gpEngine->pfnPrecacheModel ("sprites/s_bubble.spr");  // drowning bubbles
+		gpEngine->pfnPrecacheModel ("sprites/s_explod.spr");  // sprite explosion
+
+		gpEngine->pfnPrecacheModel ("models/v_axe.mdl");
+		gpEngine->pfnPrecacheModel ("models/v_shot.mdl");
+		gpEngine->pfnPrecacheModel ("models/v_nail.mdl");
+
+		gpEngine->pfnPrecacheModel ("models/bolt.mdl");              // for lightning gun
+		gpEngine->pfnPrecacheModel ("models/bolt2.mdl");             // for lightning gun
+		gpEngine->pfnPrecacheModel ("models/bolt3.mdl");             // for boss shock
+		gpEngine->pfnPrecacheModel ("models/lavaball.mdl");  // for testing
+		
+		gpEngine->pfnPrecacheModel ("models/missile.mdl");
+		gpEngine->pfnPrecacheModel ("models/grenade.mdl");
+		gpEngine->pfnPrecacheModel ("models/spike.mdl");
+		gpEngine->pfnPrecacheModel ("models/s_spike.mdl");
+
+		gpEngine->pfnPrecacheModel ("models/backpack.mdl");
+
+		gpEngine->pfnPrecacheModel ("models/zom_gib.mdl");
+
+		gpEngine->pfnPrecacheModel ("models/v_light.mdl");
+		*/
+
+	//
+	// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
+	//
+
+		// 0 normal
+		gpEngine->pfnLightStyle(0, "m");
+		
+		// 1 FLICKER (first variety)
+		gpEngine->pfnLightStyle(1, "mmnmmommommnonmmonqnmmo");
+		
+		// 2 SLOW STRONG PULSE
+		gpEngine->pfnLightStyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
+		
+		// 3 CANDLE (first variety)
+		gpEngine->pfnLightStyle(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
+		
+		// 4 FAST STROBE
+		gpEngine->pfnLightStyle(4, "mamamamamama");
+		
+		// 5 GENTLE PULSE 1
+		gpEngine->pfnLightStyle(5,"jklmnopqrstuvwxyzyxwvutsrqponmlkj");
+		
+		// 6 FLICKER (second variety)
+		gpEngine->pfnLightStyle(6, "nmonqnmomnmomomno");
+		
+		// 7 CANDLE (second variety)
+		gpEngine->pfnLightStyle(7, "mmmaaaabcdefgmmmmaaaammmaamm");
+		
+		// 8 CANDLE (third variety)
+		gpEngine->pfnLightStyle(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
+		
+		// 9 SLOW STROBE (fourth variety)
+		gpEngine->pfnLightStyle(9, "aaaaaaaazzzzzzzz");
+		
+		// 10 FLUORESCENT FLICKER
+		gpEngine->pfnLightStyle(10, "mmamammmmammamamaaamammma");
+
+		// 11 SLOW PULSE NOT FADE TO BLACK
+		gpEngine->pfnLightStyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
+		
+		// styles 32-62 are assigned by the light program for switchable lights
+
+		// 63 testing
+		gpEngine->pfnLightStyle(63, "a");
+		
+		//
+		
+		gpEngine->pfnCVarSetFloat("sv_zmax", 4096);
+		
+		if(self->speed > 0)
+			gpEngine->pfnCVarSetFloat("sv_zmax", self->speed);
+		
+		if(self->netname)
 		{
+			auto pEntity{nullptr};
+			if(pEntity)
+			{
+			};
 		};
+		
+		gpEngine->pfnCVarSetFloat("v_dark", 0.0f);
+		
+		if(self->spawnflags & SF_WORLD_DARK)
+			gpEngine->pfnCVarSetFloat("v_dark", 1.0f);
+		
+		gbDisplayTitle = false;
+		
+		if(self->spawnflags & SF_WORLD_TITLE)
+			gbDisplayTitle = true;
+		
+		gpEngine->pfnCVarSetFloat("mp_defaultteam", 0);
+		
+		if(self->spawnflags & SF_WORLD_FORCETEAM)
+			gpEngine->pfnCVarSetFloat("mp_defaultteam", 1);
 	};
-	
-	gpEngine->pfnCVarSetFloat("v_dark", 0.0f);
-	
-	if(self->spawnflags & SF_WORLD_DARK)
-		gpEngine->pfnCVarSetFloat("v_dark", 1.0f);
-	
-	gbDisplayTitle = false;
-	
-	if(self->spawnflags & SF_WORLD_TITLE)
-		gbDisplayTitle = true;
-	
-	gpEngine->pfnCVarSetFloat("mp_defaultteam", 0);
-	
-	if(self->spawnflags & SF_WORLD_FORCETEAM)
-		gpEngine->pfnCVarSetFloat("mp_defaultteam", 1);
 };
 
 bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &asValue)
@@ -290,7 +321,7 @@ bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &as
 	else if(asKey == "newunit")
 	{
 		if(std::stoi(asValue))
-			gpEngine->pfnCVarSetFloat("sv_newunit", "1");
+			gpEngine->pfnCVarSetFloat("sv_newunit", 1.0f);
 		return true;
 	}
 	else if(asKey == "gametitle")
@@ -359,21 +390,27 @@ void CopyToBodyQue(entvars_t *ent)
 	if(ent->effects & EF_NODRAW)
 		return;
 	
-	auto pBodyQueVars{gpEngine->pfnGetVarsOfEntity(bodyque_head)};
+	auto pBodyQueVars{gpEngine->pfnGetVarsOfEnt(bodyque_head)};
 	
-	pBodyQueVars->angles = ent->angles;
+	//pBodyQueVars->angles = ent->angles; // TODO
+	pBodyQueVars->angles[0] = ent->angles[0];
+	pBodyQueVars->angles[1] = ent->angles[1];
+	pBodyQueVars->angles[2] = ent->angles[2];
 	pBodyQueVars->model = ent->model;
 	pBodyQueVars->modelindex = ent->modelindex;
 	pBodyQueVars->frame = ent->frame;
 	pBodyQueVars->colormap = ent->colormap;
 	pBodyQueVars->movetype = MOVETYPE_TOSS; // TODO: was ent->movetype
-	pBodyQueVars->velocity = ent->velocity;
+	//pBodyQueVars->velocity = ent->velocity; // TODO
+	pBodyQueVars->velocity[0] = ent->velocity[0];
+	pBodyQueVars->velocity[1] = ent->velocity[1];
+	pBodyQueVars->velocity[2] = ent->velocity[2];
 	pBodyQueVars->flags = 0;
 	
 	pBodyQueVars->deadflag = ent->deadflag;
 	
 	pBodyQueVars->renderfx = kRenderFxDeadPlayer; // TODO
-	pBodyQueVars->renderamt = GetEntityIndex(GetEntityFromVars(ent)); // TODO
+	//pBodyQueVars->renderamt = GetEntityIndex(GetEntityFromVars(ent)); // TODO
 	
 	pBodyQueVars->effects = ent->effects | EF_NOINTERP;
 	
