@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2022 BlackPhrase
+ * Copyright (C) 2018-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,43 @@ enum class TargetEngineAPI : int
 	constexpr auto TargetAPI{TargetEngineAPI::Next};
 #endif
 
-edict_t *CBaseEntity::ToEdict() const
+/*
+================
+Save
+================
+*/
+int CBaseEntity::Save(CGameSave &aGameSave)
 {
-	if constexpr(TargetAPI == TargetEngineAPI::Next)
-		return nullptr; // TODO
-	else
-		return gpEngine->pfnFindEntityByVars(self);
+	if(aGameSave.WriteEntVars("ENTVARS", self))
+		return aGameSave.WriteFields("BASE", this, mSaveData, ARRAYSIZE(mSaveData));
+	return 0;
+};
+
+/*
+================
+Restore
+================
+*/
+int CBaseEntity::Restore(const CGameSave &aGameSave)
+{
+	int nStatus{aGameSave.ReadEntVars("ENTVARS", self)};
+	
+	if(nStatus)
+		nStatus = aGameSave.ReadFields("BASE", this, mSaveData, ARRAYSIZE(mSaveData));
+	
+	if(self->modelindex != 0 && !IsNullString(self->model))
+	{
+		// Set model is about to destroy these
+		idVec3 vMins{self->mins};
+		idVec3 vMaxs{self->maxs};
+		
+		mpGame->GetResourceLoader()->PrecacheResource(reinterpret_cast<char*>(gpEngine->pfnGetString(self->model))); // TODO: PreloadResource()/PrecacheModel()?
+		
+		SetModel(gpEngine->pfnGetString(self->model));
+		SetSize(vMins, vMaxs); // Reset them
+	};
+	
+	return nStatus;
 };
 
 /*
@@ -81,15 +112,16 @@ void CBaseEntity::TraceAttack(CBaseEntity *apAttacker, float afDamage, const idV
 T_Damage
 
 The damage is coming from inflictor, but get mad at attacker
-This should be the only function that ever reduces health.
+This should be the only function that ever reduces health
+Inflict damage on this entity. anDmgBitSum indicates type of damage inflicted, ie DMG_CRUSH
 ============
 */
 int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float afDamage, int anDmgBitSum)
 {
-	idVec3 dir;
-
 	if(!IsDamageable())
 		return 0;
+	
+	// Some entity types may be immune or resistant to some damage types
 
 	//----(SA)	added
 	//if( g_gametype.integer == GT_SINGLE_PLAYER && !targ->aiCharacter && targ->client && targ->client->cameraPortal )
@@ -122,11 +154,27 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 	};
 */
 
-// save damage based on the target's armor level
+	/*
+	idVec3 vTemp{inflictor->GetOrigin() - VecBModelOrigin(self)};
+	
+	// If attacker == inflictor, the attack was a melee or other instant-hit attack
+	// (that is, no actual entity projectile was involved in the attack so use the
+	// shooter's origin)
+	if(attacker == inflictor)
+		vTemp = inflictor->GetOrigin() - VecBModelOrigin(self);
+	else
+		// An actual missile was involved
+		;
+	
+	// This global is still used for glass and other non-monster killables, along with decals
+	gvAttackDir = vTemp.Normalize();
+	*/
+
+	// Save damage based on the target's armor level
 
 	float save = ceil(GetArmorType() * afDamage); // TODO: int?
 /*
-	if (save >= GetArmorValue())
+	if(save >= GetArmorValue())
 	{
 		save = GetArmorValue();
 		SetArmorType(0);     // lost all armor
@@ -139,10 +187,10 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 	float take = ceil(afDamage - save); // TODO: int?
 
 /*
-// add to the damage total for clients, which will be sent as a single
-// message at the end of the frame
-// FIXME: remove after combining shotgun blasts?
-	if (GetFlags() & FL_CLIENT)
+	// add to the damage total for clients, which will be sent as a single
+	// message at the end of the frame
+	// FIXME: remove after combining shotgun blasts?
+	if(HasFlags(FL_CLIENT))
 	{
 		self->dmg_take += take;
 		self->dmg_save += save;
@@ -152,10 +200,10 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 	damage_inflictor = inflictor;
 */
 
-	// figure momentum add
-	if((inflictor != world) && (GetMoveType() == MOVETYPE_WALK))
+	// Figure momentum add (don't let hurt brushes or other triggers move player)
+	if((inflictor != nullptr) && (GetMoveType() == CBaseEntity::MoveType::Walk || GetMoveType() == CBaseEntity::MoveType::Step) && (attacker->GetSolidity() != CBaseEntity::Solidity::Trigger)) // TODO: was check for world entity instead of nullptr (but works the same way)
 	{
-		dir = GetOrigin() - (inflictor->GetAbsMin() + inflictor->GetAbsMax()) * 0.5;
+		idVec3 dir = GetOrigin() - (inflictor->GetAbsMin() + inflictor->GetAbsMax()) * 0.5;
 		dir = dir.Normalize();
 		
 		// Set kickback for smaller weapons
@@ -165,10 +213,9 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 //			self->v.velocity = self->v.velocity + dir * afDamage * 11;
 //		else
 		{
-			// Otherwise, these rules apply to rockets and grenades                        
-			// for blast velocity
+			// Otherwise, these rules apply to rockets and grenades for blast velocity
 			
-			float fForce{afDamage * 8};
+			float fForce{afDamage * ((32 * 32 * 72.0) / (GetSize().x * GetSize().y * GetSize().z)) * 5}; // TODO: was {afDamage * 8};
 			
 			if(fForce > 1000.0f)
 				fForce = 1000.0f;
@@ -183,7 +230,7 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 
 /*
 	// check for godmode or invincibility
-	if(GetFlags() & FL_GODMODE)
+	if(HasFlags(FL_GODMODE))
 		return 0;
 	
 	if(self->invincible_finished >= gpGlobals->time)
@@ -212,12 +259,12 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 		return 0;
 */
 	
-	// do the damage
-	AddHealth(-take);
+	// Do the damage
+	AddHealth(-take); // TODO: TakeHealth?
 
 	if(GetHealth() <= 0)
 	{
-		Killed(attacker, inflictor, GIB_NORMAL); // TODO
+		Killed(attacker, inflictor, CBaseEntity::GibType::Normal); // TODO
 		return 0;
 	};
 
@@ -227,13 +274,13 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 	//CBaseEntity *oldself{self};
 
 /*SERVER
-	if ( (self.flags & FL_MONSTER) && attacker != world)
+	if ((HasFlags(FL_MONSTER)) && attacker != world)
 	{
 	// get mad unless of the same class (except for soldiers)
 		if (self != attacker && attacker != self->GetEnemy())
 		{
-			if ( (self.classname != attacker.classname) 
-			|| (self.classname == "monster_army" ) )
+			if ( (GetClassName() != attacker.classname) 
+			|| (GetClassName() == "monster_army" ) )
 			{
 				if (GetEnemy()->GetClassName() == "player")
 					self.oldenemy = GetEnemy();
@@ -250,6 +297,11 @@ int CBaseEntity::TakeDamage(CBaseEntity *inflictor, CBaseEntity *attacker, float
 	return 1;
 };
 
+/*
+============
+TakeHealth
+============
+*/
 int CBaseEntity::TakeHealth(float afValue, int anDmgBitSum)
 {
 	if(!IsDamageable())
@@ -271,12 +323,12 @@ int CBaseEntity::TakeHealth(float afValue, int anDmgBitSum)
 Killed
 ============
 */
-void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGib) // TODO: no last inflictor in original hl code, only source sdk
+void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, GibType aeGibType) // TODO: no last inflictor in original hl code, only source sdk // TODO: handle the gib type
 {
 	//CBaseEntity *oself{self};
 
 	/*
-	if(GetMoveType() == MOVETYPE_PUSH || GetMoveType() == MOVETYPE_NONE)
+	if(GetMoveType() == CBaseEntity::MoveType::Push || GetMoveType() == CBaseEntity::MoveType::None)
 	{
 		// doors, triggers, etc
 		self->th_die();
@@ -287,7 +339,7 @@ void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, 
 	
 	/*
 	// bump the monster counter
-	if(GetFlags() & FL_MONSTER)
+	if(HasFlags(FL_MONSTER))
 	{
 		gpGlobals->killed_monsters++;
 		gpEngine->pfnMessageBegin(MSG_ALL, SVC_KILLEDMONSTER);
@@ -298,7 +350,7 @@ void CBaseEntity::Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, 
 
 	//ClientObituary(self, apAttacker);
 	
-	SetDamageable(DAMAGE_NO);
+	SetDamageable(CBaseEntity::Damageable::No);
 	//SetTouchCallback(CBaseEntity::SUB_Null);
 	//SetEffects(0);
 	SetDeadFlag(DEAD_DEAD);
@@ -337,24 +389,101 @@ void CBaseEntity::FireBullets(float shotcount, const idVec3 &avDir, const idVec3
 	
 	//puff_org = hit.vecEndPos - avDir * 4;
 
-	idVec3 direction;
+	idVec3 vDirection;
 	
 	while(shotcount > 0)
 	{
-		direction = avDir + crandom() * avSpread.x * gpGlobals->v_right + crandom() * avSpread.y * gpGlobals->v_up;
+		vDirection = avDir + crandom() * avSpread.x * gpGlobals->v_right + crandom() * avSpread.y * gpGlobals->v_up;
 		
 		TraceResult hit{};
-		mpWorld->TraceLine(src, src + direction * 2048, false, this, &hit);
+		mpWorld->TraceLine(src, src + vDirection * 2048, false, this, &hit);
 		
 		if(hit.flFraction != 1.0)
-			TraceAttack(apAttacker, 4, direction, hit, 0); // TODO
-
+			TraceAttack(apAttacker, 4, vDirection, hit, 0); // TODO
+		
 		--shotcount;
 	};
 	
 	ApplyMultiDamage(this, apAttacker);
 };
+
+/*
+================
+EmitSound
+================
+*/
+void CBaseEntity::EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags, int anPitch)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnEmitSound(ToEdict(), anChannel, asSample.c_str(), afVolume, afAttenuation, anFlags, anPitch);
+};
+
+/*
+================
+MakeStatic
+================
+*/
+void CBaseEntity::MakeStatic()
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnMakeStatic(ToEdict());
+};
+
+/*
+================
+MakeDormant
+================
+*/
+void CBaseEntity::MakeDormant()
+{
+	AddFlags(FL_DORMANT); // SetBits(self->flags, FL_DORMANT);
 	
+	SetSolidity(CBaseEntity::Solidity::Not); // Don't touch
+	SetMoveType(CBaseEntity::MoveType::None); // Don't move
+	AddEffects(EF_NODRAW); //SetBits(self->effects, EF_NODRAW); // Don't draw
+	SetNextThink(0); // Don't think
+	
+	// Relink
+	SetOrigin(GetOrigin()); // TODO: UpdateOrigin/ResetOrigin()?
+};
+
+/*
+================
+SUB_Remove
+================
+*/
+void CBaseEntity::SUB_Remove()
+{
+	if(GetHealth() > 0)
+	{
+		SetHealth(0);
+	};
+	
+	mpWorld->RemoveEntity(this);
+};
+
+/*
+================
+ToEdict
+================
+*/
+edict_t *CBaseEntity::ToEdict() const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return nullptr; // TODO
+	else
+		return gpEngine->pfnFindEntityByVars(self);
+};
+
+/*
+================
+GetIndex
+================
+*/
 int CBaseEntity::GetIndex() const
 {
 	if constexpr(TargetAPI == TargetEngineAPI::Next)
@@ -363,6 +492,11 @@ int CBaseEntity::GetIndex() const
 		return gpEngine->pfnIndexOfEdict(ToEdict());
 };
 
+/*
+================
+SetModel
+================
+*/
 void CBaseEntity::SetModel(const std::string &asName)
 {
 	if constexpr(TargetAPI == TargetEngineAPI::Next)
@@ -371,6 +505,11 @@ void CBaseEntity::SetModel(const std::string &asName)
 		gpEngine->pfnSetModel(ToEdict(), asName.c_str());
 };
 
+/*
+================
+SetOrigin
+================
+*/
 void CBaseEntity::SetOrigin(const idVec3 &avOrigin)
 {
 	mvOrigin = avOrigin;
@@ -381,6 +520,11 @@ void CBaseEntity::SetOrigin(const idVec3 &avOrigin)
 		gpEngine->pfnSetOrigin(ToEdict(), avOrigin);
 };
 
+/*
+================
+SetSize
+================
+*/
 void CBaseEntity::SetSize(const idVec3 &avMins, const idVec3 &avMaxs)
 {
 	mSize.mins = avMins;
@@ -392,22 +536,11 @@ void CBaseEntity::SetSize(const idVec3 &avMins, const idVec3 &avMaxs)
 		gpEngine->pfnSetSize(ToEdict(), avMins, avMaxs);
 };
 
-void CBaseEntity::EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags, int anPitch)
-{
-	if constexpr(TargetAPI == TargetEngineAPI::Next)
-		; // TODO
-	else
-		gpEngine->pfnEmitSound(ToEdict(), anChannel, asSample.c_str(), afVolume, afAttenuation, anFlags, anPitch);
-};
-
-void CBaseEntity::MakeStatic()
-{
-	if constexpr(TargetAPI == TargetEngineAPI::Next)
-		; // TODO
-	else
-		gpEngine->pfnMakeStatic(ToEdict());
-};
-
+/*
+================
+GetNoise
+================
+*/
 const std::string &CBaseEntity::GetNoise() const
 {
 	if constexpr(TargetAPI == TargetEngineAPI::Next)
@@ -416,6 +549,11 @@ const std::string &CBaseEntity::GetNoise() const
 		return gpEngine->pfnSzFromIndex(self->noise);
 };
 
+/*
+================
+SetTarget
+================
+*/
 void CBaseEntity::SetTarget(const char *asTarget)
 {
 	if constexpr(TargetAPI == TargetEngineAPI::Next)
@@ -424,12 +562,12 @@ void CBaseEntity::SetTarget(const char *asTarget)
 		self->target = gpEngine->pfnAllocString(asTarget); // TODO: pfnMakeString
 };
 
-void CBaseEntity::SUB_Remove()
+/*
+================
+SetCollisionBox
+================
+*/
+void CBaseEntity::SetCollisionBox()
 {
-	if(GetHealth() > 0)
-	{
-		SetHealth(0);
-	};
-	
-	mpWorld->RemoveEntity(this);
+	::SetObjectCollisionBox(self);
 };
