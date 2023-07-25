@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2019, 2021-2022 BlackPhrase
+ * Copyright (C) 2018-2019, 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <engine/edict.h>
 
 #include <SystemEventListener_Game.hpp>
+#include <GameServerEventListener.hpp>
 #include <GameClientEventListener.hpp>
 
 #include "Game.hpp"
@@ -36,14 +37,19 @@
 #include "Util.hpp"
 #include "BaseEntity.hpp"
 
-void set_suicide_frame(entvars_t *self);
-
-
 CSystemEventListener_Game gSystemEventListener;
 ISystemEventListener *gpSystemEventListener{&gSystemEventListener};
 
-CGameClientEventListener gGameClientEventListener;
+CGameServerEventListener gGameServerEventListener(gpGame);
+CGameServerEventListener *gpGameServerEventListener{&gGameServerEventListener};
+
+CGameClientEventListener gGameClientEventListener(gpGame);
 CGameClientEventListener /*IGameClientEventListener*/ *gpGameClientEventListener{&gGameClientEventListener}; // TODO: can't use the IGameClientEventListener here as we need to access the OnClientKill method of the CGameClientEventListener class
+
+CBasePlayer *ToBasePlayer(CBaseEntity *apEntity)
+{
+	return static_cast<CBasePlayer*>(apEntity->GetPrivateData());
+};
 
 
 int ToClientID(edict_t *apEntDict)
@@ -82,22 +88,25 @@ respawn
 called by ClientKill and DeadThink
 ================
 */
-void respawn(entvars_t *self)
+void respawn(entvars_t *self, bool bCopyCorpse)
 {
 	if(gpGlobals->coop || gpGlobals->deathmatch)
 	{
-		// make a copy of the dead body for appearances sake
-		CopyToBodyQue(self);
+		if(bCopyCorpse)
+		(
+			// Make a copy of the dead body for appearances sake
+			CopyToBodyQue(self);
+		};
 		
 		// set default spawn parms
-		//SetNewParms (self);
+		//SetNewParms(self);
 		
-		// respawn              
+		// Respawn player    
 		//ClientPutInServer(self);
-		ToBaseEntity(self)->Spawn();
+		ToBaseEntity(self)->Spawn(); // GetClassPtr((CBasePlayer*)self)->Spawn();
 	}
 	else
-		gpEngine->pfnServerCommand("reload\n");
+		gpEngine->pfnServerCommand("reload\n"); // Restart the entire server
 };
 
 /*
@@ -131,8 +140,8 @@ ClientCommand
 */
 void ClientCommand(edict_t *pclent)
 {
-	CCmdArgs CmdArgs;
-	// TODO: cmd args
+	auto sCmdArgs{gpEngine->pfnCmd_Args()};
+	CCmdArgs CmdArgs(sCmdArgs);
 	gpGameClientEventListener->OnClientCommand(ToClientID(pclent), CmdArgs);
 };
 
@@ -153,7 +162,8 @@ ServerActivate
 */
 void ServerActivate(edict_t *edicts, int edictcount, int maxclients)
 {
-	// TODO
+	gpGameServerEventListener->mvEdicts = edicts; // BP: meh...
+	gpGameServerEventListener->OnActivate(edictcount, maxclients);
 };
 
 /*
@@ -163,7 +173,7 @@ ServerDeactivate
 */
 void ServerDeactivate()
 {
-	// TODO
+	gpGameServerEventListener->OnDeactivate();
 };
 
 /*
@@ -224,6 +234,7 @@ ParmsChangeLevel
 void ParmsChangeLevel() // TODO: SetChangeParms?
 {
 	// TODO
+	//gpGame->OnChangeLevel()?
 };
 
 /*
@@ -243,12 +254,14 @@ GetGameDescription
 */
 const char *GetGameDescription()
 {
-	return "Stub (Null)";
+	return "Untitled game/mod"; // TODO: gpGame->GetDescription() or GetTitle()
 };
 
 /*
 ================
-Sys_Error_Game
+Sys_Error
+
+Engine is going to shut down, allows setting a breakpoint here to catch that occasion
 ================
 */
 void Sys_Error_Game(const char *error)
@@ -274,7 +287,7 @@ CvarValue
 void CvarValue(const edict_t *pent, const char *value)
 {
 	// TODO: how to handle that?
-	//gpGameClientEventListener->OnClientCvarValueReceived(ToClientID(pent), 0, "TODO", value);
+	//gpGameClientEventListener->OnCvarValueReceived(ToClientID(pent), 0, "TODO", value);
 };
 
 /*
@@ -284,7 +297,7 @@ CvarValue2
 */
 void CvarValue2(const edict_t *pent, int requestid, const char *cvarname, const char *value)
 {
-	gpGameClientEventListener->OnClientCvarValueReceived(ToClientID(pent), requestid, cvarname, value);
+	gpGameClientEventListener->OnCvarValueReceived(ToClientID(pent), requestid, cvarname, value);
 };
 
 // Spectator functions (unused)
@@ -303,7 +316,7 @@ void CvarValue2(const edict_t *pent, int requestid, const char *cvarname, const 
 ===========
 SpectatorConnect
 
-called when a spectator connects to a server
+Called when a spectator connects to a server
 ============
 */
 void SpectatorConnect(edict_t *self)
@@ -322,7 +335,7 @@ void SpectatorConnect(edict_t *self)
 ===========
 SpectatorDisconnect
 
-called when a spectator disconnects from a server
+Called when a spectator disconnects from a server
 ============
 */
 void SpectatorDisconnect(edict_t *self)
@@ -386,11 +399,41 @@ void SpectatorThink(edict_t *self)
 /*
 ================
 SetupVisibility
+
+A client can have a separate "view entity" indicating that his/her view should
+depend on the origin of that view entity. If that's the case, then pViewEntity will
+be non-null and will be used. Otherwise, the current entity's origin is used
+Either is offset by the view_ofs to get the eye position
+From the eye position, we set up the PVS and PAS to use for filtering network
+messages to the client. At this point, we could override the actual PAS or PVS
+values, or use a different origin
+
+NOTE: Do not cache the values of PAS and PVS, as they depend on reusable memory in
+the engine, they are only good for this one frame
 ================
 */
 void SetupVisibility(edict_t *pViewEntity, edict_t *pClientEnt, byte **pvs, byte **pas)
 {
-	// TODO
+	edict_t *pView{pClientEnt};
+	
+	// Find the client's PVS
+	if(pViewEntity)
+		pView = pViewEntity;
+	
+	if(pClientEnt->v.flag & FL_PROXY)
+	{
+		*pvs = nullptr; // The spectator proxy sees
+		*pas = nullptr; // and hears everything
+		return;
+	};
+	
+	idVec3 vOrigin{pView->v.origin + pView->v.view_ofs};
+	
+	if(pView->v.flags & FL_DUCKING)
+		vOrigin += (VEC_HULL_MIN - VEC_DUCK_HULL_MIN);
+	
+	*pvs = gpEngine->pfnSetPVS((float*)&vOrigin);
+	*pas = gpEngine->pfnSetPAS((float*)&vOrigin);
 };
 
 /*
@@ -400,6 +443,7 @@ AddToFullPack
 */
 int AddToFullPack(struct entity_state_s *state, int e, edict_t *pent, edict_t *host_edict, int hostflags, int player, byte *pSet)
 {
+	// TODO
 	return 0;
 };
 
@@ -410,67 +454,270 @@ CreateBaseline
 */
 void CreateBaseline(int player, int entindex, struct entity_state_s *baseline, edict_t *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
 {
-	// TODO
+	baseline->origin = entity->v.origin;
+	baseline->angles = entity->v.angles;
+	baseline->frame = entity->v.frame;
+	baseline->skin = (short)entity->v.skin;
+	
+	// Render info
+	baseline->rendermode = (byte)entity->v.rendermode;
+	baseline->renderamt = (byte)entity->v.renderamt;
+	baseline->rendercolor.r = (byte)entity->v.rendercolor.x;
+	baseline->rendercolor.g = (byte)entity->v.rendercolor.y;
+	baseline->rendercolor.b = (byte)entity->v.rendercolor.z;
+	baseline->renderfx = (byte)entity->v.renderfx;
+	
+	if(player)
+	{
+		baseline->mins = player_mins;
+		baseline->maxs = player_maxs;
+		
+		baseline->colormap = eindex;
+		baseline->modelindex = playermodelindex;
+		baseline->friction = 1.0;
+		baseline->movetype = MOVETYPE_WALK;
+		
+		baseline->scale = entity->v.scale;
+		baseline->solid = SOLID_SLIDEBOX;
+		baseline->framerate = 1.0;
+		baseline->gravity = 1.0;
+	}
+	else
+	{
+		baseline->mins = entity->v.mins;
+		baseline->maxs = entity->v.maxs;
+		
+		baseline->colormap = 0;
+		baseline->modelindex = entity->v.modelindex;
+		
+		//SV_ModelIndex(pr_strings + entity->v.model);
+		
+		baseline->movetype = entity->v.movetype;
+		
+		baseline->scale = entity->v.scale;
+		baseline->solid = entity->v.solid;
+		baseline->framerate = entity->v.framerate;
+		baseline->gravity = entity->v.gravity;
+	};
 };
 
 /*
 ================
 RegisterEncoders
+
+Allow game module to override network encoding of certain types of entities and tweak values
 ================
 */
-void RegisterEncoders(){};
+void RegisterEncoders()
+{
+	gpGame->RegisterEncoders();
+};
 
 /*
 ================
 GetWeaponData
 ================
 */
-int GetWeaponData(edict_t *player, struct weapon_data_s *data)
+int GetWeaponData(edict_t *player, weapon_data_t *data)
 {
-	// TODO
-	return 0;
+#ifdef OPENLAMBDA_USE_CLIENT_WEAPONS
+	int i;
+	weapon_data_t *pItem{nullptr};
+	entvars_t *self = &player->v;
+	CBasePlayer *pPlayer{dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(self))};
+	CBaseWeapon *pGun{nullptr};
+	
+	SItemInfo ItemInfo{};
+	
+	memset(data, 0, 32 * sizeof(weapon_data_t)); // TODO: 32 -> 64?
+	
+	if(!pPlayer)
+		return 1;
+	
+	// Go through all of the weapons and make a list of the ones to pack
+	for(i = 0; i < MAX_ITEM_TYPES; ++i)
+	{
+		if(pPlayer->mrgpPlayerItems[i])
+		{
+			// There's a weapon here. Should I pack it?
+			CBaseItem *pPlayerItem{pPlayer->mrgpPlayerItems[i]};
+			
+			while(pPlayerItem)
+			{
+				pGun = dynamic_cast<CBaseWeapon*>(pPlayerItem->GetWeaponPtr());
+				
+				if(pGun && pGun->UseDecrement())
+				{
+					// Get the ID
+					memset(&ItemInfo, 0, sizeof(ItemInfo));
+					pGun->GetItemInfo(&ItemInfo);
+					
+					if(ItemInfo.iID >= 0 && ItemInfo.iID < 32) // TODO: 64?
+					{
+						pItem = &data[ItemInfo.iID];
+						
+						pItem->m_iId = ItemInfo.iID;
+						pItem->m_iClip = pGun->mnClip;
+						
+						pItem->m_flTimeWeaponIdle = max(pGun->m_flTimeWeaponIdle, -0.001);
+						pItem->m_flNextPrimaryAttack = max(pGun->m_flNextPrimaryAttack, -0.001);
+						pItem->m_flNextSecondaryAttack = max(pGun->m_flNextSecondaryAttack, -0.001);
+						
+						pItem->m_fInReload = pGun->mbInReload;
+						pItem->m_fInSpecialReload = pGun->mbInSpecialReload;
+						
+						pItem->fuser1 = max(pGun->self->fuser1, -0.001);
+						pItem->fuser2 = pGun->m_flStartThrow;
+						pItem->fuser3 = pGun->m_flReleaseThrow;
+						
+						pItem->iuser1 = pGun->m_chargeReady;
+						pItem->iuser2 = pGun->m_fInAttack;
+						pItem->iuser3 = pGun->m_fireState;
+						
+						//pItem->m_flPumpTime = max(pGun->m_flPumpTime, -0.001);
+					};
+				};
+				
+				pPlayerItem = pPlayerItem->mpNext;
+			};
+		};
+	};
+#else // if not defined OPENLAMBDA_USE_CLIENT_WEAPONS
+	memset(data, 0, 32 * sizeof(weapon_data_t)); // TODO: 32 -> 64?
+#endif // OPENLAMBDA_USE_CLIENT_WEAPONS
+	return 1;
 };
 
 /*
 ================
 UpdateClientData
+
+Data sent to current client only
+Engine sets the clientdata struct fields to 0 before calling
 ================
 */
-void UpdateClientData(const edict_t *pent, int sendweapons, struct clientdata_s *pcd){};
+void UpdateClientData(const edict_t *pent, int sendweapons, struct clientdata_s *pcd)
+{
+	if(!pent || !pent->pvPrivateData)
+		return;
+	
+	entvars_t *pVars{&pent->v};
+	
+	if()
+	{
+	};
+	
+	pcd->flags = pVars->flags;
+	pcd->health = pVars->health;
+	
+	pcd->viewmodel = gpEngine->pfnGetModexInfex(gpEngine->pfnGetString(pVars->viewmodel));
+	
+	pcd->waterlevel = pVars->waterlevel;
+	pcd->watertype = pVars->watertype;
+	
+	pcd->weapons = pVars->weapons;
+	
+	// Vectors
+	pcd->origin = pVars->origin;
+	pcd->velocity = pVars->velocity;
+	pcd->view_ofs = pVars->view_ofs;
+	pcd->punchangle = pVars->punchangle;
+	
+	pcd->bInDuck = pVars->bInDuck;
+	pcd->flTimeStepSound = pVars->flTimeStepSound;
+	pcd->flDuckTime = pVars->flDuckTime;
+	pcd->flSwimTime = pVars->flSwimTime;
+	pcd->waterjumptime = pVars->teleport_time;
+	
+	strcpy(pcd->physinfo, gpEngine->pfnGetPhysicsInfo(pent));
+	
+	pcd->maxspeed = pVars->maxspeed;
+	pcd->fov = pVars->fov;
+	pcd->weaponanim = pVars->weaponanim;
+	
+	pcd->pushmsec = pVars->pushmsec;
+	
+	// Spectator mode
+	if(pVarsOrg)
+	{
+		pcd->iuser1 = pVarsOrg->iuser1;
+		pcd->iuser2 = pVarsOrg->iuser2;
+	}
+	else
+	{
+		pcd->iuser1 = pVars->iuser1;
+		pcd->iuser2 = pVars->iuser2;
+	};
+	
+	if(sendweapons)
+	{
+	};
+};
 
 /*
 ================
 CmdStart
+
+We're about to run this user cmd for the specified player. We can set up
+group info and masking here, for example
+This is the time to examine the user cmd for anything extra. This call happens even
+if think does not
 ================
 */
 void CmdStart(const edict_t *player, const struct usercmd_s *cmd, uint random_seed)
 {
-	// TODO
+	auto pBaseEntity{ToBaseEntity(player)}; // entvars_t *pev = (entvars_t*)&player->v
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)}; // dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev);
+	
+	if(!pBasePlayer)
+		return;
+	
+	if(pBasePlayer->GetGroupInfo() != 0)
+		UTIL_SetGroupTrace(pBasePlayer->self->groupinfo, GROUP_OP_AND);
+	
+	pBasePlayer->SetRandomSeed(random_seed);
 };
 
 /*
 ================
 CmdEnd
+
+Each cmd start is exactly matched with a cmd end, clean up any group trace flags
+(and such stuff) here
 ================
 */
 void CmdEnd(const edict_t *player)
 {
-	// TODO
+	auto pBaseEntity{ToBaseEntity(player)}; // entvars_t *pev = (entvars_t*)&player->v
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)}; // dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev);
+	
+	if(!pBasePlayer)
+		return;
+	
+	if(pBasePlayer->GetGroupInfo() != 0)
+		UTIL_UnsetGroupTrace();
 };
 
 /*
 ================
 ConnectionlessPacket
+
+Return 1 if the packet is valid. Set len if you want to send a response packet
+Incoming, it holds the max size of the response_buffer, so you must zero it out if
+you choose not to respond
 ================
 */
 int ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char *response_buffer, int *len)
 {
-	return 0;
+	return gpGameServerEventListener->OnConnectionlessPacketReceived(net_from, args, response_buffer, len);
 };
 
 /*
 ================
 GetHullBounds
+
+Engine calls this to enumerate player collision hulls, for prediction
+Return 0 if the hullnumber doesn't exist
 ================
 */
 int GetHullBounds(int hullnumber, float *mins, float *maxs)
@@ -502,11 +749,21 @@ int GetHullBounds(int hullnumber, float *mins, float *maxs)
 /*
 ================
 CreateInstancedBaselines
+
+Create pseudo-baselines for items that aren't placed in the map at spawn time,
+but which are likely to be created during the play (e.g, grenades, ammo packs,
+projectiles, corpses, etc)
 ================
 */
 void CreateInstancedBaselines()
 {
-	// TODO
+	//entity_state_t EntState{};
+	
+	// Create any additional baselines here for things like grenades, etc
+	//auto nResult{gpEngine->pfnInstaceBaseline(pc->pev->classname, &EntState)};
+	
+	// Destroy objects
+	//gpGame->GetWorld->RemoveEntity(pc);
 };
 
 /*
