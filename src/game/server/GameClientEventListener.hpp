@@ -24,11 +24,12 @@
 
 #include <next/engine/IGameClientEventListener.hpp>
 
+class CBaseGame;
+
 class CGameClientEventListener final : public IGameClientEventListener
 {
 public:
-	CGameClientEventListener();
-	~CGameClientEventListener();
+	CGameClientEventListener(CBaseGame *apGame) : mpGame(apGame){}
 
 	//void Release() override {delete this;}
 
@@ -42,7 +43,11 @@ public:
 	void OnClientUserInfoChanged(int anClientID, char *asUserInfo) override;
 	
 	int OnInconsistentFileFound(int anClientID, const char *asFileName, char *asDisconnectMsg) override;
+	
+	void OnCvarValueReceived(int anClientID, int anRequestID, const char *asCvarName, const char *asCvarValue) override;
 public: //private:
 	/// Called when a client sent a "kill" command (handled by OnClientCommand)
 	void OnClientKill(int anClientID);
+private:
+	CBaseGame *mpGame{nullptr};
 };

@@ -32,10 +32,10 @@
 #include <GameServerEventListener.hpp>
 #include <GameClientEventListener.hpp>
 
-#include "Game.hpp"
-#include "IGameRules.hpp"
-#include "Util.hpp"
-#include "BaseEntity.hpp"
+#include <BaseGame.hpp>
+#include <IGameRules.hpp>
+#include <Util.hpp>
+#include <BaseEntity.hpp>
 
 CSystemEventListener_Game gSystemEventListener;
 ISystemEventListener *gpSystemEventListener{&gSystemEventListener};
@@ -46,15 +46,26 @@ CGameServerEventListener *gpGameServerEventListener{&gGameServerEventListener};
 CGameClientEventListener gGameClientEventListener(gpGame);
 CGameClientEventListener /*IGameClientEventListener*/ *gpGameClientEventListener{&gGameClientEventListener}; // TODO: can't use the IGameClientEventListener here as we need to access the OnClientKill method of the CGameClientEventListener class
 
-CBasePlayer *ToBasePlayer(CBaseEntity *apEntity)
+CBasePlayer *ToBasePlayer(edict_t *apEntity)
 {
 	return static_cast<CBasePlayer*>(apEntity->GetPrivateData());
+};
+
+CBasePlayer *ToBasePlayer(CBaseEntity *apEntity)
+{
+	return dynamic_cast<CBasePlayer*>(apEntity); // dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev)); (pev == entvars_t *)
 };
 
 
 int ToClientID(edict_t *apEntDict)
 {
-	return 0; // TODO: get entity id, check that it's > 0 and less than maxplayers count, return it
+	int nID{gpEngine->pfnIndexOfEdict(apEntDict)};
+	
+	// Check that this is a player entity
+	if(nID < 1 || nID > gpGlobals->maxClients)
+		return -1;
+	
+	return nID - 1;
 };
 
 /*
@@ -125,7 +136,7 @@ void ClientKill(edict_t *self)
 ===========
 ClientPutInServer
 
-called each time a player enters a new level
+Called each time a player enters a new level
 ============
 */
 void ClientPutInServer(edict_t *client)
@@ -190,7 +201,7 @@ void PlayerPreThink(edict_t *self)
 	if(!pBaseEntity)
 		return;
 	
-	auto pBasePlayer{dynamic_cast<CBasePlayer*>(pBaseEntity)};
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)};
 	
 	if(pBasePlayer)
 		pBasePlayer->PreThink();
@@ -210,7 +221,7 @@ void PlayerPostThink(edict_t *self)
 	if(!pBaseEntity)
 		return;
 	
-	auto pBasePlayer{dynamic_cast<CBasePlayer*>(pBaseEntity)};
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)};
 	
 	if(pBasePlayer)
 		pBasePlayer->PostThink();
@@ -233,8 +244,14 @@ ParmsChangeLevel
 */
 void ParmsChangeLevel() // TODO: SetChangeParms?
 {
-	// TODO
-	//gpGame->OnChangeLevel()?
+	// TODO: gpGame->OnChangeLevel()?
+	
+	// Retrieve the pointer to the save data
+	auto pSaveData{(SAVERESTOREDATA*)gpGlobals->pSaveData};
+	// TODO: gpGame->GetSaveData()?
+	
+	if(pSaveData)
+		pSaveData->connectionCount = BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
 };
 
 /*
@@ -250,11 +267,15 @@ void StartFrame()
 /*
 ================
 GetGameDescription
+
+Returns the descriptive name of the game
 ================
 */
 const char *GetGameDescription()
 {
-	return "Untitled game/mod"; // TODO: gpGame->GetDescription() or GetTitle()
+	if(gpGame->GetRules())
+		return gpGame->GetRules()->GetGameDescription(); // TODO: gpGame->GetDescription() or GetTitle()?
+	return "Untitled game/mod";
 };
 
 /*
@@ -272,11 +293,47 @@ void Sys_Error_Game(const char *error)
 /*
 ================
 PlayerCustomization
+
+A new player customization has been registered on the server
+
+NOTE: This only sets the # of frames of the spray can logo animation right now
 ================
 */
 void PlayerCustomization(edict_t *pPlayer, customization_t *pCustom)
 {
-	// TODO
+	auto pBaseEntity{ToBaseEntity(pPlayer)};
+	
+	//if(!pBaseEntity)
+		//return;
+	
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)};
+	
+	if(!pBasePlayer)
+	{
+		ALERT(at_console, "PlayerCustomization: Couldn't get player!\n");
+		return;
+	};
+	
+	if(pCustom)
+	{
+		ALERT(at_console, "PlayerCustomization: NULL customization!\n");
+		return;
+	};
+	
+	switch(pCustom->resource.type)
+	{
+	case t_decal:
+		pBasePlayer->SetCustomDecalFrames(pCustom->nUserData2); // Second int is max # of frames
+		break;
+	case t_sound:
+	case t_skin:
+	case t_model:
+		// Ignore for now
+		break;
+	default:
+		ALERT(at_console, "PlayerCustomization: Unknown customization type!\n");
+		break;
+	};
 };
 
 /*
@@ -439,6 +496,11 @@ void SetupVisibility(edict_t *pViewEntity, edict_t *pClientEnt, byte **pvs, byte
 /*
 ================
 AddToFullPack
+
+Return 1 if the entity state has been filled in for the ent and the entity will be
+propagated to the client, 0 otherwise
+
+state is the server
 ================
 */
 int AddToFullPack(struct entity_state_s *state, int e, edict_t *pent, edict_t *host_edict, int hostflags, int player, byte *pSet)
@@ -450,6 +512,9 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *pent, edict_t *h
 /*
 ================
 CreateBaseline
+
+Creates baselines used for network encoding, especially for player data
+since players are not spawned until connect time
 ================
 */
 void CreateBaseline(int player, int entindex, struct entity_state_s *baseline, edict_t *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
@@ -602,9 +667,20 @@ void UpdateClientData(const edict_t *pent, int sendweapons, struct clientdata_s 
 		return;
 	
 	entvars_t *pVars{&pent->v};
+	auto pBaseEntity{ToBaseEntity(pent)};
+	auto pBasePlayer{ToBasePlayer(pBaseEntity)};
 	
-	if()
+	entvars_t *pVarsOrg{nullptr};
+	
+	// If user is spectating different player in first person, override some vars
+	if(pBasePlayer && pBasePlayer->self->iuser1 == OBS_IN_EYE)
 	{
+		if(pBasePlayer->mhObserverTarget)
+		{
+			pVarsOrg = pVars;
+			pVars = pBasePlayer->mhObserverTarget->self;
+			pBasePlayer = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pVars));
+		};
 	};
 	
 	pcd->flags = pVars->flags;
@@ -640,6 +716,7 @@ void UpdateClientData(const edict_t *pent, int sendweapons, struct clientdata_s 
 	// Spectator mode
 	if(pVarsOrg)
 	{
+		// Don't use spec vars from the chased player
 		pcd->iuser1 = pVarsOrg->iuser1;
 		pcd->iuser2 = pVarsOrg->iuser2;
 	}
@@ -649,9 +726,52 @@ void UpdateClientData(const edict_t *pent, int sendweapons, struct clientdata_s 
 		pcd->iuser2 = pVars->iuser2;
 	};
 	
+#ifdef OPENLAMBDA_USE_CLIENT_WEAPONS
 	if(sendweapons)
 	{
+		if(pBasePlayer)
+		{
+			pcd->m_flNextAttack = pBasePlayer->mfNextAttack;
+			
+			pcd->fuser2 = pBasePlayer->mfNextAmmoBurn;
+			pcd->fuser3 = pBasePlayer->mfAmmoStartCharge;
+			
+			pcd->vuser1.x = pBasePlayer->ammo_9mm;
+			pcd->vuser1.y = pBasePlayer->ammo_357;
+			pcd->vuser1.z = pBasePlayer->ammo_argrens;
+			pcd->ammo_nails = pBasePlayer->ammo_bolts;
+			pcd->ammo_shells = pBasePlayer->ammo_buckshot;
+			pcd->ammo_rockets = pBasePlayer->ammo_rockets;
+			pcd->ammo_cells = pBasePlayer->ammo_uranium;
+			pcd->vuser2.x = pBasePlayer->ammo_hornets;
+			
+			if(pBasePlayer->mpActiveItem)
+			{
+				pBaseWeapon *pGun{reinterpret_cast<CBaseWeapon*>(pBasePlayer->mpActiveItem->GetWeaponPtr())};
+				if(pGun && pGun->UseDecrement())
+				{
+					SItemInfo ItemInfo{};
+					memset(&ItemInfo, 0, sizeof(ItemInfo));
+					pGun->GetItemInfo(&ItemInfo);
+					
+					pcd->m_iId = ItemInfo.iId;
+					
+					pcd->vuser3.z = pGun->mnSecondaryAmmoType;
+					pcd->vuser4.x = pGun->mnPrimaryAmmoType;
+					
+					pcd->vuser4.y = pBasePlayer->m_rgAmmo[pGun->mnPrimaryAmmoType];
+					pcd->vuser4.z = pBasePlayer->m_rgAmmo[pGun->mnSecondaryAmmoType];
+					
+					if(pBasePlayer->mpActiveItem->m_iId == WEAPON_RPG)
+					{
+						pcd->vuser2.y = ((CRpg*)pBasePlayer->mpActiveItem)->mfSpotActive;
+						pcd->vuser2.z = ((CRpg*)pBasePlayer->mpActiveItem)->m_cActiveRockets;
+					};
+				};
+			};
+		};
 	};
+#endif // OPENLAMBDA_USE_CLIENT_WEAPONS
 };
 
 /*
@@ -760,7 +880,7 @@ void CreateInstancedBaselines()
 	//entity_state_t EntState{};
 	
 	// Create any additional baselines here for things like grenades, etc
-	//auto nResult{gpEngine->pfnInstaceBaseline(pc->pev->classname, &EntState)};
+	//auto nResult{gpEngine->pfnInstanceBaseline(pc->pev->classname, &EntState)};
 	
 	// Destroy objects
 	//gpGame->GetWorld->RemoveEntity(pc);
@@ -769,6 +889,9 @@ void CreateInstancedBaselines()
 /*
 ================
 InconsistentFile
+
+One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the specified player
+Return 0 to allow the client to continue, 1 to force immediate disconnection (with an optional disconnect message of up to 256 characters)
 ================
 */
 int InconsistentFile(const edict_t *player, const char *filename, char *disconnectmsg)
