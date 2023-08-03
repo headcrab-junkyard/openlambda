@@ -20,6 +20,9 @@
 /// @file
 
 #include "HLGame.hpp"
+#include "HLGameRules.hpp"
+#include "HLGameRulesMultiplayer.hpp"
+#include "HLGameRulesTeamplay.hpp"
 
 CHLGame gGame; //(nullptr);
 CGame *gpGame{&gGame};
@@ -476,6 +479,36 @@ bool CHLGame::Init(CreateInterfaceFn afnEngineFactory)
 
 void CHLGame::InstallRules()
 {
+	// TODO: remove from here
+	//gpEngine->pfnServerCommand("exec game.cfg\n");
+	//gpEngine->pfnServerExecute();
+	
+	gbTeamPlay = false;
+	
+	if(!gpGlobals->deathmatch)
+	{
+		// Generic Half-Life
+		mpRules = new CHLGameRules(this);
+	}
+	else
+	{
+		if(teamplay.GetBool())
+		{
+			// Teamplay
+			gbTeamPlay = true;
+			mpRules = new CHLGameRulesTeamplay(this);
+		}
+		//else if((int)gpGlobals->deathmatch == 1)
+		//{
+			// Vanilla deathmatch
+			//mpRules = new CHLGameRulesMultiplayer(this);
+		//}
+		else
+		{
+			// Vanilla deathmatch?
+			mpRules = new CHLGameRulesMultiplayer(this);
+		};
+	};
 };
 
 void CHLGame::RegisterCvars()
