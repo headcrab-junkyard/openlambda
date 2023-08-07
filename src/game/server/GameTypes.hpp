@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,30 @@
 
 #pragma once
 
-enum eAnimType
+enum eAnimType // TODO: ePlayerAnimTypes? PLAYER_ANIM in original code
 {
-	PLAYER_IDLE,
-	PLAYER_DIE,
+	PLAYER_IDLE = 0,
 	PLAYER_WALK,
+	PLAYER_JUMP,
+	PLAYER_SUPERJUMP,
+	PLAYER_DIE,
+	PLAYER_ATTACK1,
 };
+
+enum eActivityTypes
+{
+	ACT_RESET = 0,
+	
+	ACT_IDLE = 1,
+	ACT_GUARD,
+	ACT_WALK,
+	ACT_RUN,
+	ACT_FLY,
+	ACT_SWIM,
+	ACT_HOP,
+	ACT_LEAP,
+	ACT_FALL,
+	ACT_LAND,
+};
+
+using tActivityMap = std::map<eActivityTypes, const char *>;
