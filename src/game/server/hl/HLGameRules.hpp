@@ -25,91 +25,106 @@
 #include <IGameRules.hpp>
 
 // CHalfLifeRules
-class CHLGameRules : public IGameRules
+class CHLGameRules : public IGameRules // TODO: CBaseGameRules?
 {
 public:
 	CHLGameRules();
 	virtual ~CHLGameRules() = default;
 	
-	virtual void Think() override;
+	virtual void Think() override {}
 	
-	virtual bool IsAllowedToSpawn(CBaseEntity *apEntity) const override;
+	virtual bool IsAllowedToSpawn(CBaseEntity *apEntity) const override {return true;}
 	
 	virtual bool IsFlashlightAllowed() const override {return true;}
 	
 	virtual bool ShouldSwitchWeapon(CBasePlayer *apPlayer, CBaseItem *apWeapon) const override;
 	
-	virtual bool GetNextBestWeapon(CBasePlayer *apPlayer, CBaseItem *apCurWeapon) const override; // TODO: remove apCurWeapon?
+	virtual bool GetNextBestWeapon(CBasePlayer *apPlayer, CBaseItem *apCurWeapon) const override {return false;} // TODO: remove apCurWeapon?
 	
 	// Methods to verify the single/multiplayer status of the game
-	virtual bool IsMultiplayer() const override;
-	virtual bool IsDeathmatch() const override;
-	virtual bool IsCoOp() const override;
+	virtual bool IsMultiplayer() const override {return false;}
+	virtual bool IsDeathmatch() const override {return false;}
+	virtual bool IsCoOp() const override {return false;}
 	
 	// Client connection/disconnection
-	virtual bool ClientConnected(int anClientID, const char *asName, const char *asAddr, char asRejectReason[128]) override;
-	virtual void ClientDisconnected(int anClientID) override;
+	virtual bool OnClientConnected(int anClientID, const char *asName, const char *asAddr, char asRejectReason[128]) override {return true;}
+	virtual void OnClientDisconnected(int anClientID) override {}
 	
 	// The client game module is ready for updating
-	virtual void InitPlayerHUD(CBasePlayer *apPlayer) override;
+	virtual void InitPlayerHUD(CBasePlayer *apPlayer) override {}
 	
 	// Player damage rules
 	virtual float GetPlayerFallDamage(CBasePlayer *apPlayer) const override;
 	
 	// Player (re)spawn control
-	virtual void OnPlayerSpawn(CBasePlayer *apPlayer) override;
-	virtual void OnPlayerThink(CBasePlayer *apPlayer) override;
+	virtual void OnPlayerSpawn(CBasePlayer *apPlayer) override {}
+	virtual void OnPlayerThink(CBasePlayer *apPlayer) override {}
 	
-	virtual bool PlayerCanRespawn(CBasePlayer *apPlayer) const override;
+	virtual bool PlayerCanRespawn(CBasePlayer *apPlayer) const override {return true;}
 	
 	virtual float GetPlayerSpawnTime(CBasePlayer *apPlayer) const override;
 	
 	virtual bool IsAutoTargetCrosshairAllowed() const override;
 	
 	// Player kills/scoring
-	virtual int GetPointsForKill(CBasePlayer *apAttacker, CBasePlayer *apKilled) const override; // TODO: victim, killer?
 	
-	virtual void OnPlayerKilled(CBasePlayer *apVictim, CBaseEntity *apKiller, CBaseEntity *apInflictor) override;
+	/// How many points awarded to anyone that kills this player?
+	virtual int GetPointsForKill(CBasePlayer *apAttacker, CBasePlayer *apKilled) const override {return 1;} // TODO: victim, killer?
 	
-	virtual void DeathNotice(CBasePlayer *apVictim, CBaseEntity *apKiller, CBaseEntity *apInflictor) override;
+	/// Someone/something killed this player
+	virtual void OnPlayerKilled(CBasePlayer *apVictim, CBaseEntity *apKiller, CBaseEntity *apInflictor) override {}
+	
+	virtual void DeathNotice(CBasePlayer *apVictim, CBaseEntity *apKiller, CBaseEntity *apInflictor) override {}
 	
 	// Weapon retrieval
-	virtual void OnPlayerGotWeapon(CBasePlayer *apPlayer, CBaseItem *apWeapon) override;
+	
+	/// Player has grabbed a weapon that was sitting in the world
+	virtual void OnPlayerGotWeapon(CBasePlayer *apPlayer, CBaseItem *apWeapon) override {}
 	
 	// Weapon (re)spawn control
-	virtual bool ShouldRespawnWeapon(CBaseItem *apWeapon) const override;
-	virtual float GetWeaponRespawnTime(CBaseItem *apWeapon) const override;
 	
-	virtual float TryRespawnWeapon(CBaseItem *apWeapon) override;
+	/// Any conditions inhibiting the respawning of this weapon?
+	virtual bool ShouldRespawnWeapon(CBaseItem *apWeapon) const override {return false;}
 	
+	/// What is the time in the future at which this weapon can respawn?
+	virtual float GetWeaponRespawnTime(CBaseItem *apWeapon) const override {return -1;}
+	
+	/// Returns 0 if the weapon can respawn now, otherwise it returns the time at which it can try to spawn again
+	virtual float TryRespawnWeapon(CBaseItem *apWeapon) override {return 0;}
+	
+	/// Where should this weapon be respawned? (Some game variations may choose to randomize spawn locations)
 	virtual idVec3 GetWeaponRespawnSpot(CBaseItem *apWeapon) const override;
 	
 	// Item retrieval
-	virtual bool CanPlayerHaveItem(CBasePlayer *apPlayer, CItemPickup *apItem) const override; // TODO: CanPlayerPickupItem?
-	virtual void OnPlayerGotItem(CBasePlayer *apPlayer, CItemPickup *apItem) override;
+	virtual bool CanPlayerHaveItem(CBasePlayer *apPlayer, CItemPickup *apItem) const override {return true;} // TODO: CanPlayerPickupItem?
+	virtual void OnPlayerGotItem(CBasePlayer *apPlayer, CItemPickup *apItem) override {}
 	
 	// Item (re)spawn control
-	virtual bool ShouldRespawnItem(CItemPickup *apItem) const override;
-	virtual float GetItemRespawnTime(CItemPickup *apItem) const override;
+	virtual bool ShouldRespawnItem(CItemPickup *apItem) const override {return false;}
+	
+	/// At what time in the future should this item respawn?
+	virtual float GetItemRespawnTime(CItemPickup *apItem) const override {return -1;}
+	
+	/// Where should this item be respawned? (Some game variations may choose to randomize spawn locations)
 	virtual idVec3 GetItemRespawnSpot(CItemPickup *apItem) const override;
 	
 	// Ammo retrieval
-	virtual void OnPlayerGotAmmo(CBasePlayer *apPlayer, const char *asName, int anCount) override;
+	virtual void OnPlayerGotAmmo(CBasePlayer *apPlayer, const char *asName, int anCount) override {}
 	
 	// Ammo (re)spawn control
-	virtual int ShouldRespawnAmmo(CBaseAmmo *apAmmo) const override;
-	virtual float GetAmmoRespawnTime(CBaseAmmo *apAmmo) const override;
+	virtual bool ShouldRespawnAmmo(CBaseAmmo *apAmmo) const override {return false;}
+	virtual float GetAmmoRespawnTime(CBaseAmmo *apAmmo) const override {return -1;}
 	virtual idVec3 GetAmmoRespawnSpot(CBaseAmmo *apAmmo) const override;
 	
 	// Health charger respawn control
 	virtual float GetHealthChargerRechargeTime() const override;
 	
 	// What happens to a dead player's weapons and ammo
-	virtual int HandleDeadPlayerWeapons(CBasePlayer *apPlayer) override;
-	virtual int HandleDeadPlayerAmmo(CBasePlayer *apPlayer) override;
+	virtual ItemDropType HandleDeadPlayerWeapons(CBasePlayer *apPlayer) override;
+	virtual ItemDropType HandleDeadPlayerAmmo(CBasePlayer *apPlayer) override;
 	
 	// Monsters
-	virtual bool AreMonstersAllowed() const override;
+	virtual bool AreMonstersAllowed() const override {return true;}
 	
 	// Teamplay stuff
 	virtual const char *GetTeamID(CBaseEntity *apEntity) const override {return "";} // TODO: make CBaseEntity::GetTeamID?
