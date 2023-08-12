@@ -1,0 +1,6 @@
+"GameInfo"
+{
+	game "ApertureSrc Engine Test"
+	title "ApertureSrc Test"
+	type "singleplayer_only"
+}
