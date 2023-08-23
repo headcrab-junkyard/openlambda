@@ -63,6 +63,7 @@ public:
 		Toggle
 	};
 	
+	//enum Capabilities : int // TODO: Caps?
 	enum
 	{
 		FCAP_ACROSS_TRANSITION
@@ -106,6 +107,10 @@ public:
 		Aim
 	};
 	
+	enum class DmgType : int
+	{
+		Generic = 0,
+	};
 	
 	enum class GibType : int
 	{
@@ -175,36 +180,33 @@ public:
 	virtual int TakeDamage(CBaseEntity *apInflictor, CBaseEntity *apAttacker, float afDamage, int anDmgBitSum); // TODO: was T_Damage
 	
 	/// Called when the entity receives health
-	virtual float TakeHealth(float afValue, float afIgnore);
+	virtual float TakeHealth(float afValue, float afIgnore, int anDmgBitSum); // TODO: wtf is afIgnore and where did it come from?
 	
 	/// Called when the entity gets killed/destroyed
-	virtual void Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, int anGibType);
+	virtual void Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, GibType aeGibType = GibType::Normal); // TODO: wtf if apLastInflictor?
 	
 	/// Used to make entity shoot in specified direction (like a turret)
-	void FireBullets(float shotcount, const idVec3 &dir, const idVec3 &spread, CBaseEntity *apAttacker);
+	void FireBullets(float afShotCount, const idVec3 &avDir, const idVec3 &avSpread, CBaseEntity *apAttacker = nullptr);
 	
 	/// Used to make entity emit various sounds with specified properties
 	void EmitSound(int anChannel, const std::string &asSample, float afVolume, float afAttenuation, int anFlags = 0, int anPitch = PITCH_NORM);
 	
 	/// Used to mark the entity for deletion (use this instead of deleting the entity)
-	void MarkForDeletion()
-	{
-		self->flags |= FL_KILLME;
-	};
+	void MarkForDeletion(){AddFlags(FL_KILLME);}
 	
 	/// Make the entity static
 	void MakeStatic();
 	
-	/// Make the entity dormant
+	/// Make the entity dormant (inactive)
 	void MakeDormant();
 	
-	/// Remove this entity
+	/// Remove this entity (convenient way to delay removing oneself)
 	void SUB_Remove();
 	
 	/// Does nothing
 	void SUB_Null(){}
 	
-	///
+	/// Lets the entity handle its settings from the map file
 	virtual bool HandleKeyValue(const std::string &asKey, const std::string &asValue){return false;}
 	
 	// Setter & getter (+ checks & conversion) methods
@@ -300,10 +302,12 @@ public:
 		return mvAngles;
 	};
 	
-	void SetGravity(float afY){
+	void SetGravity(float afY)
+	{
 		self->gravity = afY;
 		//mvGravity.y = afY;
 	};
+	
 	const float GetGravity() const {return self->gravity;}
 	//const idVec3 &GetGravity() const {return idVec3(0.0f, self->gravity, 0.0f);}
 	
@@ -330,11 +334,14 @@ public:
 	
 	const Bounds &GetSize() const {return mSize;}
 	
-	void SetMoveType(int anType){self->movetype = anType;}
-	int GetMoveType() const {return self->movetype;}
+	void SetMoveType(MoveType aeType){self->movetype = static_cast<int>(aeType);}
+	MoveType GetMoveType() const {return static_cast<MoveType>(self->movetype);}
 	
-	void SetSolidity(int anSolidity);
-	int GetSolidity() const;
+	void SetSolidity(Solidity aeSolidity){self->solid = static_cast<int >(aeSolidity);}
+	Solidity GetSolidity() const {return static_cast<Solidity>(self->solid);}
+	
+	// TODO: Replace with HasSpawnFlags?
+	int GetSpawnFlags() const {return self->spawnflags;}
 	
 	void SetFlags(int anFlags){self->flags = anFlags;}
 	int GetFlags() const {return self->flags;}
@@ -345,15 +352,15 @@ public:
 	void RemoveFlags(int anFlags){self->flags &= ~anFlags;}
 	
 	void SetEffects(int anEffects){self->effects = anEffects;}
-	//void AddEffects(int anEffects){self->effects |= anEffects;}
-	//void RemoveEffects(int anEffects){self->effects &= ~anEffects;}
+	void AddEffects(int anEffects){self->effects |= anEffects;}
+	void RemoveEffects(int anEffects){self->effects &= ~anEffects;}
 	int GetEffects() const {return self->effects;}
 	
 	void SetSkin(int anSkin){self->skin = anSkin;}
 	int GetSkin() const {return self->skin;}
 	
 	// TODO: IsMarkedForDeletion?
-	bool MarkedForDeletion() const {return self->flags & FL_KILLME;}
+	bool MarkedForDeletion() const {return HasFlags(FL_KILLME);}
 
 	int GetWaterType() const {return self->watertype;}
 	int GetWaterLevel() const {return self->waterlevel;}
@@ -367,7 +374,7 @@ public:
 	void SetGoal(CBaseEntity *apGoal){mpGoal = apGoal;}
 	CBaseEntity *GetGoal() const {return mpGoal;} // TODO: GetGoalEnt(ity)?
 	
-	void SetFriction(float afFriction);
+	void SetFriction(float afFriction){self->friction = afFriction;}
 	
 	void SetSpeed(float afSpeed){self->speed = afSpeed;}
 	float GetSpeed() const {return self->speed;}
@@ -387,13 +394,14 @@ public:
 		return mvMoveDir;
 	};
 	
-	void SetDamageable(int anDamageable){self->takedamage = anDamageable;}
-	int GetDamageable() const {return self->takedamage;}
+	void SetDamageable(Damageable aeDamageable){self->takedamage = static_cast<int>(aeDamageable);}
+	Damageable GetDamageable() const {return static_cast<Damageable>(self->takedamage);}
 	
 	// TODO: ShouldTakeDamage?
-	bool IsDamageable() const {return GetDamageable() > DAMAGE_NO;}
+	bool IsDamageable() const {return GetDamageable() > Damageable::No;}
 	
-	bool IsDormant() const {return self->flags & FL_DORMANT;}
+	/// @return true if the entity is dormant/inactive, false otherwise
+	bool IsDormant() const {return HasFlags(FL_DORMANT);}
 	
 	const std::string &GetNoise() const;
 	
@@ -473,5 +481,10 @@ private:
 	
 	CBaseEntity *mpOwner{nullptr};
 	CBaseEntity *mpEnemy{nullptr};
-	CBaseEntity *mpGoal{nullptr};
+	CBaseEntity *mpGoal{nullptr}; ///< A movetarget or an enemy 
+public:
+	//float	ammo_shells{0};
+	//float	ammo_nails{0};
+	//float	ammo_rockets{0};
+	//float	ammo_cells{0};
 };
