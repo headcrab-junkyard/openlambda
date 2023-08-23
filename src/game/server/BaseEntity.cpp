@@ -571,3 +571,198 @@ void CBaseEntity::SetCollisionBox()
 {
 	::SetObjectCollisionBox(self);
 };
+
+/*
+================
+SaveSpawnParms
+================
+*/
+void CBaseEntity::SaveSpawnParms()
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnSaveSpawnParms(self);
+};
+
+/*
+================
+GetSpawnParms
+================
+*/
+void CBaseEntity::GetSpawnParms()
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnGetSpawnParms(self);
+};
+
+/*
+================
+SetCrosshairAngle
+================
+*/
+void CBaseEntity::SetCrosshairAngle(float afPitch, float afYaw)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnSetCrosshairAngle(self, afPitch, afYaw);
+};
+
+/*
+================
+MoveTo
+================
+*/
+void CBaseEntity::MoveTo(const idVec3 &avGoal, float afDist, MoveType aeMoveType)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnMoveToOrigin(self, avGoal, afDist, aeMoveType);
+};
+
+/*
+================
+WalkMove
+================
+*/
+void CBaseEntity::WalkMove(float afYaw, float afDist, int anMode)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnWalkMove(self, afYaw, afDist, anMode);
+};
+
+/*
+================
+AnimationAutomove
+================
+*/
+void CBaseEntity::AnimationAutomove(float afTime)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnAnimationAutomove(self, afTime);
+};
+
+/*
+================
+ChangeYaw
+================
+*/
+void CBaseEntity::ChangeYaw()
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnChangeYaw(self);
+};
+
+/*
+================
+SetCollisionBox
+================
+*/
+void CBaseEntity::ChangePitch()
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnChangePitch(self);
+};
+
+/*
+================
+SetCollisionBox
+================
+*/
+int CBaseEntity::DropToFloor()
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return 0; // TODO
+	else
+		return gpEngine->pfnDropToFloor(self);
+};
+
+/*
+================
+IsOnFloor
+================
+*/
+int CBaseEntity::IsOnFloor() const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return 0; // TODO
+	else
+		return gpEngine->pfnIsOnFloor(self);
+};
+
+/*
+================
+GetModelPtr
+================
+*/
+void *CBaseEntity::GetModelPtr() const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return nullptr; // TODO
+	else
+		return gpEngine->pfnGetModelPtr(self);
+};
+
+/*
+================
+GetIllum
+================
+*/
+int CBaseEntity::GetIllum() const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return 0; // TODO
+	else
+		return gpEngine->pfnGetIllum(self);
+};
+
+/*
+================
+GetAttachment
+================
+*/
+void CBaseEntity::GetAttachment(int anAttachment, idVec3 &avOrigin, idVec3 &avAngles) const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnGetAttachment(self, anAttachment, avOrigin, avAngles);
+};
+
+/*
+================
+GetBonePosition
+================
+*/
+void CBaseEntity::GetBonePosition(int anBone, idVec3 &avOrigin, idVec3 &avAngles) const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnGetBonePosition(self, anBone, avOrigin, avAngles);
+};
+
+/*
+================
+GetAimVector
+================
+*/
+void CBaseEntity::GetAimVector(float afSpeed, idVec3 &avReturn) const
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		; // TODO
+	else
+		gpEngine->pfnGetAimVector(self, afSpeed, avReturn);
+};

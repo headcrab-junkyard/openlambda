@@ -1,7 +1,8 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2022 BlackPhrase
+ * Copyright (C) 1996-1997 Id Software, Inc.
+ * Copyright (C) 2018-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -416,6 +417,37 @@ public:
 		mvAbsMax = self->absmax;
 		return mvAbsMax;
 	};
+	
+	void SetCollisionBox(); // TODO: SetupCollisionBox?
+	
+	//
+	
+	// TODO: move some of those over to CBasePlayer/CBaseCharacter?
+	
+	void SaveSpawnParms();
+	void GetSpawnParms();
+	
+	void SetCrosshairAngle(float afPitch, float afYaw);
+	
+	void MoveTo(const idVec3 &avGoal, float afDist, MoveType aeMoveType);
+	void WalkMove(float afYaw, float afDist, int anMode);
+	
+	void AnimationAutomove(float afTime);
+	
+	void ChangeYaw();
+	void ChangePitch();
+	
+	int DropToFloor();
+	int IsOnFloor() const;
+	
+	void *GetModelPtr() const;
+	
+	int GetIllum() const;
+	
+	void GetAttachment(int anAttachment, idVec3 &avOrigin, idVec3 &avAngles) const;
+	void GetBonePosition(int anBone, idVec3 &avOrigin, idVec3 &avAngles) const;
+	
+	void GetAimVector(float afSpeed, idVec3 &avReturn) const;
 protected:
 	void SetClassName(const char *asName){/*self->classname = asName;*/} // TODO: gpEngine->pfnMakeString
 private:
