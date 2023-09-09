@@ -76,7 +76,7 @@ int CBaseEntity::Restore(const CGameSave &aGameSave)
 		
 		PrecacheModel(reinterpret_cast<char*>(mpGame->GetStringPool()->GetByIndex(self->model)));
 		
-		SetModel(gpEngine->pfnGetString(self->model));
+		SetModel(mpGame->GetStringPool()->GetByIndex(self->model));
 		SetSize(vMins, vMaxs); // Reset them
 	};
 	

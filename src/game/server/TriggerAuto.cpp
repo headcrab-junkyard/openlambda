@@ -64,7 +64,7 @@ bool CTriggerAuto::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asVal
 {
 	if(asKey == "globalstate")
 	{
-		mnGlobalState = gpEngine->pfnAllocString(asValue.c_str());
+		mnGlobalState = mpGame->GetStringPool()->Alloc(asValue.data());
 		return true;
 	}
 	else if(asKey == "triggerstate")

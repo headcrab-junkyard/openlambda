@@ -311,7 +311,7 @@ bool CWorldSpawn::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValu
 	}
 	else if(asKey == "chaptertitle")
 	{
-		self->netname = gpEngine->pfnAllocString(asValue.c_str());
+		self->netname = mpGame->GetStringPool()->Alloc(asValue.data());
 		return true;
 	}
 	else if(asKey == "startdark")
@@ -334,7 +334,7 @@ bool CWorldSpawn::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValu
 	}
 	else if(asKey == "mapteams")
 	{
-		self->team = gpEngine->pfnAllocString(asValue.c_str());
+		self->team = mpGame->GetStringPool()->Alloc(asValue.data());
 		return true;
 	}
 	else if(asKey == "defaultteam")

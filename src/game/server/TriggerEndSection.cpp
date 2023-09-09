@@ -71,7 +71,7 @@ bool CTriggerEndSection::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView
 	if(asKey == "section")
 	{
 		// Store this in message so we don't have to write save/restore for this entity
-		self->message = gpEngine->pfnMakeString(asValue.c_str());
+		self->message = mpGame->GetStringPool()->Alloc(asValue.data());
 		return true;
 	};
 	
@@ -100,7 +100,7 @@ void CTriggerEndSection::TouchCommon()
 	SetUseCallback(nullptr);
 	
 	if(self->message)
-		gpEngine->pfnEndSection(gpEngine->pfnSzFromIndex(self->message));
+		gpEngine->pfnEndSection(mpGame->GetStringPool()->GetByIndex(self->message));
 	
 	mpWorld->RemoveEntity(this);
 };

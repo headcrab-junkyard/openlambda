@@ -39,7 +39,7 @@ bool CBaseDelay::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue
 	}
 	else if(asKey == "killtarget")
 	{
-		mnKillTargetString = gpEngine->pfnAllocString(asValue.c_str());
+		mnKillTargetString = mpGame->GetStringPool()->Alloc(asValue.data());
 		return true;
 	};
 	

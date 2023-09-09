@@ -87,7 +87,7 @@ bool CLight::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 	}
 	else if(asKey == "pattern")
 	{
-		//mnPattern = gpEngine->pfnAllocString(asValue.c_str());
+		//mnPattern = mpGame->GetStringPool()->Alloc(asValue.c_str());
 		return true;
 	};
 	

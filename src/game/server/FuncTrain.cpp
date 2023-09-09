@@ -74,22 +74,22 @@ void CFuncTrain::Spawn()
 	case 0:
 		PrecacheSound("misc/null.wav");
 		
-		self->noise = gpEngine->pfnAllocString("misc/null.wav");
-		self->noise1 = gpEngine->pfnAllocString("misc/null.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("misc/null.wav");
+		self->noise1 = mpGame->GetStringPool()->Alloc("misc/null.wav");
 		break;
 	case 1:
 		PrecacheSound("plats/train1.wav");
 		PrecacheSound("plats/train2.wav");
 		
-		self->noise = gpEngine->pfnAllocString("plats/train2.wav");
-		self->noise1 = gpEngine->pfnAllocString("plats/train1.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("plats/train2.wav");
+		self->noise1 = mpGame->GetStringPool()->Alloc("plats/train1.wav");
 		break;
 	case 2:
 		PrecacheSound("plats/platmove1.wav");
 		PrecacheSound("plats/platstop1.wav");
 		
-		self->noise = gpEngine->pfnAllocString("plats/platstop1.wav");
-		self->noise1 = gpEngine->pfnAllocString("plats/platmove1.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("plats/platstop1.wav");
+		self->noise1 = mpGame->GetStringPool()->Alloc("plats/platmove1.wav");
 		break;
 	};
 	//

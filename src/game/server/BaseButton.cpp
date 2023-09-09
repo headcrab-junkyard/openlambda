@@ -56,19 +56,19 @@ void CBaseButton::Spawn()
 	{
 	case 0:
 		PrecacheSound("buttons/airbut1.wav");
-		self->noise = gpEngine->pfnAllocString("buttons/airbut1.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("buttons/airbut1.wav");
 		break;
 	case 1:
 		PrecacheSound("buttons/switch21.wav");
-		self->noise = gpEngine->pfnAllocString("buttons/switch21.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("buttons/switch21.wav");
 		break;
 	case 2:
 		PrecacheSound("buttons/switch02.wav");
-		self->noise = gpEngine->pfnAllocString("buttons/switch02.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("buttons/switch02.wav");
 		break;
 	case 3:
 		PrecacheSound("buttons/switch04.wav");
-		self->noise = gpEngine->pfnAllocString("buttons/switch04.wav");
+		self->noise = mpGame->GetStringPool()->Alloc("buttons/switch04.wav");
 		break;
 	};
 	//
