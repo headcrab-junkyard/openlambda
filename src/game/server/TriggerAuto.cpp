@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021-2022 BlackPhrase
+ * Copyright (C) 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@ public:
 	void Spawn() override;
 	//void Precache();
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
 	void Think() override;
 	
@@ -52,7 +53,7 @@ void CTriggerAuto::Spawn()
 	//
 };
 
-bool CTriggerAuto::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CTriggerAuto::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "globalstate")
 	{
@@ -61,7 +62,7 @@ bool CTriggerAuto::HandleKeyValue(const std::string &asKey, const std::string &a
 	}
 	else if(asKey == "triggerstate")
 	{
-		int nType{std::stoi(asValue)};
+		int nType{std::stoi(asValue.data())};
 		switch(nType)
 		{
 		case 0:

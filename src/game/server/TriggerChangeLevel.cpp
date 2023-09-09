@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019, 2021 BlackPhrase
+ * Copyright (C) 2019, 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class CTriggerChangeLevel : public CBaseTrigger
 public:
 	void Spawn() override;
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
 	void Touch(CBaseEntity *other) override;
 private:
@@ -49,7 +49,7 @@ void CTriggerChangeLevel::Spawn()
 	SetTouchCallback(CTriggerChangeLevel::Touch);
 };
 
-bool CTriggerChangeLevel::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CTriggerChangeLevel::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "map")
 	{

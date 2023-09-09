@@ -57,7 +57,7 @@ class CPathCorner : public CPointEntity
 public:
 	void Spawn() override;
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
 	void Touch(CBaseEntity *apOther) override;
 };
@@ -74,7 +74,7 @@ void CPathCorner::Spawn()
 	SetSize(idVec3(-8,-8, -8), idVec3(8, 8, 8));
 };
 
-bool CPathCorner::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CPathCorner::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "wait")
 	{

@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019-2021 BlackPhrase
+ * Copyright (C) 2019-2021, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@
 
 LINK_ENTITY_TO_CLASS(DelayedUse, CBaseDelay);
 
-bool CBaseDelay::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CBaseDelay::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "delay")
 	{
-		mfDelay = std::stof(asValue);
+		mfDelay = std::stof(asValue.data());
 		return true;
 	}
 	else if(asKey == "killtarget")

@@ -29,7 +29,7 @@ public:
 	void Spawn() override;
 	//void Precache();
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 };
 
 LINK_ENTITY_TO_CLASS(func_ladder, CFuncLadder);
@@ -45,7 +45,7 @@ void CFuncLadder::Spawn()
 	SetMoveType(MOVETYPE_PUSH);
 };
 
-bool CFuncLadder::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CFuncLadder::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	return CBaseTrigger::HandleKeyValue(asKey, asValue);
 };

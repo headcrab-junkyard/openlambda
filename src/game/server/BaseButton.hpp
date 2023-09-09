@@ -38,7 +38,7 @@ public:
 	void Touch(CBaseEntity *apOther) override; // TODO: ButtonTouch?
 	void Blocked(CBaseEntity *apOther) override;
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
 	void Wait();
 	void Done();

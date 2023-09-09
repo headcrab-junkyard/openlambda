@@ -28,5 +28,6 @@ class CWorldSpawn : public CBaseEntity
 public:
 	void Spawn() override;
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
+	
 };

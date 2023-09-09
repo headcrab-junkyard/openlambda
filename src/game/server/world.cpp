@@ -284,27 +284,27 @@ void CWorldSpawn::Spawn()
 	};
 };
 
-bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CWorldSpawn::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "skyname")
 	{
-		gpEngine->pfnCVarSetString("sv_skyname", asValue.c_str());
+		gpEngine->pfnCVarSetString("sv_skyname", asValue.data());
 		return true;
 	}
 	else if(asKey == "sounds")
 	{
-		gpGlobals->cdAudioTrack = std::stoi(asValue);
+		gpGlobals->cdAudioTrack = std::stoi(asValue.data());
 		return true;
 	}
 	else if(asKey == "WaveHeight")
 	{
-		self->scale = std::stof(asValue) * (1.0 / 8.0);
+		self->scale = std::stof(asValue.data()) * (1.0 / 8.0);
 		gpEngine->pfnCVarSetFloat("sv_wateramp", self->scale);
 		return true;
 	}
 	else if(asKey == "MaxRange")
 	{
-		self->speed = std::stof(asValue);
+		self->speed = std::stof(asValue.data());
 		return true;
 	}
 	else if(asKey == "chaptertitle")
@@ -314,19 +314,19 @@ bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &as
 	}
 	else if(asKey == "startdark")
 	{
-		if(std::stoi(asValue))
+		if(std::stoi(asValue.data()))
 			self->spawnflags |= SF_WORLD_DARK;
 		return true;
 	}
 	else if(asKey == "newunit")
 	{
-		if(std::stoi(asValue))
+		if(std::stoi(asValue.data()))
 			gpEngine->pfnCVarSetFloat("sv_newunit", 1.0f);
 		return true;
 	}
 	else if(asKey == "gametitle")
 	{
-		if(std::stoi(asValue))
+		if(std::stoi(asValue.data()))
 			self->spawnflags |= SF_WORLD_TITLE;
 		return true;
 	}
@@ -337,7 +337,7 @@ bool CWorldSpawn::HandleKeyValue(const std::string &asKey, const std::string &as
 	}
 	else if(asKey == "defaultteam")
 	{
-		if(std::stoi(asValue))
+		if(std::stoi(asValue.data()))
 			self->spawnflags |= SF_WORLD_FORCETEAM;
 		return true;
 	};

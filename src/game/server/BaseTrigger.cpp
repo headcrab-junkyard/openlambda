@@ -249,11 +249,11 @@ void CBaseTrigger::MultiWaitOver()
 	SetThinkCallback(nullptr);
 };
 
-bool CBaseTrigger::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CBaseTrigger::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "damage")
 	{
-		self->dmg = std::stof(asValue);
+		self->dmg = std::stof(asValue.data());
 		return true;
 	}
 	else if(asKey == "count")

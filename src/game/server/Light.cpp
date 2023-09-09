@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2020-2022 BlackPhrase
+ * Copyright (C) 2020-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ public:
 	bool PreSpawn() const override;
 	void Spawn() override;
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
 	void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue) override;
 private:
@@ -71,16 +71,16 @@ void CLight::Spawn()
 	};
 };
 
-bool CLight::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CLight::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "style")
 	{
-		mnStyle = std::stoi(asValue);
+		mnStyle = std::stoi(asValue.data());
 		return true;
 	}
 	else if(asKey == "pitch")
 	{
-		self->angles[0] = std::stof(asValue);
+		self->angles[0] = std::stof(asValue.data());
 		return true;
 	}
 	else if(asKey == "pattern")

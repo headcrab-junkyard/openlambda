@@ -207,7 +207,7 @@ public:
 	void SUB_Null(){}
 	
 	/// Lets the entity handle its settings from the map file
-	virtual bool HandleKeyValue(const std::string &asKey, const std::string &asValue){return false;}
+	virtual bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue){return false;}
 	
 	// Setter & getter (+ checks & conversion) methods
 	

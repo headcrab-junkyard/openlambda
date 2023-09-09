@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public:
 	bool PreSpawn() override;
 	void Spawn() override;
 	
-	bool HandleKeyValue(const std::string &asKey, const std::string &asValue) override;
+	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
 	void Touch(CBaseEntity *apOther) override;
 	
@@ -57,7 +57,7 @@ void CTriggerEndSection::Spawn()
 		SetTouchCallback(CTriggerEndSection::Touch);
 };
 
-bool CTriggerEndSection::HandleKeyValue(const std::string &asKey, const std::string &asValue)
+bool CTriggerEndSection::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 {
 	if(asKey == "section")
 	{
