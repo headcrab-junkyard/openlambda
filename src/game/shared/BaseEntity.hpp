@@ -32,6 +32,8 @@
 #include <mathlib/vec3.h>
 #include <mathlib/bounds.h>
 
+#include <next/CommonTypes.hpp>
+
 //using edict_t = struct edict_s;
 
 extern globalvars_t *gpGlobals;

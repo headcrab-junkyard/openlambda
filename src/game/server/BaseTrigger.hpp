@@ -23,6 +23,8 @@
 
 #include "BaseToggle.hpp"
 
+//=============================================================================
+
 class CBaseTrigger : public CBaseToggle
 {
 public:

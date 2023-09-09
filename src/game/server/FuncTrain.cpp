@@ -24,6 +24,8 @@
 #include "BaseToggle.hpp"
 #include "Util.hpp"
 
+//=============================================================================
+
 /*QUAKED func_train (0 .5 .8) ?
 Trains are moving platforms that players can ride.
 The targets origin specifies the min point of the train at each corner.
@@ -102,12 +104,12 @@ void CFuncTrain::Spawn()
 		self->dmg = 2;
 
 	//self->cnt = 1;
-	SetSolidity(SOLID_BSP);
+	SetSolidity(CBaseEntity::Solidity::BSP);
 	
-	if(self->spawnflags & SF_TRACTTRAIN_PASSABLE)
-		SetSolidity(SOLID_NOT);
+	if(GetSpawnFlags() & SF_TRACTTRAIN_PASSABLE)
+		SetSolidity(CBaseEntity::Solidity::None);
 	
-	SetMoveType(MOVETYPE_PUSH);
+	SetMoveType(CBaseEntity::MoveType::Push);
 	
 	//SetBlockedCallback(CFuncTrain::Blocked);
 	//SetUseCallback(CFuncTrain::Use);

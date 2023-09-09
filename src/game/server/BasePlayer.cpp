@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-2001 Id Software, Inc.
- * Copyright (C) 2018-2022 BlackPhrase
+ * Copyright (C) 2018-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 /// @brief player functions/definitions
 
 #include "BasePlayer.hpp"
-#include "Game.hpp"
+#include "BaseGame.hpp"
 #include "Util.hpp"
 #include "IGameRules.hpp"
 #include "BaseItem.hpp"
@@ -121,13 +121,15 @@ CBasePlayer::CBasePlayer() : mpGame(gpGame){}
 
 void CBasePlayer::Spawn()
 {
+	// Clear entity values
 	SetClassName("player");
 	SetMaxHealth(100);
 	SetHealth(GetMaxHealth());
-	SetArmorValue(0);
-	self->takedamage = DAMAGE_AIM;
-	SetSolidity(SOLID_SLIDEBOX);
-	SetMoveType(MOVETYPE_WALK);
+	SetArmorValue(0); // TODO: recheck
+	//SetDeadFlag(CBaseEntity::DeadFlag::No); // TODO
+	SetDamageable(CBaseEntity::Damageable::Aim);
+	SetSolidity(CBaseEntity::Solidity::SlideBox);
+	SetMoveType(CBaseEntity::MoveType::Walk);
 	//self->show_hostile = 0; // TODO
 	SetFlags(FL_CLIENT);
 	self->air_finished = gpGlobals->time + 12; // TODO: level.time in q2
@@ -153,20 +155,23 @@ void CBasePlayer::Spawn()
 	//W_SetCurrentAmmo(); // TODO
 
 	//self->attack_finished = gpGlobals->time; // TODO
-	//self->th_pain = player_pain; // TODO
-	//self->th_die = PlayerDie; // TODO
 	
-	self->deadflag = DEAD_NO;
+	//self->th_pain = CBasePlayer::Pain; // TODO
+	//self->th_die = CBasePlayer::Die; // TODO
+	
+	SetDeadFlag(DEAD_NO);
 
 	// pausetime is set by teleporters to keep the player from moving a while
 	//self->pausetime = 0; // TODO
 	
 	// oh, this is a hack!
-	SetModel("models/eyes.mdl");
+	//SetModel("models/eyes.mdl");
 	//modelindex_eyes = self->modelindex; // TODO
 
 	SetModel("models/player.mdl");
 	modelindex_player = self->modelindex;
+	
+	SetSequence(LookupActivity(ACT_IDLE));
 
 	SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
 	

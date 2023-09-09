@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020-2021 BlackPhrase
+ * Copyright (C) 2020-2021, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 /// @file
 
 #include "Util.hpp"
+
+//============================================================================
 
 idVec3 VEC_HULL_MIN(-16, -16, -24);
 idVec3 VEC_HULL_MAX(16, 16, 32);

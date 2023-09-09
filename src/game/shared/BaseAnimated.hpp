@@ -24,6 +24,8 @@
 
 #include "BaseDelay.hpp"
 
+struct MonsterEvent_t;
+
 class CBaseAnimated : public CBaseDelay
 {
 public:
@@ -82,5 +84,5 @@ public: // TODO: private:
 	bool mbSequenceFinished{false}; ///< Flag set when StudioAdvanceFrame moves across a frame boundary
 	bool mbSequenceLoops{false}; ///< True if the sequence loops
 private:
-	void *GetModel() const;
+	void *GetModelPtr() const;
 };

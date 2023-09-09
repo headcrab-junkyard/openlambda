@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 
 #include "FuncDoor.hpp"
 #include "Util.hpp"
+
+//=============================================================================
 
 LINK_ENTITY_TO_CLASS(func_door, CFuncDoor);
 
@@ -55,7 +57,7 @@ void CFuncDoor::Spawn()
 	else
 		dprint("no worldtype set!\n");
 	
-	if (self->sounds == 0)
+	if(self->sounds == 0)
 	{
 		PrecacheSound("misc/null.wav");
 		
@@ -63,7 +65,7 @@ void CFuncDoor::Spawn()
 		self->noise2 = "misc/null.wav";
 	};
 	
-	if (self->sounds == 1)
+	if(self->sounds == 1)
 	{
 		PrecacheSound("doors/drclos4.wav");
 		PrecacheSound("doors/doormv1.wav");
@@ -72,7 +74,7 @@ void CFuncDoor::Spawn()
 		self->v.noise2 = "doors/doormv1.wav";
 	};
 	
-	if (self->sounds == 2)
+	if(self->sounds == 2)
 	{
 		PrecacheSound("doors/hydro1.wav");
 		PrecacheSound("doors/hydro2.wav");
@@ -81,7 +83,7 @@ void CFuncDoor::Spawn()
 		self->noise1 = "doors/hydro2.wav";
 	};
 	
-	if (self->sounds == 3)
+	if(self->sounds == 3)
 	{
 		PrecacheSound("doors/stndr1.wav");
 		PrecacheSound("doors/stndr2.wav");
@@ -90,7 +92,7 @@ void CFuncDoor::Spawn()
 		self->noise1 = "doors/stndr2.wav";
 	};
 	
-	if (self->sounds == 4)
+	if(self->sounds == 4)
 	{
 		PrecacheSound("doors/ddoor1.wav");
 		PrecacheSound("doors/ddoor2.wav");
@@ -98,18 +100,18 @@ void CFuncDoor::Spawn()
 		self->noise1 = "doors/ddoor2.wav";
 		self->noise2 = "doors/ddoor1.wav";
 	};
-
+	
 	SetMovedir(self);
-
+	
 	//SetMaxHealth(GetHealth());
 	SetSolidity(SOLID_BSP);
-	SetMoveType(MOVETYPE_PUSH);
+	SetMoveType(CBaseEntity::MoveType::Push);
 	
-	SetOrigin(self->origin);  
-	SetModel(self->model);
+	SetOrigin(GetOrigin());  
+	SetModel(GetModel());
 	
 	SetClassName("door");
-
+	
 	SetBlockedCallback(CFuncDoor::Blocked);
 	SetUseCallback(CFuncDoor::Use);
 	
@@ -118,8 +120,8 @@ void CFuncDoor::Spawn()
 	//if(self->spawnflags & DOOR_GOLD_KEY)
 		//self->items = IT_KEY2;
 	
-	if(!self->speed)
-		self->speed = 100;
+	if(!GetSpeed())
+		SetSpeed(100);
 	//if(!self->wait)
 		//self->wait = 3;
 	//if(!self->lip)
@@ -127,12 +129,12 @@ void CFuncDoor::Spawn()
 	//if(!self->dmg)
 		//self->dmg = 2;
 
-	self->v.pos1 = self->v.origin;
+	self->v.pos1 = self->GetOrigin();
 	self->v.pos2 = self->v.pos1 + self->v.movedir*(fabs(self->v.movedir*self->v.size) - self->v.lip);
 
-// DOOR_START_OPEN is to allow an entity to be lighted in the closed position
-// but spawn in the open position
-	if (self->spawnflags & DOOR_START_OPEN)
+	// DOOR_START_OPEN is to allow an entity to be lighted in the closed position
+	// but spawn in the open position
+	if(GetSpawnFlags() & DOOR_START_OPEN)
 	{
 		SetOrigin(self->pos2);
 		self->pos2 = self->pos1;
@@ -197,25 +199,28 @@ Prints messages and opens key doors
 */
 void CFuncDoor::Touch(CBaseEntity *other)
 {
-	if (other.classname != "player")
-		return;
-	if (self.owner.attack_finished > time)
+	// Ignore touches by anything but players
+	if(other->GetClassName() != "player")
 		return;
 
-	self.owner.attack_finished = time + 2;
+/*	
+	if(GetOwner()->attack_finished > gpGlobals->time)
+		return;
 
-	if (self.owner.message != "")
+	GetOwner()->attack_finished = gpGlobals->time + 2;
+
+	if(self->owner->message != "")
 	{
-		centerprint (other, self.owner.message);
-		gpEngine->pfnEmitSound (other, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
+		centerprint(other, GetOwner()->message);
+		other->EmitSound(CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
 	};
-	
-// key door stuff
-	if (!self.items)
+
+	// key door stuff
+	if(!self->GetItems())
 		return;
 
-// FIXME: blink key on player's status bar
-	if ( (self.items & other.items) != self.items )
+	// FIXME: blink key on player's status bar
+	if((self->items & other.items) != self.items)
 	{
 		if (self.owner.items == IT_KEY1)
 		{
@@ -255,11 +260,13 @@ void CFuncDoor::Touch(CBaseEntity *other)
 		};
 		return;
 	};
+*/
 
 	other->items = other->items - self->items;
+	
 	SetTouchCallback(SUB_Null);
-	if(self->enemy)
-		self->enemy->touch = SUB_Null;    // get paired door
+	if(self->GetEnemy())
+		self->GetEnemy()->SetTouchCallback(SUB_Null); // get paired door
 	Use();
 };
 

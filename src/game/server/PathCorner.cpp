@@ -1,34 +1,31 @@
 /*
-	movetarget.qc
-
-	movetarget code
-
-	Copyright (C) 1996-1997  Id Software, Inc.
-
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
-	of the License, or (at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-	See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to:
-
-		Free Software Foundation, Inc.
-		59 Temple Place - Suite 330
-		Boston, MA  02111-1307, USA
-
+ * This file is part of OpenLambda Project
+ *
+ * Copyright (C) 1996-1997 Id Software, Inc.
+ * Copyright (C) 2021-2023 BlackPhrase
+ *
+ * OpenLambda Project is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenLambda Project is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenLambda Project. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /// @file
 
 #include "PointEntity.hpp"
+#include "BaseGame.hpp"
+#include "IGameWorld.hpp"
 #include "Util.hpp"
+
+//=============================================================================
 
 /*
 ==============================================================================
@@ -69,7 +66,7 @@ void CPathCorner::Spawn()
 	if(!self->targetname)
 		objerror("monster_movetarget: no targetname");
 		
-	SetSolidity(SOLID_TRIGGER);
+	SetSolidity(CBaseEntity::Solidity::Trigger);
 	SetTouchCallback(CPathCorner::Touch);
 	SetSize(idVec3(-8,-8, -8), idVec3(8, 8, 8));
 };
@@ -99,14 +96,14 @@ void CPathCorner::Touch(CBaseEntity *apOther)
 		return;
 	
 	if(apOther->GetEnemy())
-		return; // fighting, not following a path
+		return; // Fighting, not following a path
 
 	//CBaseEntity *temp = self;
 	//self = apOther;
 	//apOther = temp;
 
 	if(apOther->GetClassName() == "monster_ogre")
-		apOther->EmitSound(CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE); // play chainsaw drag sound
+		apOther->EmitSound(CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE); // Play chainsaw drag sound
 
 	//dprint ("t_movetarget\n");
 	apOther->SetGoal(/*apOther->movetarget =*/ gpEngine->pfnFindEntityByString(world, "targetname", apOther->GetTarget()));

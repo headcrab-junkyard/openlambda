@@ -35,6 +35,8 @@
 
 //#include <next/scriptsystem/IScriptSystem.hpp>
 
+//=============================================================================
+
 bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 {
 	mpSystem = reinterpret_cast<ISystem*>(afnEngineFactory(OGS_SYSTEM_INTERFACE_VERSION, nullptr));

@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021-2022 BlackPhrase
+ * Copyright (C) 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 /// @file
 
 #pragma once
+
+//=============================================================================
 
 enum eAnimType // TODO: ePlayerAnimTypes? PLAYER_ANIM in original code
 {

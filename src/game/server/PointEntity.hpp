@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020 BlackPhrase
+ * Copyright (C) 2020, 2022-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,15 @@
 
 #include "BaseEntity.hpp"
 
+//=============================================================================
+
 class CPointEntity : public CBaseEntity
 {
 public:
 	void Spawn() override
 	{
-		SetSolidity(SOLID_NOT);
+		SetSolidity(CBaseEntity::Solidity::None);
 	};
+	
+	virtual int GetObjectCaps() const override {return CBaseEntity::GetObjectCaps() & ~FCAP_ACROSS_TRANSITION;}
 };

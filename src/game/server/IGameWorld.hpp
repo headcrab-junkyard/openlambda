@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,15 @@
 
 #pragma once
 
-#include <string>
+#include <next/CommonTypes.hpp>
+
+//=============================================================================
 
 class CBaseEntity;
 
-struct IGameWorld
+interface IPhysicsWorld;
+
+interface IGameWorld
 {
 	///
 	virtual CBaseEntity *SpawnEntity(const std::string &asName = "") = 0;
@@ -37,8 +41,9 @@ struct IGameWorld
 	virtual CBaseEntity *GetEntityByIndex(int anIndex) const = 0;
 	
 	///
-	virtual CBaseEntity *FindEntityByString(CBaseEntity *apEntSearchAfter, const std::string &asString, const std::string &asValue) const = 0;
+	virtual CBaseEntity *FindEntityByString(CBaseEntity *apEntSearchAfter, std::string_view asString, std::string_view asValue) const = 0;
 	
 	///
-	virtual CBaseEntity *FindEntityByTargetName(CBaseEntity *apEntSearchAfter, const std::string &asTargetName) const = 0;
+	virtual CBaseEntity *FindEntityByTargetName(CBaseEntity *apEntSearchAfter, std::string_view asTargetName) const = 0;
+	
 };

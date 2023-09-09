@@ -21,7 +21,14 @@
 /// @file
 /// @brief a trigger that is used for changing levels
 
+#include <cstring>
+
 #include "BaseTrigger.hpp"
+#include "Util.hpp"
+
+//============================================================================
+
+char /*string_t*/ gsNextMap[64]{}; // TODO: IGameWorld->SetNextMap
 
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
 When the player touches this, he gets sent to the map listed in the "map" variable.  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
@@ -36,13 +43,21 @@ public:
 	void Touch(CBaseEntity *other) override;
 private:
 	void Execute();
+	
+	CBaseEntity *FindIntermission();
+private:
+	char msMapName[64]{};
+
+	float intermission_exittime{0.0f};
+	
+	bool intermission_running{false};
 };
 
 LINK_ENTITY_TO_CLASS(trigger_changelevel, CTriggerChangeLevel);
 
 void CTriggerChangeLevel::Spawn()
 {
-	if(!self->map)
+	if(!msMapName || !*msMapName)
 		objerror("chagnelevel trigger doesn't have map");
 	
 	InitTrigger(); // TODO: CBaseTrigger::Spawn?
@@ -88,16 +103,16 @@ void CTriggerChangeLevel::Touch(CBaseEntity *apOther)
 		return;
 	};
 
-	gpEngine->pfnBroadcastPrint(PRINT_HIGH, apOther->v.netname);
+	gpEngine->pfnBroadcastPrint(PRINT_HIGH, apOther->self->netname);
 	gpEngine->pfnBroadcastPrint(PRINT_HIGH," exited the level\n");
 	
-	nextmap = self->map;
+	strcpy(gsNextMap, msMapName);
 
-	SUB_UseTargets(apOther, USE_TOGGLE, 0);
+	SUB_UseTargets(apOther, UseType::Toggle, 0);
 
-	SetTouchCallback(SUB_Null);
+	//SetTouchCallback(SUB_Null);
 
-	// we can't move people right now, because touch functions are called
+	// We can't move people right now, because touch functions are called
 	// in the middle of C movement code, so set a think time to do it
 	SetThinkCallback(CTriggerChangeLevel::Execute);
 	SetNextThink(gpGlobals->time + 0.1);
@@ -113,12 +128,12 @@ Take the players to the intermission spot
 */
 void CTriggerChangeLevel::Execute()
 {
-	intermission_running = 1;
+	intermission_running = true;
 	
-	// enforce a wait time before allowing changelevel
+	// Enforce a wait time before allowing changelevel
 	intermission_exittime = gpGlobals->time + 5;
-
-	// play intermission music
+	
+	// Play intermission music
 	gpEngine->pfnMessageBegin(MSG_ALL, SVC_CDTRACK);
 	gpEngine->pfnWriteByte(3);
 	gpEngine->pfnWriteByte(3);

@@ -20,12 +20,20 @@
 /// @file
 
 #include "BaseTrigger.hpp"
+#include "BaseGame.hpp"
+#include "IGameRules.hpp"
+#include "IGameWorld.hpp"
+#include "IStringPool.hpp"
 #include "Util.hpp"
+
+constexpr auto SF_ENDSECTION_USEONLY{0x0001};
+
+//============================================================================
 
 class CTriggerEndSection : public CBaseTrigger
 {
 public:
-	bool PreSpawn() override;
+	bool PreSpawn() const override;
 	void Spawn() override;
 	
 	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
@@ -39,7 +47,7 @@ private:
 
 LINK_ENTITY_TO_CLASS(trigger_endsection, CTriggerEndSection);
 
-bool CTriggerEndSection::PreSpawn()
+bool CTriggerEndSection::PreSpawn() const
 {
 	if(mpGame->GetRules()->IsDeathmatch())
 		return false;
@@ -53,7 +61,8 @@ void CTriggerEndSection::Spawn()
 	
 	SetUseCallback(CTriggerEndSection::Use);
 	
-	if()
+	// If it's a "use only" trigger, don't set the touch callback
+	if(!(GetSpawnFlags() & SF_ENDSECTION_USEONLY))
 		SetTouchCallback(CTriggerEndSection::Touch);
 };
 
@@ -61,6 +70,7 @@ bool CTriggerEndSection::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView
 {
 	if(asKey == "section")
 	{
+		// Store this in message so we don't have to write save/restore for this entity
 		self->message = gpEngine->pfnMakeString(asValue.c_str());
 		return true;
 	};
@@ -70,7 +80,8 @@ bool CTriggerEndSection::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView
 
 void CTriggerEndSection::Touch(CBaseEntity *apOther)
 {
-	if(!apOther->IsNetClient())
+	// Only save on clients
+	if(!apOther->IsNetClient()) // TODO
 		return;
 	
 	TouchCommon();
@@ -78,7 +89,7 @@ void CTriggerEndSection::Touch(CBaseEntity *apOther)
 
 void CTriggerEndSection::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
-	if(apActivator && !apActivator->IsNetClient())
+	if(apActivator && !apActivator->IsNetClient()) // TODO
 		return;
 	
 	TouchCommon();

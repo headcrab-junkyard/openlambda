@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,17 +87,17 @@ void CTriggerMulti::Spawn()
 
 	if(GetHealth() > 0)
 	{
-		//if(self->spawnflags & SPAWNFLAG_NOTOUCH)
+		//if(GetSpawnFlags() & SPAWNFLAG_NOTOUCH)
 			//objerror("health and notouch don't make sense\n");
 		SetMaxHealth(GetHealth());
 		//self->th_die = CTriggerMulti::Killed;
-		SetDamageable(DAMAGE_YES);
-		SetSolidity(SOLID_BBOX);
-		SetOrigin(GetOrigin());	// make sure it links into the world
+		SetDamageable(CBaseEntity::Damageable::Yes);
+		SetSolidity(CBaseEntity::Solidity::BoundingBox);
+		SetOrigin(GetOrigin());	// Make sure it links into the world
 	}
 	else
 	{
-		if(!(self->spawnflags & SPAWNFLAG_NOTOUCH))
+		//if(!(GetSpawnFlags() & SPAWNFLAG_NOTOUCH))
 			SetTouchCallback(CTriggerMulti::MultiTouch);
 	};
 };

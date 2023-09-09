@@ -21,6 +21,8 @@
 
 #include "BaseAnimated.hpp"
 
+//=============================================================================
+
 TYPEDESCRIPTION CBaseAnimated::mSaveData[]{};
 
 int CBaseAnimated::Save(CGameSave &aGameSave)
@@ -77,7 +79,7 @@ float CBaseAnimated::StudioFrameAdvance(float afInterval)
 
 void CBaseAnimated::ResetSequenceInfo()
 {
-	GetSequenceInfo(GetModel(), self, &mfFrameRate, &mfGroundSpeed);
+	GetSequenceInfo(GetModelPtr(), self, &mfFrameRate, &mfGroundSpeed);
 	
 	mbSequenceLoops = ((GetSequenceFlags() & STUDIO_LOOPING) != 0);
 	
@@ -90,7 +92,7 @@ void CBaseAnimated::ResetSequenceInfo()
 
 void CBaseAnimated::DispatchAnimEvents(float afFutureInterval)
 {
-	auto pModel{GetModel()};
+	auto pModel{GetModelPtr()};
 	
 	if(!pModel)
 	{
@@ -121,7 +123,7 @@ void CBaseAnimated::DispatchAnimEvents(float afFutureInterval)
 
 int CBaseAnimated::GetSequenceFlags() const
 {
-	return ::GetSequenceFlags(GetModel(), self);
+	return ::GetSequenceFlags(GetModelPtr(), self);
 };
 
 int CBaseAnimated::LookupActivity(int anActivity, bool abHeaviest) const
@@ -129,22 +131,22 @@ int CBaseAnimated::LookupActivity(int anActivity, bool abHeaviest) const
 	if(!abHeaviest)
 		ASSERT(anActivity != 0);
 	
-	return ::LookupActivity(GetModel(), self, anActivity, abHeaviest);
+	return ::LookupActivity(GetModelPtr(), self, anActivity, abHeaviest);
 };
 
 int CBaseAnimated::LookupSequence(const char *asLabel) const
 {
-	return ::LookupSequence(GetModel(), asLabel);
+	return ::LookupSequence(GetModelPtr(), asLabel);
 };
 
 float CBaseAnimated::SetBoneController(int anController, float afValue)
 {
-	return SetController(GetModel(), self, anController, afValue);
+	return SetController(GetModelPtr(), self, anController, afValue);
 };
 
 float CBaseAnimated::SetBlending(int anBlender, float afValue)
 {
-	return ::SetBlending(GetModel(), self, anBlender, afValue);
+	return ::SetBlending(GetModelPtr(), self, anBlender, afValue);
 };
 
 void CBaseAnimated::GetBonePosition(int anBone, idVec3 &avOrigin, idVec3 &avAngles) const
@@ -159,7 +161,7 @@ void CBaseAnimated::GetAutoMovement(idVec3 &avOrigin, idVec3 &avAngles, float af
 
 int CBaseAnimated::FindTransition(int anEndingSequence, int anGoalSequence, int *apDir)
 {
-	auto pModel{GetModel()};
+	auto pModel{GetModelPtr()};
 	
 	if(!apDir)
 	{
@@ -181,17 +183,17 @@ void CBaseAnimated::GetAttachment(int anAttachment, idVec3 &avOrigin, idVec3 &av
 
 void CBaseAnimated::SetBodyGroup(int anGroup, int anValue)
 {
-	::SetBodyGroup(GetModel(), self, anGroup, anValue);
+	::SetBodyGroup(GetModelPtr(), self, anGroup, anValue);
 };
 
 int CBaseAnimated::GetBodyGroup(int anGroup) const
 {
-	return ::GetBodyGroup(GetModel(), self, anGroup);
+	return ::GetBodyGroup(GetModelPtr(), self, anGroup);
 };
 
 int CBaseAnimated::ExtractBoundingBox(int anSequence, float *avMins, float *avMaxs)
 {
-	return ::ExtractBoundingBox(GetModel(), anSequence, avMins, avMaxs);
+	return ::ExtractBoundingBox(GetModelPtr(), anSequence, avMins, avMaxs);
 };
 
 void CBaseAnimated::SetSequenceBox()
@@ -267,7 +269,7 @@ void CBaseAnimated::SetSequenceBox()
 	};
 };
 
-void *CBaseAnimated::GetModel() const
+void *CBaseAnimated::GetModelPtr() const
 {
 	return gpEngine->pfnGetModelPtr(ToEdict());
 };

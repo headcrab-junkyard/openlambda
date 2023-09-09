@@ -18,9 +18,16 @@
 */
 
 /// @file
+/// @brief This trigger will fire when the level spawns (or respawns if not fire once)
+/// It will check a global state before firing. It supports delay and killtargets
 
 #include "BaseDelay.hpp"
+#include "BaseGame.hpp"
+#include "IGameWorld.hpp"
+#include "IStringPool.hpp"
 #include "Util.hpp"
+
+//============================================================================
 
 constexpr auto SF_AUTO_FIREONCE{0x0001};
 

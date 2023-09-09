@@ -22,6 +22,9 @@
 
 #include "BaseDelay.hpp"
 #include "Util.hpp"
+#include "BaseGame.hpp"
+#include "IStringPool.hpp"
+#include "IGameWorld.hpp"
 
 //=============================================================================
 

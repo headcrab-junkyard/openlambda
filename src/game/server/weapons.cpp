@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2022 BlackPhrase
+ * Copyright (C) 2018-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@
 
 /// @file
 /// @brief weapon and weapon hit functions
+
+
+//============================================================================
 
 //void player_run();
 //void T_RadiusDamage(entvars_t bomb, entvars_t attacker, float rad, entvars_t ignore, string dtype);

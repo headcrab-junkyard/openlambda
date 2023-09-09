@@ -29,6 +29,8 @@
 #include "Util.hpp"
 #include "World.hpp"
 
+//============================================================================
+
 extern enginefuncs_t gEngFuncs;
 enginefuncs_t *gpEngine = &gEngFuncs;
 
@@ -269,17 +271,17 @@ void CWorldSpawn::Spawn()
 		
 		gpEngine->pfnCVarSetFloat("v_dark", 0.0f);
 		
-		if(self->spawnflags & SF_WORLD_DARK)
+		if(GetSpawnFlags() & SF_WORLD_DARK)
 			gpEngine->pfnCVarSetFloat("v_dark", 1.0f);
 		
 		gbDisplayTitle = false;
 		
-		if(self->spawnflags & SF_WORLD_TITLE)
+		if(GetSpawnFlags() & SF_WORLD_TITLE)
 			gbDisplayTitle = true;
 		
 		gpEngine->pfnCVarSetFloat("mp_defaultteam", 0);
 		
-		if(self->spawnflags & SF_WORLD_FORCETEAM)
+		if(GetSpawnFlags() & SF_WORLD_FORCETEAM)
 			gpEngine->pfnCVarSetFloat("mp_defaultteam", 1);
 	};
 };

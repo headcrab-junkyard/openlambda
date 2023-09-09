@@ -22,7 +22,9 @@
 
 #pragma once
 
-#include <IStringPool.hpp>
+#include "IStringPool.hpp"
+
+//============================================================================
 
 class CStringPool : public IStringPool
 {

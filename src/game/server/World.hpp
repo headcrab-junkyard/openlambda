@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2021, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,18 @@
 
 #pragma once
 
-#include "CBaseEntity.hpp"
+#include "BaseEntity.hpp"
+#include "IGameWorld.hpp"
 
-class CWorldSpawn : public CBaseEntity
+//============================================================================
+
+// TODO: CGameWorld?
+class CWorldSpawn : public CBaseEntity//, public IGameWorld
 {
 public:
 	void Spawn() override;
 	
 	bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue) override;
 	
+	// IGameWorld interface implementation
 };

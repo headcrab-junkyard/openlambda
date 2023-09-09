@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019, 2021-2022 BlackPhrase
+ * Copyright (C) 2019, 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,15 @@
 /// @file
 
 #include "BaseAmmo.hpp"
-#include "Game.hpp"
+#include "BaseGame.hpp"
 #include "IGameRules.hpp"
+
+//=============================================================================
 
 void CBaseAmmo::Spawn()
 {
-	SetMoveType(MOVETYPE_TOSS);
-	SetSolidity(SOLID_TRIGGER);
+	SetMoveType(CBaseEntity::MoveType::Toss);
+	SetSolidity(CBaseEntity::Solidity::Trigger);
 	SetSize(idVec3(-16, -16, 0), idVec3(16, 16, 16));
 	SetOrigin(GetOrigin());
 	
@@ -40,7 +42,7 @@ void CBaseAmmo::Respawn()
 {
 	// Remove it in single player, or setup for respawning in deathmatch
 	AddEffects(EF_NODRAW); // TODO: was SetModel(string_null);
-	SetSolidity(SOLID_NOT);
+	SetSolidity(CBaseEntity::Solidity::None);
 
 	//if(gpGlobals->deathmatch != 2)
 		//SetNextThink(gpGlobals->time + 30);

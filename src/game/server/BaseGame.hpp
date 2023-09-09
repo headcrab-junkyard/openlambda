@@ -25,6 +25,8 @@
 
 #include <next/game/server/IGame.hpp>
 
+//=============================================================================
+
 interface ISystem;
 interface IFileSystem;
 interface IGameServer;
@@ -32,22 +34,24 @@ interface IVoiceServer;
 interface IPhysicsSystem;
 interface IScriptSystem;
 
+interface IStringPool;
+
 //interface IGameSetup;
 interface IGameRules;
 
-class IGameWorld;
+interface IGameWorld;
 
 class CSystemEventListener_Game;
 class CGameServerEventListener;
 class CGameClientEventListener;
 
-class CBaseGame /*final*/ : public IGame
+class CBaseGame : public IGame
 {
 public:
 	CBaseGame();
 	//CBaseGame(IGameRules *apRules) : mpRules(apRules){}
 	//CBaseGame(IGameRules *apRules, IGameWorld *apWorld);
-	//~CBaseGame();
+	virtual ~CBaseGame() = default;
 public: // IGame interface impl
 	bool Init(CreateInterfaceFn afnEngineFactory) override;
 	void Shutdown() override;

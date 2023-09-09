@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2020-2021 BlackPhrase
+ * Copyright (C) 2020-2022 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,8 @@ LINK_ENTITY_TO_CLASS(func_wall, CFuncWall);
 void CFuncWall::Spawn()
 {
 	SetAngles(idVec3::Origin);
-	SetMoveType(MOVETYPE_PUSH); // So it doesn't get pushed by anything
-	SetSolidity(SOLID_BSP);
+	SetMoveType(CBaseEntity::MoveType::Push); // So it doesn't get pushed by anything
+	SetSolidity(CBaseEntity::Solidity::BSP);
 	SetUseCallback(CFuncWall::Use);
 	
 	SetModel(GetModel());
@@ -76,8 +76,8 @@ LINK_ENTITY_TO_CLASS(func_illusionary, CFuncIllusionary);
 void CFuncIllusionary::Spawn()
 {
 	SetAngles(idVec3::Origin);
-	SetMoveType(MOVETYPE_NONE);
-	SetSolidity(SOLID_NOT);
+	SetMoveType(CBaseEntity::MoveType::None);
+	SetSolidity(CBaseEntity::Solidity::None);
 	
 	SetModel(GetModel());
 	

@@ -21,11 +21,18 @@
 
 #pragma once
 
+#include <next/CommonTypes.hpp>
+
+//=============================================================================
+
 class CBaseEntity;
 class CBasePlayer;
 class CBaseAmmo;
 class CBaseItem;
 class CItemPickup;
+class CBaseCharacter;
+
+interface ICmdArgs;
 
 // TODO
 /*
@@ -35,7 +42,7 @@ class CItemPickup;
 	Chat team/location prefixes
 	Achievements
 */
-struct IGameRules
+interface IGameRules
 {
 	virtual ~IGameRules() = default;
 	//virtual void Release() = 0; // BP: this will be useful in case the implementation will be defined inside of another dll
@@ -166,8 +173,7 @@ struct IGameRules
 	virtual void OnPlayerSpawn(CBasePlayer *apPlayer) = 0;
 	
 	/// Called by CBasePlayer::PreThink every frame, before physics are run and after keys are accepted
-	virtual void OnPlayerThink(CBasePlayer *apPlayer) = 0;
-	//virtual void OnPlayerThink(CBasePlayer *apPlayer){}
+	virtual void OnPlayerThink(CBasePlayer *apPlayer) = 0; // TODO: {}
 	
 	/// Is this player allowed to respawn now?
 	virtual bool PlayerCanRespawn(CBasePlayer *apPlayer) const = 0; // TODO: CanPlayerRespawn?
@@ -182,7 +188,7 @@ struct IGameRules
 	//virtual bool IsSpawnPointValid() const = 0;
 	
 ///////////////////////////////////////////////////////////////////////////////
-// Client damage rules
+// Player damage rules
 ///////////////////////////////////////////////////////////////////////////////
 	
 	///
@@ -324,9 +330,9 @@ struct IGameRules
 	// What happens to a dead player's weapons and ammo
 	enum class ItemDropType : int
 	{
-		None = 0,
-		Active,
-		All
+		None = 0, ///< Drop nothing
+		Active, ///< Drop only current weapon
+		All ///< Drop everything
 	};
 	
 	/// What should I do with a player's weapons when he's killed?
@@ -377,7 +383,7 @@ struct IGameRules
 ///////////////////////////////////////////////////////////////////////////////
 	
 	virtual bool PlayTextureSounds() = 0;
-	virtual bool PlayFootstepSounds(CBasePlayer *apPlayer, float afVolume) = 0;
+	virtual bool ShouldPlayFootstepSounds(CBasePlayer *apPlayer, float afVolume) const = 0;
 	
 ///////////////////////////////////////////////////////////////////////////////
 	

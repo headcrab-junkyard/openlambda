@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@ class CTriggerMonsterJump : public CBaseTrigger
 public:
 	void Spawn() override;
 	
+	void Think() override;
+	
 	void Touch(CBaseEntity *apOther) override;
 private:
 	float GetHeight() const {return mfHeight;}
@@ -50,12 +52,22 @@ void CTriggerMonsterJump::Spawn()
 {
 	if(!GetSpeed())
 		self->speed = 200;
+	
 	if(!GetHeight())
 		mfHeight = 200;
+	
 	if(GetAngles() == idVec3::Origin)
 		SetAngles(idVec3(0, 360, 0));
+	
 	InitTrigger();
 	SetTouchCallback(CTriggerMonsterJump::Touch);
+};
+
+void CTriggerMonsterJump::Think()
+{
+	SetSolidity(CBaseEntity::Solidity::None);
+	SetOrigin(GetOrigin());
+	SetThinkCallback(nullptr);
 };
 
 void CTriggerMonsterJump::Touch(CBaseEntity *apOther)
@@ -63,7 +75,7 @@ void CTriggerMonsterJump::Touch(CBaseEntity *apOther)
 	if(apOther->GetFlags() & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER)
 		return;
 
-	// set XY even if not on ground, so the jump will clear lips
+	// Set XY even if not on ground, so the jump will clear lips
 	float fVelX{GetMoveDir().x * GetSpeed()};
 	float fVelY{GetMoveDir().y * GetSpeed()};
 	float fVelZ{0.0f};

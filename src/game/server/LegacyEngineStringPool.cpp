@@ -20,6 +20,9 @@
 /// @file
 
 #include "LegacyEngineStringPool.hpp"
+#include "engine.h"
+
+//============================================================================
 
 tStringPoolEntry CStringPool::Alloc(const char *asText)
 {

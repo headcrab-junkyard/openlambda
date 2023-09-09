@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include "BaseTrigger.hpp"
 #include "Util.hpp"
 
+//=============================================================================
+
 class CFuncLadder : public CBaseTrigger
 {
 public:
@@ -36,13 +38,13 @@ LINK_ENTITY_TO_CLASS(func_ladder, CFuncLadder);
 
 void CFuncLadder::Spawn()
 {
-	SetSolidity(SOLID_NOT);
+	SetSolidity(CBaseEntity::Solidity::None);
 	SetSkin(CONTENTS_LADDER);
 	
 	//SetEffects();
 	
 	SetModel(gpEngine->pfnSzFromIndex(self->model));
-	SetMoveType(MOVETYPE_PUSH);
+	SetMoveType(CBaseEntity::MoveType::Push);
 };
 
 bool CFuncLadder::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)

@@ -23,6 +23,8 @@
 #include "PointEntity.hpp"
 #include "Util.hpp"
 
+//=============================================================================
+
 /*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) START_OFF
 Non-displayed light.
 Default light value is 300
@@ -64,7 +66,7 @@ void CLight::Spawn()
 	if(mnStyle >= 32)
 	{
 		//SetUseCallback(CLight::Use);
-		if(self->spawnflags & START_OFF)
+		if(GetSpawnFlags() & START_OFF)
 			gpEngine->pfnLightStyle(mnStyle, "a");
 		else
 			gpEngine->pfnLightStyle(mnStyle, "m");
@@ -94,7 +96,7 @@ bool CLight::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)
 
 void CLight::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
-	if(self->spawnflags & START_OFF)
+	if(GetSpawnFlags() & START_OFF)
 	{
 		gpEngine->pfnLightStyle(mnStyle, "m");
 		self->spawnflags &= ~START_OFF;

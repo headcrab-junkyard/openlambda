@@ -21,11 +21,16 @@
 /// @file
 
 #include "BaseEntity.hpp"
-#include "GameWorld.hpp"
+#include "BaseGame.hpp"
+#include "IStringPool.hpp"
+#include "IResourceLoader.hpp"
+#include "IGameWorld.hpp" //#include "GameWorld.hpp"
 #include "engine.h"
 //#include "const.h"
 #include "weapons.hpp"
 #include "Util.hpp"
+
+//=============================================================================
 
 enum class TargetEngineAPI : int
 {

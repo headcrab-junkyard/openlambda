@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019-2021 BlackPhrase
+ * Copyright (C) 2019-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,15 @@
 */
 
 /// @file
+/// @brief multiplayer intermission spot entity
 
 #include "PointEntity.hpp"
+#include "BaseGame.hpp"
+#include "IGameWorld.hpp"
+#include "IStringPool.hpp"
 #include "Util.hpp"
+
+//=============================================================================
 
 /*QUAKED info_intermission (1 0.5 0.5) (-16 -16 -16) (16 16 16)
 This is the camera point for the intermission.
@@ -31,11 +37,32 @@ class CInfoIntermission : public CPointEntity
 {
 public:
 	void Spawn() override;
+	
+	void Think() override;
 };
 
 LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission);
 
 void CInfoIntermission::Spawn()
 {
-	SetAngles(self->mangle); // so C can get at it
+	//SetAngles(self->mangle); // So C can get at it
+	
+	SetOrigin(GetOrigin());
+	SetSolidity(CBaseEntity::Solidity::None);
+	SetEffects(EF_NODRAW);
+	self->v_angle = idVec3::Origin;
+	
+	SetNextThink(gpGlobals->time + 2); // Let the targets spawn
+};
+
+void CInfoIntermission::Think()
+{
+	// Find my target
+	auto pTarget{mpGame->GetWorld()->FindEntityByTargetName(nullptr, mpGame->GetStringPool()->GetByIndex(this->GetTarget()))};
+	
+	if(pTarget) // TODO: !FNullEnt(pTarget)?
+	{
+		self->v_angle = gpEngine->pfnVecToAngles((pTarget->GetOrigin() - GetOrigin()).Normalize());
+		self->v_angle.x = -self->v_angle.x;
+	};
 };

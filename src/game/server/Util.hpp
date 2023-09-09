@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019-2021 BlackPhrase
+ * Copyright (C) 2019-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,18 @@
 
 #pragma once
 
+#include <next/CommonTypes.hpp>
+
 #include "engine.h"
-#include "mathlib/vec3.h"
+
+#include <mathlib/vec3.h>
+
 #include "exports.h"
 
 #define LINK_ENTITY_TO_CLASS(mapClassName, dllClassName) \
 	C_EXPORT void mapClassName(entvars_t *self){GetClassPtr(reinterpret_cast<dllClassName*>(self));}
+
+//============================================================================
 
 class CBaseEntity;
 

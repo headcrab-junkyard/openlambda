@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019-2021 BlackPhrase
+ * Copyright (C) 2019-2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,11 @@
 /// @brief button and multiple button code
 
 #include "BaseButton.hpp"
+#include "BaseGame.hpp"
+#include "IStringPool.hpp"
 #include "Util.hpp"
+
+//=============================================================================
 
 extern void SetMovedir(entvars_t *self);
 
@@ -71,8 +75,8 @@ void CBaseButton::Spawn()
 	
 	SetMovedir(self);
 
-	SetMoveType(MOVETYPE_PUSH);
-	SetSolidity(SOLID_BSP);
+	SetMoveType(CBaseEntity::MoveType::Push);
+	SetSolidity(CBaseEntity::Solidity::BSP);
 	SetModel(GetModel());
 
 	//SetBlockedCallback(CBaseButton::Blocked);
@@ -82,7 +86,7 @@ void CBaseButton::Spawn()
 	{
 		//SetMaxHealth(GetHealth());
 		//self->th_die = CBaseButton::Killed;
-		SetDamageable(DAMAGE_YES);
+		SetDamageable(CBaseEntity::Damageable::Yes);
 	}
 	//else
 		//SetTouchCallback(CBaseButton::Touch);
@@ -120,7 +124,7 @@ void CBaseButton::Touch(CBaseEntity *apOther)
 	Fire();
 };
 
-void CBaseButton::Blocked(CBaseEntity *other)
+void CBaseButton::Blocked(CBaseEntity *apOther)
 {
 	// Do nothing, just don't ome all the way back out
 };
@@ -136,7 +140,7 @@ void CBaseButton::Wait()
 	
 	SUB_UseTargets(GetEnemy(), UseType::Toggle, 0);
 	
-	self->frame = 1; // use alternate textures
+	self->frame = 1; // Use alternate textures
 };
 
 void CBaseButton::Done()
@@ -149,9 +153,9 @@ void CBaseButton::Return()
 	SetState(State::GoingDown);
 	SetMoveDoneCallback(CBaseButton::Done);
 	LinearMove(mvPos1, GetSpeed());
-	self->frame = 0; // use normal textures
+	self->frame = 0; // Use normal textures
 	//if(GetHealth())
-		//SetDamageable(DAMAGE_YES); // can be shot again
+		//SetDamageable(DAMAGE_YES); // Can be shot again
 };
 
 void CBaseButton::Fire()
@@ -171,7 +175,7 @@ void CBaseButton::Killed(CBaseEntity *apAttacker)
 {
 	SetEnemy(damage_attacker);
 	SetHealth(GetMaxHealth());
-	SetDamageable(DAMAGE_NO); // wil be reset upon return
+	SetDamageable(DAMAGE_NO); // Will be reset upon return
 	Fire();
 };
 */
