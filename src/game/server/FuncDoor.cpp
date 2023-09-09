@@ -30,22 +30,25 @@ void CFuncDoor::Spawn()
 {
 	if(world->v.worldtype == 0)
 	{
-		gpEngine->pfnPrecacheSound ("doors/medtry.wav");
-		gpEngine->pfnPrecacheSound ("doors/meduse.wav");
+		PrecacheSound("doors/medtry.wav");
+		PrecacheSound("doors/meduse.wav");
+		
 		self->v.noise3 = "doors/medtry.wav";
 		self->v.noise4 = "doors/meduse.wav";
 	}
 	else if(world->v.worldtype == 1)
 	{
-		gpEngine->pfnPrecacheSound ("doors/runetry.wav");
-		gpEngine->pfnPrecacheSound ("doors/runeuse.wav");
+		PrecacheSound("doors/runetry.wav");
+		PrecacheSound("doors/runeuse.wav");
+		
 		self->v.noise3 = "doors/runetry.wav";
 		self->v.noise4 = "doors/runeuse.wav";
 	}
 	else if(world->v.worldtype == 2)
 	{
-		gpEngine->pfnPrecacheSound ("doors/basetry.wav");
-		gpEngine->pfnPrecacheSound ("doors/baseuse.wav");
+		PrecacheSound("doors/basetry.wav");
+		PrecacheSound("doors/baseuse.wav");
+		
 		self->noise3 = "doors/basetry.wav";
 		self->noise4 = "doors/baseuse.wav";
 	}
@@ -54,39 +57,44 @@ void CFuncDoor::Spawn()
 	
 	if (self->sounds == 0)
 	{
-		gpEngine->pfnPrecacheSound ("misc/null.wav");
+		PrecacheSound("misc/null.wav");
+		
 		self->noise1 = "misc/null.wav";
 		self->noise2 = "misc/null.wav";
 	};
 	
 	if (self->sounds == 1)
 	{
-		gpEngine->pfnPrecacheSound ("doors/drclos4.wav");
-		gpEngine->pfnPrecacheSound ("doors/doormv1.wav");
+		PrecacheSound("doors/drclos4.wav");
+		PrecacheSound("doors/doormv1.wav");
+		
 		self->v.noise1 = "doors/drclos4.wav";
 		self->v.noise2 = "doors/doormv1.wav";
 	};
 	
 	if (self->sounds == 2)
 	{
-		gpEngine->pfnPrecacheSound ("doors/hydro1.wav");
-		gpEngine->pfnPrecacheSound ("doors/hydro2.wav");
+		PrecacheSound("doors/hydro1.wav");
+		PrecacheSound("doors/hydro2.wav");
+		
 		self->noise2 = "doors/hydro1.wav";
 		self->noise1 = "doors/hydro2.wav";
 	};
 	
 	if (self->sounds == 3)
 	{
-		gpEngine->pfnPrecacheSound ("doors/stndr1.wav");
-		gpEngine->pfnPrecacheSound ("doors/stndr2.wav");
+		PrecacheSound("doors/stndr1.wav");
+		PrecacheSound("doors/stndr2.wav");
+		
 		self->noise2 = "doors/stndr1.wav";
 		self->noise1 = "doors/stndr2.wav";
 	};
 	
 	if (self->sounds == 4)
 	{
-		gpEngine->pfnPrecacheSound ("doors/ddoor1.wav");
-		gpEngine->pfnPrecacheSound ("doors/ddoor2.wav");
+		PrecacheSound("doors/ddoor1.wav");
+		PrecacheSound("doors/ddoor2.wav");
+		
 		self->noise1 = "doors/ddoor2.wav";
 		self->noise2 = "doors/ddoor1.wav";
 	};

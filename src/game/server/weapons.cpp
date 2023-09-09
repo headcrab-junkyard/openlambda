@@ -26,21 +26,24 @@
 //void SpawnBlood(vec3_t org, float damage);
 //void SuperDamageSound();
 
-// called by worldspawn
+// Called by worldspawn
 void W_Precache()
 {
-	precache_sound ("weapons/r_exp3.wav");  // new rocket explosion
-	precache_sound ("weapons/rocket1i.wav");        // spike gun
-	precache_sound ("weapons/sgun1.wav");
-	precache_sound ("weapons/guncock.wav"); // player shotgun
-	precache_sound ("weapons/ric1.wav");    // ricochet (used in c code)
-	precache_sound ("weapons/ric2.wav");    // ricochet (used in c code)
-	precache_sound ("weapons/ric3.wav");    // ricochet (used in c code)
-	precache_sound ("weapons/spike2.wav");  // super spikes
-	precache_sound ("weapons/tink1.wav");   // spikes tink (used in c code)
-	precache_sound ("weapons/grenade.wav"); // grenade launcher
-	precache_sound ("weapons/bounce.wav");          // grenade bounce
-	precache_sound ("weapons/shotgn2.wav"); // super shotgun
+	gpEngine->pfnPrecacheSound("weapons/r_exp3.wav"); // new rocket explosion
+	
+	gpEngine->pfnPrecacheSound("weapons/rocket1i.wav"); // spike gun
+	gpEngine->pfnPrecacheSound("weapons/sgun1.wav");
+	gpEngine->pfnPrecacheSound("weapons/guncock.wav"); // player shotgun
+	
+	gpEngine->pfnPrecacheSound("weapons/ric1.wav"); // ricochet (used in c code)
+	gpEngine->pfnPrecacheSound("weapons/ric2.wav"); // ricochet (used in c code)
+	gpEngine->pfnPrecacheSound("weapons/ric3.wav"); // ricochet (used in c code)
+	
+	gpEngine->pfnPrecacheSound("weapons/spike2.wav"); // super spikes
+	gpEngine->pfnPrecacheSound("weapons/tink1.wav"); // spikes tink (used in c code)
+	gpEngine->pfnPrecacheSound("weapons/grenade.wav"); // grenade launcher
+	gpEngine->pfnPrecacheSound("weapons/bounce.wav"); // grenade bounce
+	gpEngine->pfnPrecacheSound("weapons/shotgn2.wav"); // super shotgun
 };
 
 float crandom()

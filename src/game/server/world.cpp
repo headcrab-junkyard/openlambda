@@ -97,114 +97,114 @@ void CWorldSpawn::Spawn()
 		//ClientPrecache();
 		
 		// Sounds used from C physics code
-		gpEngine->pfnPrecacheSound("common/null.wav"); // Clears sound channels
+		PrecacheSound("common/null.wav"); // Clears sound channels
 		
-		gpEngine->pfnPrecacheSound ("demon/dland2.wav");            // landing thud
-		gpEngine->pfnPrecacheSound ("misc/h2ohit1.wav");            // landing splash
+		PrecacheSound("demon/dland2.wav");            // landing thud
+		PrecacheSound("misc/h2ohit1.wav");            // landing splash
 		
 		// Setup precaches always needed
-		gpEngine->pfnPrecacheSound ("items/itembk2.wav");           // item respawn sound
-		gpEngine->pfnPrecacheSound ("player/plyrjmp8.wav");         // player jump
-		gpEngine->pfnPrecacheSound ("player/land.wav");                     // player landing
-		gpEngine->pfnPrecacheSound ("player/land2.wav");            // player hurt landing
-		gpEngine->pfnPrecacheSound ("player/drown1.wav");           // drowning pain
-		gpEngine->pfnPrecacheSound ("player/drown2.wav");           // drowning pain
-		gpEngine->pfnPrecacheSound ("player/gasp1.wav");            // gasping for air
-		gpEngine->pfnPrecacheSound ("player/gasp2.wav");            // taking breath
-		gpEngine->pfnPrecacheSound ("player/h2odeath.wav");         // drowning death
-
-		gpEngine->pfnPrecacheSound ("misc/talk.wav");                       // talk
-		gpEngine->pfnPrecacheSound ("player/teledth1.wav");         // telefrag
+		PrecacheSound("items/itembk2.wav");           // item respawn sound
+		PrecacheSound("player/plyrjmp8.wav");         // player jump
+		PrecacheSound("player/land.wav");                     // player landing
+		PrecacheSound("player/land2.wav");            // player hurt landing
+		PrecacheSound("player/drown1.wav");           // drowning pain
+		PrecacheSound("player/drown2.wav");           // drowning pain
+		PrecacheSound("player/gasp1.wav");            // gasping for air
+		PrecacheSound("player/gasp2.wav");            // taking breath
+		PrecacheSound("player/h2odeath.wav");         // drowning death
 		
-		gpEngine->pfnPrecacheSound ("misc/r_tele1.wav");            // teleport sounds
-		gpEngine->pfnPrecacheSound ("misc/r_tele2.wav");
-		gpEngine->pfnPrecacheSound ("misc/r_tele3.wav");
-		gpEngine->pfnPrecacheSound ("misc/r_tele4.wav");
-		gpEngine->pfnPrecacheSound ("misc/r_tele5.wav");
+		PrecacheSound("misc/talk.wav");                       // talk
+		PrecacheSound("player/teledth1.wav");         // telefrag
 		
-		gpEngine->pfnPrecacheSound ("weapons/lock4.wav");           // ammo pick up
-		gpEngine->pfnPrecacheSound ("weapons/pkup.wav");            // weapon up
-		gpEngine->pfnPrecacheSound ("items/armor1.wav");            // armor up
-		gpEngine->pfnPrecacheSound ("weapons/lhit.wav");            //lightning
-		gpEngine->pfnPrecacheSound ("weapons/lstart.wav");          //lightning start
-		gpEngine->pfnPrecacheSound ("items/damage3.wav");
-
-		gpEngine->pfnPrecacheSound ("misc/power.wav");                      //lightning for boss
-
-		// player gib sounds
-		gpEngine->pfnPrecacheSound ("player/gib.wav");                      // player gib sound
-		gpEngine->pfnPrecacheSound ("player/udeath.wav");           // player gib sound
-		gpEngine->pfnPrecacheSound ("player/tornoff2.wav");         // gib sound
-
-		// player pain sounds
-		gpEngine->pfnPrecacheSound ("player/pain1.wav");
-		gpEngine->pfnPrecacheSound ("player/pain2.wav");
-		gpEngine->pfnPrecacheSound ("player/pain3.wav");
-		gpEngine->pfnPrecacheSound ("player/pain4.wav");
-		gpEngine->pfnPrecacheSound ("player/pain5.wav");
-		gpEngine->pfnPrecacheSound ("player/pain6.wav");
-
-		// player death sounds
-		gpEngine->pfnPrecacheSound ("player/death1.wav");
-		gpEngine->pfnPrecacheSound ("player/death2.wav");
-		gpEngine->pfnPrecacheSound ("player/death3.wav");
-		gpEngine->pfnPrecacheSound ("player/death4.wav");
-		gpEngine->pfnPrecacheSound ("player/death5.wav");
-
-		gpEngine->pfnPrecacheSound ("boss1/sight1.wav");
-
-		// axe sounds    
-		gpEngine->pfnPrecacheSound ("weapons/ax1.wav");                     // ax swoosh
-		gpEngine->pfnPrecacheSound ("player/axhit1.wav");           // ax hit meat
-		gpEngine->pfnPrecacheSound ("player/axhit2.wav");           // ax hit world
-
-		gpEngine->pfnPrecacheSound ("player/h2ojump.wav");          // player jumping into water
-		gpEngine->pfnPrecacheSound ("player/slimbrn2.wav");         // player enter slime
-		gpEngine->pfnPrecacheSound ("player/inh2o.wav");            // player enter water
-		gpEngine->pfnPrecacheSound ("player/inlava.wav");           // player enter lava
-		gpEngine->pfnPrecacheSound ("misc/outwater.wav");           // leaving water sound
-
-		gpEngine->pfnPrecacheSound ("player/lburn1.wav");           // lava burn
-		gpEngine->pfnPrecacheSound ("player/lburn2.wav");           // lava burn
-
-		gpEngine->pfnPrecacheSound ("misc/water1.wav");                     // swimming
-		gpEngine->pfnPrecacheSound ("misc/water2.wav");                     // swimming
-
+		PrecacheSound("misc/r_tele1.wav");            // teleport sounds
+		PrecacheSound("misc/r_tele2.wav");
+		PrecacheSound("misc/r_tele3.wav");
+		PrecacheSound("misc/r_tele4.wav");
+		PrecacheSound("misc/r_tele5.wav");
+		
+		PrecacheSound("weapons/lock4.wav");           // ammo pick up
+		PrecacheSound("weapons/pkup.wav");            // weapon up
+		PrecacheSound("items/armor1.wav");            // armor up
+		PrecacheSound("weapons/lhit.wav");            //lightning
+		PrecacheSound("weapons/lstart.wav");          //lightning start
+		PrecacheSound("items/damage3.wav");
+		
+		PrecacheSound("misc/power.wav");                      //lightning for boss
+		
+		// Player gib sounds
+		PrecacheSound("player/gib.wav");                      // player gib sound
+		PrecacheSound("player/udeath.wav");           // player gib sound
+		PrecacheSound("player/tornoff2.wav");         // gib sound
+		
+		// Player pain sounds
+		PrecacheSound("player/pain1.wav");
+		PrecacheSound("player/pain2.wav");
+		PrecacheSound("player/pain3.wav");
+		PrecacheSound("player/pain4.wav");
+		PrecacheSound("player/pain5.wav");
+		PrecacheSound("player/pain6.wav");
+		
+		// Player death sounds
+		PrecacheSound("player/death1.wav");
+		PrecacheSound("player/death2.wav");
+		PrecacheSound("player/death3.wav");
+		PrecacheSound("player/death4.wav");
+		PrecacheSound("player/death5.wav");
+		
+		PrecacheSound("boss1/sight1.wav");
+		
+		// Axe sounds    
+		PrecacheSound("weapons/ax1.wav");                     // ax swoosh
+		PrecacheSound("player/axhit1.wav");           // ax hit meat
+		PrecacheSound("player/axhit2.wav");           // ax hit world
+		
+		PrecacheSound("player/h2ojump.wav");          // player jumping into water
+		PrecacheSound("player/slimbrn2.wav");         // player enter slime
+		PrecacheSound("player/inh2o.wav");            // player enter water
+		PrecacheSound("player/inlava.wav");           // player enter lava
+		PrecacheSound("misc/outwater.wav");           // leaving water sound
+		
+		PrecacheSound("player/lburn1.wav");           // lava burn
+		PrecacheSound("player/lburn2.wav");           // lava burn
+		
+		PrecacheSound("misc/water1.wav");                     // swimming
+		PrecacheSound("misc/water2.wav");                     // swimming
+		
 		// Invulnerability sounds
-		gpEngine->pfnPrecacheSound ("items/protect.wav");
-		gpEngine->pfnPrecacheSound ("items/protect2.wav");
-		gpEngine->pfnPrecacheSound ("items/protect3.wav");
-
-		//gpEngine->pfnPrecacheModel ("models/player.mdl"); // TODO: studio models are not supported yet...
-		/*
-		gpEngine->pfnPrecacheModel ("models/eyes.mdl");
-		gpEngine->pfnPrecacheModel ("models/h_player.mdl");
-		gpEngine->pfnPrecacheModel ("models/gib1.mdl");
-		gpEngine->pfnPrecacheModel ("models/gib2.mdl");
-		gpEngine->pfnPrecacheModel ("models/gib3.mdl");
-
-		gpEngine->pfnPrecacheModel ("sprites/s_bubble.spr");  // drowning bubbles
-		gpEngine->pfnPrecacheModel ("sprites/s_explod.spr");  // sprite explosion
-
-		gpEngine->pfnPrecacheModel ("models/v_axe.mdl");
-		gpEngine->pfnPrecacheModel ("models/v_shot.mdl");
-		gpEngine->pfnPrecacheModel ("models/v_nail.mdl");
-
-		gpEngine->pfnPrecacheModel ("models/bolt.mdl");              // for lightning gun
-		gpEngine->pfnPrecacheModel ("models/bolt2.mdl");             // for lightning gun
-		gpEngine->pfnPrecacheModel ("models/bolt3.mdl");             // for boss shock
-		gpEngine->pfnPrecacheModel ("models/lavaball.mdl");  // for testing
+		PrecacheSound("items/protect.wav");
+		PrecacheSound("items/protect2.wav");
+		PrecacheSound("items/protect3.wav");
 		
-		gpEngine->pfnPrecacheModel ("models/missile.mdl");
-		gpEngine->pfnPrecacheModel ("models/grenade.mdl");
-		gpEngine->pfnPrecacheModel ("models/spike.mdl");
-		gpEngine->pfnPrecacheModel ("models/s_spike.mdl");
-
-		gpEngine->pfnPrecacheModel ("models/backpack.mdl");
-
-		gpEngine->pfnPrecacheModel ("models/zom_gib.mdl");
-
-		gpEngine->pfnPrecacheModel ("models/v_light.mdl");
+		//PrecacheModel("models/player.mdl"); // TODO: studio models are not supported yet...
+		/*
+		PrecacheModel("models/eyes.mdl");
+		PrecacheModel("models/h_player.mdl");
+		PrecacheModel("models/gib1.mdl");
+		PrecacheModel("models/gib2.mdl");
+		PrecacheModel("models/gib3.mdl");
+		
+		PrecacheModel("sprites/s_bubble.spr"); // drowning bubbles
+		PrecacheModel("sprites/s_explod.spr"); // sprite explosion
+		
+		PrecacheModel("models/v_axe.mdl");
+		PrecacheModel("models/v_shot.mdl");
+		PrecacheModel("models/v_nail.mdl");
+		
+		PrecacheModel("models/bolt.mdl"); // for lightning gun
+		PrecacheModel("models/bolt2.mdl"); // for lightning gun
+		PrecacheModel("models/bolt3.mdl"); // for boss shock
+		PrecacheModel("models/lavaball.mdl"); // for testing
+		
+		PrecacheModel("models/missile.mdl");
+		PrecacheModel("models/grenade.mdl");
+		PrecacheModel("models/spike.mdl");
+		PrecacheModel("models/s_spike.mdl");
+		
+		PrecacheModel("models/backpack.mdl");
+		
+		PrecacheModel("models/zom_gib.mdl");
+		
+		PrecacheModel("models/v_light.mdl");
 		*/
 
 	//

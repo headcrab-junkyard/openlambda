@@ -69,7 +69,7 @@ int CBaseEntity::Restore(const CGameSave &aGameSave)
 		idVec3 vMins{self->mins};
 		idVec3 vMaxs{self->maxs};
 		
-		mpGame->GetResourceLoader()->PrecacheResource(reinterpret_cast<char*>(gpEngine->pfnGetString(self->model))); // TODO: PreloadResource()/PrecacheModel()?
+		PrecacheModel(reinterpret_cast<char*>(mpGame->GetStringPool()->GetByIndex(self->model)));
 		
 		SetModel(gpEngine->pfnGetString(self->model));
 		SetSize(vMins, vMaxs); // Reset them
@@ -765,4 +765,31 @@ void CBaseEntity::GetAimVector(float afSpeed, idVec3 &avReturn) const
 		; // TODO
 	else
 		gpEngine->pfnGetAimVector(self, afSpeed, avReturn);
+
+/*
+================
+PrecacheModel
+================
+*/
+int CBaseEntity::PrecacheModel(const char *asName)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return mpGame->GetResourceLoader()->PrecacheResource(asName); // TODO: PreloadResource()/PrecacheModel()?
+	else
+		return gpEngine->pfnPrecacheModel(asName);
+};
+
+/*
+================
+PrecacheSound
+================
+*/
+bool CBaseEntity::PrecacheSound(const char *asName)
+{
+	if constexpr(TargetAPI == TargetEngineAPI::Next)
+		return mpGame->GetResourceLoader()->PrecacheResource(asName); // TODO: PreloadResource()/PrecacheModel()?
+	else
+		return gpEngine->pfnPrecacheSound(asName);
+};
+
 };

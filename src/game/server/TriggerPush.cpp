@@ -45,7 +45,7 @@ LINK_ENTITY_TO_CLASS(trigger_push, CTriggerPush);
 void CTriggerPush::Spawn()
 {
 	InitTrigger();
-	gpEngine->pfnPrecacheSound("ambience/windfly.wav");
+	PrecacheSound("ambience/windfly.wav");
 	SetTouchCallback(CTriggerPush::Touch);
 	if(!GetSpeed())
 		SetSpeed(1000);

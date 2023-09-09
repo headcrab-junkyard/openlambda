@@ -70,19 +70,22 @@ void CFuncTrain::Spawn()
 	switch(mnSounds)
 	{
 	case 0:
-		gpEngine->pfnPrecacheSound("misc/null.wav");
+		PrecacheSound("misc/null.wav");
+		
 		self->noise = gpEngine->pfnAllocString("misc/null.wav");
 		self->noise1 = gpEngine->pfnAllocString("misc/null.wav");
 		break;
 	case 1:
-		gpEngine->pfnPrecacheSound("plats/train1.wav");
-		gpEngine->pfnPrecacheSound("plats/train2.wav");
+		PrecacheSound("plats/train1.wav");
+		PrecacheSound("plats/train2.wav");
+		
 		self->noise = gpEngine->pfnAllocString("plats/train2.wav");
 		self->noise1 = gpEngine->pfnAllocString("plats/train1.wav");
 		break;
 	case 2:
-		gpEngine->pfnPrecacheSound("plats/platmove1.wav");
-		gpEngine->pfnPrecacheSound("plats/platstop1.wav");
+		PrecacheSound("plats/platmove1.wav");
+		PrecacheSound("plats/platstop1.wav");
+		
 		self->noise = gpEngine->pfnAllocString("plats/platstop1.wav");
 		self->noise1 = gpEngine->pfnAllocString("plats/platmove1.wav");
 		break;

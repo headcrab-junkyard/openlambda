@@ -60,17 +60,20 @@ void CTriggerMulti::Spawn()
 	/*
 	if(self->sounds == 1)
 	{
-		gpEngine->pfnPrecacheSound ("misc/secret.wav");
+		PrecacheSound("misc/secret.wav");
+		
 		self->noise = "misc/secret.wav";
 	}
 	else if(self->sounds == 2)
 	{
-		gpEngine->pfnPrecacheSound ("misc/talk.wav");
+		PrecacheSound("misc/talk.wav");
+		
 		self->noise = "misc/talk.wav";
 	}
 	else if(self->sounds == 3)
 	{
-		gpEngine->pfnPrecacheSound ("misc/trigger1.wav");
+		PrecacheSound("misc/trigger1.wav");
+		
 		self->noise = "misc/trigger1.wav";
 	};
 	*/

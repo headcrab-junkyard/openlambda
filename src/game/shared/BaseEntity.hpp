@@ -456,6 +456,9 @@ public:
 	void GetBonePosition(int anBone, idVec3 &avOrigin, idVec3 &avAngles) const;
 	
 	void GetAimVector(float afSpeed, idVec3 &avReturn) const;
+public: // TODO: protected?
+	int PrecacheModel(const char *asName);
+	bool PrecacheSound(const char *asName);
 protected:
 	void SetClassName(const char *asName){/*self->classname = asName;*/} // TODO: gpEngine->pfnMakeString
 private:

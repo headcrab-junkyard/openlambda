@@ -55,7 +55,7 @@ void CTriggerTeleport::Spawn()
 
 	//if(!(self->spawnflags & SILENT))
 	{
-		//gpEngine->pfnPrecacheSound("ambience/hum1.wav");
+		//PrecacheSound("ambience/hum1.wav");
 		//idVec3 vOrigin{(self->mins + self->maxs) * 0.5};
 		//gpEngine->pfnAmbientSound(vOrigin, "ambience/hum1.wav",0.5 , ATTN_STATIC);
 	};
