@@ -30,10 +30,10 @@
 
 extern void SetMovedir(entvars_t *self);
 
-const int SPAWNFLAG_NOMESSAGE{1};
-const int SPAWNFLAG_NOTOUCH{1};
+constexpr auto SPAWNFLAG_NOMESSAGE{1};
+constexpr auto SPAWNFLAG_NOTOUCH{1};
 
-const int PLAYER_ONLY{1};
+constexpr auto PLAYER_ONLY{1};
 
 LINK_ENTITY_TO_CLASS(trigger, CBaseTrigger);
 

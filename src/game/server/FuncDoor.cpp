@@ -35,16 +35,16 @@ void CFuncDoor::Spawn()
 		PrecacheSound("doors/medtry.wav");
 		PrecacheSound("doors/meduse.wav");
 		
-		self->v.noise3 = "doors/medtry.wav";
-		self->v.noise4 = "doors/meduse.wav";
+		self->noise3 = "doors/medtry.wav";
+		self->noise4 = "doors/meduse.wav";
 	}
 	else if(world->v.worldtype == 1)
 	{
 		PrecacheSound("doors/runetry.wav");
 		PrecacheSound("doors/runeuse.wav");
 		
-		self->v.noise3 = "doors/runetry.wav";
-		self->v.noise4 = "doors/runeuse.wav";
+		self->noise3 = "doors/runetry.wav";
+		self->noise4 = "doors/runeuse.wav";
 	}
 	else if(world->v.worldtype == 2)
 	{
@@ -70,8 +70,8 @@ void CFuncDoor::Spawn()
 		PrecacheSound("doors/drclos4.wav");
 		PrecacheSound("doors/doormv1.wav");
 		
-		self->v.noise1 = "doors/drclos4.wav";
-		self->v.noise2 = "doors/doormv1.wav";
+		self->noise1 = "doors/drclos4.wav";
+		self->noise2 = "doors/doormv1.wav";
 	};
 	
 	if(self->sounds == 2)
@@ -104,7 +104,7 @@ void CFuncDoor::Spawn()
 	SetMovedir(self);
 	
 	//SetMaxHealth(GetHealth());
-	SetSolidity(SOLID_BSP);
+	SetSolidity(CBaseEntity::Solidity::BSP);
 	SetMoveType(CBaseEntity::MoveType::Push);
 	
 	SetOrigin(GetOrigin());  
@@ -115,9 +115,9 @@ void CFuncDoor::Spawn()
 	SetBlockedCallback(CFuncDoor::Blocked);
 	SetUseCallback(CFuncDoor::Use);
 	
-	//if(self->spawnflags & DOOR_SILVER_KEY)
+	//if(GetSpawnFlags() & DOOR_SILVER_KEY)
 		//self->items = IT_KEY1;
-	//if(self->spawnflags & DOOR_GOLD_KEY)
+	//if(GetSpawnFlags() & DOOR_GOLD_KEY)
 		//self->items = IT_KEY2;
 	
 	if(!GetSpeed())
@@ -129,8 +129,8 @@ void CFuncDoor::Spawn()
 	//if(!self->dmg)
 		//self->dmg = 2;
 
-	self->v.pos1 = self->GetOrigin();
-	self->v.pos2 = self->v.pos1 + self->v.movedir*(fabs(self->v.movedir*self->v.size) - self->v.lip);
+	self->pos1 = self->GetOrigin();
+	self->pos2 = self->pos1 + self->movedir * (fabs(self->movedir * self->size) - self->lip);
 
 	// DOOR_START_OPEN is to allow an entity to be lighted in the closed position
 	// but spawn in the open position
@@ -140,9 +140,9 @@ void CFuncDoor::Spawn()
 		self->pos2 = self->pos1;
 		self->pos1 = self->origin;
 	};
-
+	
 	self->state = STATE_BOTTOM;
-
+	
 	//if(GetHealth())
 	{
 		//self->takedamage = DAMAGE_YES;
@@ -153,23 +153,21 @@ void CFuncDoor::Spawn()
 		//self->wait = -1;
 	
 	SetTouchCallback(CFuncDoor::Touch);
-
+	
 	// LinkDoors can't be done until all of the doors have been spawned, so
 	// the sizes can be detected properly.
 	//SetThinkCallback(LinkDoors);
-	//SetNextThink(self->v.ltime + 0.1);
+	//SetNextThink(self->ltime + 0.1);
 };
 
 void CFuncDoor::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
-	entity oself;
+	self->message = ""; // Door message are for touch only
+	GetOwner()->message = "";        
+	GetEnemy()->message = "";
 
-	self.message = ""; // door message are for touch only
-	self.owner.message = "";        
-	self.enemy.message = "";
-
-	oself = self;
-	self = self.owner;
+	CBaseEntity *oself{self};
+	self = self->GetOwner();
 	Fire(apActivator);
 	self = oself;
 };
@@ -262,7 +260,7 @@ void CFuncDoor::Touch(CBaseEntity *other)
 	};
 */
 
-	other->items = other->items - self->items;
+	//other->SetItems(other->GetItems() - self->GetItems());
 	
 	SetTouchCallback(SUB_Null);
 	if(self->GetEnemy())
@@ -272,19 +270,17 @@ void CFuncDoor::Touch(CBaseEntity *other)
 
 CBaseEntity *spawn_field(const idVec3 &fmins, const idVec3 &fmaxs)
 {
-	CBaseEntity *trigger;
-	idVec3 t1, t2;
-
-	trigger = gpEngine->pfnSpawn();
-	trigger.movetype = MOVETYPE_NONE;
-	trigger.solid = SOLID_TRIGGER;
-	trigger.owner = self;
-	trigger.touch = door_trigger_touch;
-
-	t1 = fmins;
-	t2 = fmaxs;
+	CBaseEntity *trigger{gpEngine->pfnSpawn()};
 	
-	trigger->SetSize(t1 - '60 60 8', t2 + '60 60 8');
+	trigger->SetMoveType(CBaseEntity::MoveType::None);
+	trigger->SetSolidity(CBaseEntity::Solidity::Trigger);
+	trigger->SetOwner(self);
+	trigger->SetTouchCallback(door_trigger_touch);
+
+	idVec3 t1 = fmins;
+	idVec3 t2 = fmaxs;
+	
+	trigger->SetSize(t1 - idVec3(60, 60, 8), t2 + idVec3(60, 60, 8));
 	
 	return trigger;
 };
@@ -317,17 +313,19 @@ void LinkDoors()
 {
 	entvars_t t, starte;
 	idVec3 cmins, cmaxs;
-
-	if (self.enemy)
-		return;         // already linked by another door
-	if (self.spawnflags & 4)
+	
+	// already linked by another door
+	if(self->GetEnemy())
+		return;
+	
+	if(self->GetSpawnFlags() & 4)
 	{
-		self.owner = self.enemy = self;
-		return;         // don't want to link this door
+		self->owner = self->GetEnemy() = self;
+		return; // don't want to link this door
 	};
 
-	cmins = self.mins;
-	cmaxs = self.maxs;
+	cmins = self->GetMins();
+	cmaxs = self->GetMaxs();
 	
 	starte = self;
 	t = self;
@@ -346,28 +344,28 @@ void LinkDoors()
 		t = find (t, classname, self.classname);        
 		if (!t)
 		{
-			self.enemy = starte;            // make the chain a loop
+			self.enemy = starte; // make the chain a loop
 
 		// shootable, fired, or key doors just needed the owner/enemy links,
 		// they don't spawn a field
 	
-			self = self.owner;
+			self = self->GetOwner();
 
-			if (self.health)
+			if(self->GetHealth())
 				return;
-			if (self.targetname)
+			if(self->targetname)
 				return;
-			if (self.items)
+			if(self->GetItems())
 				return;
 
-			self.owner.trigger_field = spawn_field(cmins, cmaxs);
+			self->GetOwner()->trigger_field = spawn_field(cmins, cmaxs);
 
 			return;
 		};
 
-		if (EntitiesTouching(self,t))
+		if(EntitiesTouching(self, t))
 		{
-			if (t.enemy)
+			if(t.enemy)
 				objerror ("cross connected doors");
 			
 			self.enemy = t;
@@ -401,11 +399,11 @@ THINK FUNCTIONS
 void CFuncDoor::GoUp()
 {
 	if(self->state == STATE_UP)
-		return; // already going up
-
+		return; // Already going up
+	
 	if(self->state == STATE_TOP)
 	{
-		// reset top wait time
+		// Reset top wait time
 		SetNextThink(self->ltime + GetDelay());
 		return;
 	};
@@ -423,7 +421,7 @@ void CFuncDoor::GoDown()
 	EmitSound(CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	if(GetMaxHealth())
 	{
-		self->takedamage = DAMAGE_YES;
+		SetDamageable(DAMAGE_YES);
 		SetHealth(GetMaxHealth());
 	};
 	
@@ -436,8 +434,8 @@ void CFuncDoor::HitTop()
 {
 	EmitSound(CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_TOP;
-	if(self->spawnflags & DOOR_TOGGLE)
-		return; // don't come down automatically
+	if(GetSpawnFlags() & DOOR_TOGGLE)
+		return; // Don't come down automatically
 	SetThinkCallback(CFuncDoor::GoDown);
 	SetNextThink(self->ltime + GetDelay());
 };
@@ -458,43 +456,47 @@ ACTIVATION FUNCTIONS
 
 void CFuncDoor::Fire(CBaseEntity *activator)
 {
-	entity    oself;
-	entity    starte;
-
-	if (self.owner != self)
-		objerror ("door_fire: self.owner != self");
-
-// play use key sound
-
-	if (self.items)
-		gpEngine->pfnEmitSound (self, CHAN_VOICE, self.noise4, 1, ATTN_NORM);
-
-	self.message = string_null;             // no more message
+	entity oself;
+	entity starte;
+	
+	if(GetOwner() != self)
+		objerror("door_fire: self.owner != self");
+	
+	// Play use key sound
+	
+	if(self->items)
+		EmitSound(CHAN_VOICE, self->noise4, 1, ATTN_NORM);
+	
+	self->message = string_null; // No more message
 	oself = self;
-
-	if (self.spawnflags & DOOR_TOGGLE)
+	
+	if(GetSpawnFlags() & DOOR_TOGGLE)
 	{
-		if (self.state == STATE_UP || self.state == STATE_TOP)
+		if(self->GetState() == STATE_UP || self->GetState() == STATE_TOP)
 		{
 			starte = self;
 			do
 			{
-				this->go_down ();
-				self = self.enemy;
-			} while ( (self != starte) && (self != world) );
+				this->go_down();
+				self = self->GetEnemy();
+			}
+			while((self != starte) && (self != world));
+			
 			self = oself;
 			return;
-		}
-	}
+		};
+	};
 	
-// trigger all paired doors
+	// Trigger all paired doors
 	starte = self;
 	
 	do
 	{
-		self.goalentity = activator;		// Who fired us
-		this->go_up ();
-		self = self.enemy;
-	} while ( (self != starte) && (self != world) );
+		SetGoalEntity(activator); // Who fired us
+		this->go_up();
+		self = self->GetEnemy();
+	}
+	while((self != starte) && (self != world));
+	
 	self = oself;
 };

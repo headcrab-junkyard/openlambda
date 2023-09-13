@@ -126,8 +126,8 @@ void CFuncTrain::Spawn()
 	
 	mbActivated = false;
 	
-	if(mfVolume == 0.0)
-		mfVolume = 0.85;
+	if(mfVolume == 0.0f)
+		mfVolume = 0.85f;
 };
 
 void CFuncTrain::Blocked(CBaseEntity *apOther)
@@ -165,10 +165,11 @@ void CFuncTrain::Next()
 	SetTarget(pTargetEnt->GetTarget());
 	if(!GetTarget())
 		objerror("train_next: no next target");
+	
+	SetDelay(0);
 	if(pTargetEnt->GetDelay())
 		SetDelay(pTargetEnt->GetDelay());
-	else
-		SetDelay(0);
+	
 	EmitSound(CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	SetMoveDoneCallback(CFuncTrain::Wait);
 	LinearMove(pTargetEnt->GetOrigin() - GetSize().mins, GetSpeed());

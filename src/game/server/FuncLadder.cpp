@@ -21,10 +21,13 @@
 /// @brief ladder entity code
 
 #include "BaseTrigger.hpp"
+#include "BaseGame.hpp"
+#include "IStringPool.hpp"
 #include "Util.hpp"
 
 //=============================================================================
 
+// TODO: CLadder?
 class CFuncLadder : public CBaseTrigger
 {
 public:
@@ -38,13 +41,25 @@ LINK_ENTITY_TO_CLASS(func_ladder, CFuncLadder);
 
 void CFuncLadder::Spawn()
 {
+	//
+	// Precache()
+	//
 	SetSolidity(CBaseEntity::Solidity::None);
 	SetSkin(CONTENTS_LADDER);
 	
-	//SetEffects();
+	if(gpEngine->pfnCVarGetFloat("showtriggers") == 0.0f)
+	{
+		self->rendermode = kRenderTransTexture;
+		self->renderamt = 0;
+	};
 	
-	SetModel(gpEngine->pfnSzFromIndex(self->model));
-	SetMoveType(CBaseEntity::MoveType::Push);
+	RemoveEffects(EF_NODRAW); // self->effects &= ~EF_NODRAW
+	//
+	
+	// Set size and link into world
+	SetModel(GetModel());
+	
+	//SetMoveType(CBaseEntity::MoveType::Push); // TODO
 };
 
 bool CFuncLadder::HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue)

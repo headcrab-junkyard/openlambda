@@ -151,7 +151,7 @@ float CBaseAnimated::SetBlending(int anBlender, float afValue)
 
 void CBaseAnimated::GetBonePosition(int anBone, idVec3 &avOrigin, idVec3 &avAngles) const
 {
-	gpEngine->pfnGetBonePosition(ToEdict(), anBone,, avOrigin, avAngles);
+	gpEngine->pfnGetBonePosition(ToEdict(), anBone, avOrigin, avAngles);
 };
 
 void CBaseAnimated::GetAutoMovement(idVec3 &avOrigin, idVec3 &avAngles, float afInterval)

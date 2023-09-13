@@ -54,6 +54,7 @@ class CFuncDoor : public CBaseToggle
 {
 public:
 	void Spawn() override;
+	//void Precache();
 	
 	void Touch(CBaseEntity *apOther) override;
 	

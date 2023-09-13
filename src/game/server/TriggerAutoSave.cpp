@@ -27,7 +27,7 @@
 class CTriggerAutoSave : public CBaseTrigger
 {
 public:
-	bool PreSpawn() override;
+	bool PreSpawn() const override;
 	void Spawn() override;
 	
 	void Touch(CBaseEntity *apOther) override;
@@ -35,7 +35,7 @@ public:
 
 LINK_ENTITY_TO_CLASS(trigger_autosave, CTriggerAutoSave);
 
-bool CTriggerAutoSave::PreSpawn()
+bool CTriggerAutoSave::PreSpawn() const
 {
 	if(mpGame->GetRules()->IsDeathmatch())
 		return false;

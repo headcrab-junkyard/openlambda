@@ -28,6 +28,8 @@
 
 //============================================================================
 
+constexpr auto SF_CHANGELEVEL_USEONLY{0x0002};
+
 char /*string_t*/ gsNextMap[64]{}; // TODO: IGameWorld->SetNextMap
 
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
