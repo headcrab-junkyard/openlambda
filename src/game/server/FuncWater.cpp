@@ -19,9 +19,9 @@
 
 /// @file
 
-#include "FuncDoor.hpp"
+#include "BaseDoor.hpp"
 #include "Util.hpp"
 
 //=============================================================================
 
-LINK_ENTITY_TO_CLASS(func_water, CFuncDoor);
+LINK_ENTITY_TO_CLASS(func_water, CBaseDoor); // BP: PHYSICS!!!

@@ -50,7 +50,7 @@ Key doors are allways wait -1.
 3)      stone chain
 4)      screechy metal
 */
-class CFuncDoor : public CBaseToggle
+class CBaseDoor : public CBaseToggle
 {
 public:
 	void Spawn() override;

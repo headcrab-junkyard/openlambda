@@ -21,14 +21,14 @@
 /// @file
 /// @brief door functions
 
-#include "FuncDoor.hpp"
+#include "BaseDoor.hpp"
 #include "Util.hpp"
 
 //=============================================================================
 
-LINK_ENTITY_TO_CLASS(func_door, CFuncDoor);
+LINK_ENTITY_TO_CLASS(func_door, CBaseDoor);
 
-void CFuncDoor::Spawn()
+void CBaseDoor::Spawn()
 {
 	if(world->v.worldtype == 0)
 	{
@@ -112,8 +112,8 @@ void CFuncDoor::Spawn()
 	
 	SetClassName("door");
 	
-	SetBlockedCallback(CFuncDoor::Blocked);
-	SetUseCallback(CFuncDoor::Use);
+	SetBlockedCallback(CBaseDoor::Blocked);
+	SetUseCallback(CBaseDoor::Use);
 	
 	//if(GetSpawnFlags() & DOOR_SILVER_KEY)
 		//self->items = IT_KEY1;
@@ -152,7 +152,7 @@ void CFuncDoor::Spawn()
 	//if (self->items)
 		//self->wait = -1;
 	
-	SetTouchCallback(CFuncDoor::Touch);
+	SetTouchCallback(CBaseDoor::Touch);
 	
 	// LinkDoors can't be done until all of the doors have been spawned, so
 	// the sizes can be detected properly.
@@ -160,7 +160,7 @@ void CFuncDoor::Spawn()
 	//SetNextThink(self->ltime + 0.1);
 };
 
-void CFuncDoor::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
+void CBaseDoor::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 {
 	self->message = ""; // Door message are for touch only
 	GetOwner()->message = "";        
@@ -172,7 +172,7 @@ void CFuncDoor::Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeU
 	self = oself;
 };
 
-void CFuncDoor::Blocked(CBaseEntity *apOther)
+void CBaseDoor::Blocked(CBaseEntity *apOther)
 {
 	//apOther->deathtype = "squish";
 	apOther->TakeDamage(self, self->goalentity, self->dmg, DMG_CRUSH);
@@ -195,7 +195,7 @@ door_touch
 Prints messages and opens key doors
 ================
 */
-void CFuncDoor::Touch(CBaseEntity *other)
+void CBaseDoor::Touch(CBaseEntity *other)
 {
 	// Ignore touches by anything but players
 	if(other->GetClassName() != "player")
@@ -396,7 +396,7 @@ THINK FUNCTIONS
 =============================================================================
 */
 
-void CFuncDoor::GoUp()
+void CBaseDoor::GoUp()
 {
 	if(self->state == STATE_UP)
 		return; // Already going up
@@ -410,13 +410,13 @@ void CFuncDoor::GoUp()
 	
 	EmitSound(CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	self->state = STATE_UP;
-	SetMoveDoneCallback(CFuncDoor::HitTop);
+	SetMoveDoneCallback(CBaseDoor::HitTop);
 	LinearMove(self->pos2, self->speed);
 
 	SUB_UseTargets();
 };
 
-void CFuncDoor::GoDown()
+void CBaseDoor::GoDown()
 {
 	EmitSound(CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	if(GetMaxHealth())
@@ -426,21 +426,21 @@ void CFuncDoor::GoDown()
 	};
 	
 	self->state = STATE_DOWN;
-	SetMoveDoneCallback(CFuncDoor::HitBottom);
+	SetMoveDoneCallback(CBaseDoor::HitBottom);
 	LinearMove(self->pos1, self->speed);
 };
 
-void CFuncDoor::HitTop()
+void CBaseDoor::HitTop()
 {
 	EmitSound(CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_TOP;
 	if(GetSpawnFlags() & DOOR_TOGGLE)
 		return; // Don't come down automatically
-	SetThinkCallback(CFuncDoor::GoDown);
+	SetThinkCallback(CBaseDoor::GoDown);
 	SetNextThink(self->ltime + GetDelay());
 };
 
-void CFuncDoor::HitBottom()
+void CBaseDoor::HitBottom()
 {
 	EmitSound(CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_BOTTOM;
@@ -454,7 +454,7 @@ ACTIVATION FUNCTIONS
 =============================================================================
 */
 
-void CFuncDoor::Fire(CBaseEntity *activator)
+void CBaseDoor::Fire(CBaseEntity *activator)
 {
 	entity oself;
 	entity starte;
