@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020 BlackPhrase
+ * Copyright (C) 2020, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,18 @@ class CHLPlayer : public CBasePlayer
 {
 public:
 	void Spawn() override;
+	
+	void UpdateGeigerCounter();
+	void CheckSuitUpdate();
+	
+	/// Add sentence to suit playlist queue. If abGroup is true, then name is a sentence
+	// group (HEV_AA), otherwise name is a specific sentence name, i.e.: !HEV_AA0
+	// If anNoRepeatTime is specified in seconds, we don't repeat playback of this word
+	// or sentence for at least that number of seconds
+	void SetSuitUpdate(const char *asName, bool abGroup, int anNoRepeatTime);
+	
+	void BarnacleVictimBitten(CBaseEntity *apBarnacle);
+	void BarnacleVictimReleased();
 	
 	CHEVSuit *GetSuit() const {return mpSuit;}
 	bool HasSuit() const {return mpSuit != nullptr;}
