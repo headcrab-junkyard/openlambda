@@ -1,0 +1,13 @@
+// Game Info file
+// These are key/value pairs. Certain mods will use different settings
+
+game "GoldSource Test"
+startmap ""
+trainmap ""
+mpentity "info_player_deathmatch"
+gamedll "dlls/server.dll"
+gamedll_linux "dlls/server.so"
+gamedll_osx "dlls/server.dylib"
+//gamedll_macos "dlls/server.dylib"
+secure "0"
+type "singleplayer_only"
