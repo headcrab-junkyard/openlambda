@@ -18,17 +18,31 @@
 
 /// @file
 
-//#include <common/const.h>
-//#include "engine.h"
-#include <tier1/interface.h>
-//#include "input.h"
-
-int HUD_GetPlayerTeam(int playernum)
+struct kbutton_s /*CL_DLLEXPORT*/ *KB_FindKey(const char *name)
 {
-	return 0;
+	//RecClFindKey(name);
+	
+	kblist_t *pList{g_kbkeys};
+	
+	while(pList)
+	{
+		if(!stricmp(name, pList->name))
+			return pList->pkey;
+		
+		pList = pList->next;
+	};
+	
+	return nullptr;
 };
 
-void *HUD_ClientFactory()
+// TODO: CL_CreateMove
+
+int /*CL_DLLEXPORT*/ HUD_Key_Event(int down, int keynum, const char *pszCurrentBinding)
 {
-	return (void*)Sys_GetFactoryThis();
+	//RecClKeyEvent(down, keynum, pszCurrentBinding);
+	
+	if(gpViewPort)
+		gpViewPort->HandleKeyInput(down, keynum, pszCurrentBinding);
+	
+	return 1;
 };

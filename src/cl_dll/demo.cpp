@@ -18,17 +18,7 @@
 
 /// @file
 
-//#include <common/const.h>
-//#include "engine.h"
-#include <tier1/interface.h>
-//#include "input.h"
-
-int HUD_GetPlayerTeam(int playernum)
+void /*CL_DLLEXPORT*/ CL_ReadDemoBuffer(int size, byte *buffer)
 {
-	return 0;
-};
-
-void *HUD_ClientFactory()
-{
-	return (void*)Sys_GetFactoryThis();
+	// TODO
 };

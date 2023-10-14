@@ -18,17 +18,4 @@
 
 /// @file
 
-//#include <common/const.h>
-//#include "engine.h"
-#include <tier1/interface.h>
-//#include "input.h"
-
-int HUD_GetPlayerTeam(int playernum)
-{
-	return 0;
-};
-
-void *HUD_ClientFactory()
-{
-	return (void*)Sys_GetFactoryThis();
-};
+// TODO: V_CalcRefdef

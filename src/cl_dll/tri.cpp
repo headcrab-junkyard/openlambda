@@ -18,17 +18,12 @@
 
 /// @file
 
-//#include <common/const.h>
-//#include "engine.h"
-#include <tier1/interface.h>
-//#include "input.h"
-
-int HUD_GetPlayerTeam(int playernum)
+void HUD_DrawNormalTriangles()
 {
-	return 0;
+	// TODO
 };
 
-void *HUD_ClientFactory()
+void HUD_DrawTransparentTriangles()
 {
-	return (void*)Sys_GetFactoryThis();
+	// TODO
 };

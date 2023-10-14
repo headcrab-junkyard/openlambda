@@ -18,17 +18,27 @@
 
 /// @file
 
-//#include <common/const.h>
-//#include "engine.h"
-#include <tier1/interface.h>
-//#include "input.h"
-
-int HUD_GetPlayerTeam(int playernum)
+void /*CL_DLLEXPORT*/ HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed)
 {
-	return 0;
-};
-
-void *HUD_ClientFactory()
-{
-	return (void*)Sys_GetFactoryThis();
+	//RecClPostRunCmd(from, to, cmd, runfuncs, time, random_seed);
+	
+	g_runfuncs = runfuncs;
+	
+#ifdef CLIENT_WEAPONS
+	if(cl_lw && cl_lw->value)
+		HUD_WeaponsPostThink(from, to, cd, time, random_seed);
+	else
+#endif
+		to->client.fov = g_lastFOV;
+	
+	if(g_irunninggausspred == 1)
+	{
+		idVec3 vForward{};
+		gpEngine->pfnAngleVectors(v_angles, vForward, nullptr, nullptr);
+		to->client.velocity = to->client.velocity - vForward * g_flApplyVel * 5;
+		g_irunninggausspred = false;
+	};
+	
+	// All games can use FOV state
+	g_lastFOV = to->client.fov;
 };
