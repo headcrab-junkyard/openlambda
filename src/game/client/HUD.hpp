@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2021 BlackPhrase
+ * Copyright (C) 2021, 2023 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,58 +18,58 @@
 */
 
 /// @file
+/// @brief main HUD manager, handles the message, calculation and drawing the HUD
 
 #pragma once
 
-typedef struct cvar_s cvar_t;
+using cvar_t = struct cvar_s;
 
+class CHUDElement;
+class CHUDTexture;
+
+// TODO: CGameHUD?
 class CHUD
 {
 public:
+	CHUD() = default;
 	~CHUD();
 	
+	//void Reset();
+	
+	/// Called when the HUD is created at the module loading stage
 	void Init();
+	
+	/// Called when the video mode is changed
 	void VidInit();
 	
+	//void Update();
+	void Think();
+	
+	int Redraw(float afTime, int anIntermission);
+	
+	int UpdateClientData(client_data_t *apData, float afTime);
+	
+	//void SetActive(bool abActive);
+	//bool IsActive() const;
+	
+	/// HUD element registration
+	void AddElement(CHUDElement *apElement);
+	
 	float GetSensitivity() const {return mfMouseSensitivity;} // TODO: GetMouseSensitivity?
+	//float GetFOVSensitivityAdjust() const;
 	
 	/*SCREENINFO *GetScreenInfo() const;*/ // TODO
+private:
+	//void InitFonts();
+	
+	//void SetupNewTexture(CHUDTexture *apTexture);
 private:
 	cvar_t *mpCvarDraw{nullptr};
 	cvar_t *default_fov{nullptr};
 	
 	float mfMouseSensitivity{0.0f};
+	
+	//bool mbTexturesLoaded{false};
 };
 
-class CHUDElement
-{
-public:
-	virtual ~CHUDElement() = default;
-	
-	virtual int Init(){return 0;}
-	virtual int VidInit(){return 0;}
-	
-	virtual void Reset(){}
-};
-
-class CHUDAmmo : public CHUDElement
-{
-public:
-	int Init() override;
-	int VidInit() override;
-	
-	void Reset() override;
-	
-	void SlotInput(int anSlot);
-	
-	void UserCmd_Slot1(){SlotInput(0);}
-	void UserCmd_Slot2(){SlotInput(1);}
-	void UserCmd_Slot3(){SlotInput(2);}
-	void UserCmd_Slot4(){SlotInput(3);}
-	void UserCmd_Slot5(){SlotInput(4);}
-	void UserCmd_Slot6(){SlotInput(5);}
-	void UserCmd_Slot7(){SlotInput(6);}
-	void UserCmd_Slot8(){SlotInput(7);}
-	void UserCmd_Slot9(){SlotInput(8);}
-	void UserCmd_Slot10(){SlotInput(9);}
-};
+//extern CHUD gHUD; // jiHAD!
