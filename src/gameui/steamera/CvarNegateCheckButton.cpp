@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2023 BlackPhrase
+ * Copyright (C) 2023-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,21 +70,17 @@ void CCvarNegateCheckButton::Paint()
 	auto fValue{var.GetFloat()};
 	
 	if(fValue < 0.0f)
-	{
 		if(!mbStartState)
 		{
 			SetSelected(true);
 			mbStartState = true;
 		};
-	}
 	else
-	{
 		if(mbStartState)
 		{
 			SetSelected(false);
 			mbStartState = false;
 		};
-	};
 	
 	BaseClass::Paint();
 };

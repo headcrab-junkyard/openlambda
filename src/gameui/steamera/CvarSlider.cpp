@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020, 2023 BlackPhrase
+ * Copyright (C) 2020, 2023-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,12 @@
 
 #include "CvarSlider.hpp"
 
+constexpr auto CVARSLIDER_SCALE_FACTOR{100.0f};
+
+//using namespace vgui;
+
+//DECLARE_BUILD_FACTORY(CCvarSlider);
+
 CCvarSlider::CCvarSlider(Panel *apParent, const char *asName) : BaseClass(apParent, asName)
 {
 	SetupSlider(0, 1, "", false);
@@ -34,6 +40,7 @@ CCvarSlider::CCvarSlider(Panel *apParent, const char *asName, const char *asCapt
 	
 	AddActionSignalTarget(this);
 	
+	// For backwards compatibility. Ignore the .res file settings for forced setup sliders
 	mbCreatedInCode = true;
 };
 
@@ -43,9 +50,17 @@ void CCvarSlider::SetupSlider(float afMinValue, float afMaxValue, const char *as
 	mfMaxValue = afMaxValue;
 	
 	// Scale by scale factor
-	SetRange();
+	SetRange((int)(CVARSLIDER_SCALE_FACTOR * afMinValue), (int)(CVARSLIDER_SCALE_FACTOR * afMaxValue));
 	
-	// TODO
+	char sMin[32]{};
+	char sMax[32]{};
+	
+	Q_snprintf(sMin, sizeof(sMin), "%.2f", afMinValue);
+	Q_snprintf(sMax, sizeof(sMax), "%.2f", afMaxValue);
+	
+	SetTickCaptions(sMin, sMax);
+	
+	Q_strncpy(msCvarName, asName, sizeof(msCvarName));
 	
 	mbModifiedOnce = false;
 	mbAllowOutOfRange = abAllowOutOfRange;
@@ -56,6 +71,28 @@ void CCvarSlider::SetupSlider(float afMinValue, float afMaxValue, const char *as
 
 void CCvarSlider::Reset()
 {
+	// Set slider to current value
+	
+	//mfStartValue = gpEngine->pfnGetCvarFloat(msCvarName);
+	ConVarRef VarRef(msCvarName);
+	
+	if(!VarRef.IsValid())
+	{
+		mfCurrentValue = mfStartValue = 0.0f;
+		SetValue(0);
+		mnStartValue = GetValue();
+		mnLastSliderValue = mnStartValue;
+		return;
+	};
+	
+	float fStartValue = VarRef.GetFloat(); // TODO: was mfStartValue, wtf?
+	mfCurrentValue = fStartValue;
+	
+	int nValue = (int)(CVARSLIDER_SCALE_FACTOR * fStartValue);
+	SetValue(nValue);
+	
+	mnStartValue = GetValue();
+	mnLastSliderValue = mnStartValue;
 };
 
 void CCvarSlider::Paint()
@@ -89,6 +126,21 @@ void CCvarSlider::ApplySettings(KeyValues *apData)
 	
 	if(!mbCreatedInCode)
 	{
+		auto fMinValue{apData->GetFloat("minvalue", 0)};
+		auto fMaxValue{apData->GetFloat("maxvalue", 1)};
+		auto sCvarName{apData->GetString("cvar_name", "")};
+		auto bAllowOutOfRange{apData->GetBool("allowoutofrange", false)};
+		
+		SetupSlider(fMinValue, fMaxValue, sCvarName, bAllowOutOfRange);
+		
+		if(GetParent())
+		{
+			// HACK: If out parent is a property page, we want the dialog containing it
+			if(dynamic_cast<vgui::PropertyPage*>(GetParent()) && GetParent()->GetParent())
+				GetParent()->GetParent()->AddActionSignalTarget(this);
+			else
+				GetParent()->AddActionSignalTarget(this);
+		};
 	};
 };
 
@@ -98,6 +150,10 @@ void CCvarSlider::GetSettings(KeyValues *apData)
 	
 	if(!mbCreatedInCode)
 	{
+		apData->SetFloat("minvalue", mfMinValue);
+		apData->SetFloat("maxvalue", mfMaxValue);
+		apData->SetString("cvar_name", msCvarName);
+		apData->SetBool("allowoutofrange", mbAllowOutOfRange);
 	};
 };
 
@@ -129,6 +185,21 @@ void CCvarSlider::SetCvarName(const char *asName)
 
 void CCvarSlider::SetMinMaxValues(float afMinValue, float afMaxValue, bool abSetTickDisplay)
 {
+	SetRange((int)(CVARSLIDER_SCALE_FACTOR * afMinValue), (int)(CVARSLIDER_SCALE_FACTOR * afMaxValue));
+	
+	if(abSetTickDisplay)
+	{
+		char sMin[32]{};
+		char sMax[32]{};
+		
+		Q_snprintf(sMin, sizeof(sMin), "%.2f", afMinValue);
+		Q_snprintf(sMax, sizeof(sMax), "%.2f", afMaxValue);
+		
+		SetTickCaptions(sMin, sMax);
+	};
+	
+	// Set slider to current value
+	Reset();
 };
 
 void CCvarSlider::SetTickColor(Color aColor)
@@ -167,6 +238,7 @@ bool CCvarSlider::HasBeenModified() const
 	return mbModifiedOnce;
 };
 
+// Input: position
 void CCvarSlider::OnSliderMoved()
 {
 	if(HasBeenModified())
@@ -178,7 +250,7 @@ void CCvarSlider::OnSliderMoved()
 		};
 		
 		// Tell parent that we've been modified
-		PostActionSignal(new KeyValues("ControlModified"));
+		PostActionSignal(new KeyValues("ControlModified")); // TODO
 	};
 };
 

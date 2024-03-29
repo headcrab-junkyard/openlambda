@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2020, 2023 BlackPhrase
+ * Copyright (C) 2020, 2023-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public:
 	void Reset() override;
 	
 	void ApplyChanges(bool abImmediate = false) override;
-	void ApplySchemeChanges(vgui2::IScheme *apScheme) override;
+	void ApplySchemeSettings(vgui2::IScheme *apScheme) override;
 	
 	bool HasBeenModified() override;
 private:

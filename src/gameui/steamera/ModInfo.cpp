@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2022-2023 BlackPhrase
+ * Copyright (C) 2022-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,18 @@
 #include "ModInfo.hpp"
 #include "KeyValues.h"
 
+//#include <vgui_controls/Controls.h>
+//#include <FileSystem.h>
+
+//#include "EngineInterface.h"
+
+// NOTE: memdbgon must be the last include file in a source file!
+//#include <tier0/memdbgon.h>
+
 CModInfo::CModInfo()
 {
 	mpModData = new KeyValues("ModData");
-	msGameTitle[0] = 0;
+	//msGameTitle[0] = 0;
 };
 
 CModInfo::~CModInfo()
@@ -59,6 +67,13 @@ void CModInfo::LoadGameInfoFromBuffer(const char *asBuffer)
 //{
 	//if(!msGameTitle[0])
 	//{
+		// For some reason, the standard ILocalize::ConvertANSITOUnicode() strips off
+		// the '²' character in 'HALF-LIFE²', so just do a straight upconvert to unicode
+		//auto sTitle{mpModData->GetString("title", "")};
+		//int i = 0;
+		//for(; sTitle[i] != 0; ++i)
+			//msGameTitle[i] = (wchar_t)sTitle[i];
+		//msGameTitle[i] = 0;
 	//};
 	
 	//return msGameTitle;
@@ -68,6 +83,13 @@ void CModInfo::LoadGameInfoFromBuffer(const char *asBuffer)
 //{
 	//if(!msGameTitle2[0])
 	//{
+		// For some reason, the standard ILocalize::ConvertANSITOUnicode() strips off
+		// the '²' character in 'HALF-LIFE²', so just do a straight upconvert to unicode
+		//auto sTitle2{mpModData->GetString("title2", "")};
+		//int i = 0;
+		//for(; sTitle2[i] != 0; ++i)
+			//msGameTitle2[i] = (wchar_t)sTitle2[i];
+		//msGameTitle2[i] = 0;
 	//};
 	
 	//return msGameTitle2;
@@ -85,7 +107,12 @@ bool CModInfo::IsMultiplayerOnly() const
 
 bool CModInfo::IsSinglePlayerOnly() const
 {
+#ifndef _XBOX
 	return (stricmp(mpModData->GetString("type", ""), "singleplayer_only") == 0);
+#else
+	// XBOXISSUE: no support for disparate mounted content
+	return true;
+#endif
 };
 
 //bool CModInfo::HasPortals() const
