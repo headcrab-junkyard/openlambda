@@ -32,7 +32,7 @@ public:
 	CGameInfo();
 	~CGameInfo();
 	
-	void FreeModInfo();
+	void FreeGameInfo(); // TODO: FreeInfo?
 	
 	// Loads mod info from liblist.gam/gameinfo.txt
 	void LoadCurrentGameInfo();
@@ -98,7 +98,7 @@ private:
 	//wchar_t msGameTitle[128]{};
 	//wchar_t msGameTitle2[128]{};
 	
-	KeyValues *mpModData{nullptr};
+	KeyValues *mpData{nullptr};
 };
 
 // Singleton accessor

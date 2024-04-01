@@ -12,4 +12,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	OUTPUT_NAME "gameui"
 )
 
-target_link_libraries(${PROJECT_NAME} ogs-tier1)
+target_link_libraries(${PROJECT_NAME} ogs-tier1 revgui_controls)

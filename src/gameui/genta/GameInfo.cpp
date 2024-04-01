@@ -20,25 +20,26 @@
 /// @file
 
 #include "GameInfo.hpp"
-#include "KeyValues.h"
+
+#include <KeyValues.h>
 
 CGameInfo::CGameInfo()
 {
-	mpModData = new KeyValues("ModData");
+	mpData = new KeyValues("GameData");
 	msGameTitle[0] = 0;
 };
 
 CGameInfo::~CGameInfo()
 {
-	FreeModInfo();
+	FreeGameInfo();
 };
 
-void CGameInfo::FreeModInfo()
+void CGameInfo::FreeGameInfo()
 {
-	if(mpModData)
+	if(mpData)
 	{
-		mpModData->deleteThis();
-		mpModData = nullptr;
+		mpData->deleteThis();
+		mpData = nullptr;
 	};
 };
 
@@ -46,13 +47,13 @@ void CGameInfo::LoadCurrentGameInfo()
 {
 	// Load up gameinfo for the current mod
 	const char *sFileName{"liblist.gam"}; // TODO: gameinfo.txt?
-	mpModData->LoadFromFile(gpFullFileSystem, sFileName);
+	mpData->LoadFromFile(gpFullFileSystem, sFileName);
 };
 
 void CGameInfo::LoadGameInfoFromBuffer(const char *asBuffer)
 {
 	// Load up gameinfo for the current mod
-	mpModData->LoadFromBuffer("", asBuffer);
+	mpData->LoadFromBuffer("", asBuffer);
 };
 
 //const wchar_t *CGameInfo::GetGameTitle() const
@@ -75,87 +76,87 @@ void CGameInfo::LoadGameInfoFromBuffer(const char *asBuffer)
 
 const char *CGameInfo::GetGameName() const
 {
-	return mpModData->GetString("game", "");
+	return mpData->GetString("game", "");
 };
 
 bool CGameInfo::IsMultiplayerOnly() const
 {
-	return (stricmp(mpModData->GetString("type", ""), "multiplayer_only") == 0);
+	return (stricmp(mpData->GetString("type", ""), "multiplayer_only") == 0);
 };
 
 bool CGameInfo::IsSinglePlayerOnly() const
 {
-	return (stricmp(mpModData->GetString("type", ""), "singleplayer_only") == 0);
+	return (stricmp(mpData->GetString("type", ""), "singleplayer_only") == 0);
 };
 
 //bool CGameInfo::HasPortals() const
 //{
-	//return (stricmp(mpModData->GetString("hasportals", "0"), "1") == 0);
+	//return (stricmp(mpData->GetString("hasportals", "0"), "1") == 0);
 //};
 
 //bool CGameInfo::NoDifficulty() const
 //{
-	//return (stricmp(mpModData->GetString("nodifficulty", "0"), "1") == 0);
+	//return (stricmp(mpData->GetString("nodifficulty", "0"), "1") == 0);
 //};
 
 bool CGameInfo::NoModels() const
 {
-	return (stricmp(mpModData->GetString("nomodels", "0"), "1") == 0);
+	return (stricmp(mpData->GetString("nomodels", "0"), "1") == 0);
 };
 
 bool CGameInfo::NoHiModels() const
 {
-	return (stricmp(mpModData->GetString("nohimodels", "0"), "1") == 0);
+	return (stricmp(mpData->GetString("nohimodels", "0"), "1") == 0);
 };
 
 //bool CGameInfo::NoCrosshair() const
 //{
-	//return (stricmp(mpModData->GetString("nocrosshair", "1"), "1") == 0);
+	//return (stricmp(mpData->GetString("nocrosshair", "1"), "1") == 0);
 //};
 
 //bool CGameInfo::AdvCrosshair() const
 //{
-	//return (stricmp(mpModData->GetString("advcrosshair", "0"), "1") == 0);
+	//return (stricmp(mpData->GetString("advcrosshair", "0"), "1") == 0);
 //};
 
 //const char *CGameInfo::GetFallbackDir() const
 //{
-	//return mpModData->GetString("fallback_dir", "");
+	//return mpData->GetString("fallback_dir", "");
 //};
 
 //bool CGameInfo::UseGameLogo() const
 //{
-	//return (stricmp(mpModData->GetString("gamelogo", "0"), "1") == 0);
+	//return (stricmp(mpData->GetString("gamelogo", "0"), "1") == 0);
 //};
 
 //KeyValues *CGameInfo::GetHiddenMaps() const
 //{
-	//return mpModData->FindKey("hidden_maps");
+	//return mpData->FindKey("hidden_maps");
 //};
 
 const char *CGameInfo::GetStartMap() const
 {
-	return mpModData->GetString("startmap", "");
+	return mpData->GetString("startmap", "");
 };
 
 const char *CGameInfo::GetTrainMap() const
 {
-	return mpModData->GetString("trainmap", "");
+	return mpData->GetString("trainmap", "");
 };
 
 const char *CGameInfo::GetMPEntity() const
 {
-	return mpModData->GetString("mpentity", "");
+	return mpData->GetString("mpentity", "");
 };
 
 const char *CGameInfo::GetGameDLL() const
 {
-	return mpModData->GetString("gamedll", "");
+	return mpData->GetString("gamedll", "");
 };
 
 bool CGameInfo::IsSecure() const
 {
-	return (stricmp(mpModData->GetString("secure", "0"), "1") == 0);
+	return (stricmp(mpData->GetString("secure", "0"), "1") == 0);
 };
 
 CGameInfo &GameInfo()
