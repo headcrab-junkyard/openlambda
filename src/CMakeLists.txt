@@ -39,3 +39,5 @@ if(NOT OGS_DEDICATED)
 	add_subdirectory(gameui)
 	add_subdirectory(launcher)
 endif()
+
+add_subdirectory(next)

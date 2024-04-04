@@ -1,4 +1,6 @@
-project(ogs-launcher)
+project(ogs-launcher_main)
+
+set(OGS_LAUNCHER_APP_OUTPUT_NAME "launcher" CACHE STRING "Launcher application output name")
 
 add_executable(${PROJECT_NAME})
 
@@ -22,7 +24,7 @@ target_sources(${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-	OUTPUT_NAME "launcher"
+	OUTPUT_NAME ${OGS_LAUNCHER_APP_OUTPUT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} ogs-tier1)
