@@ -1,5 +1,7 @@
 project(ogs-game-client)
 
+###############################################################################
+
 set(LIB_TYPE MODULE)
 
 if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
@@ -17,6 +19,8 @@ target_sources(${PROJECT_NAME}
 )
 
 #target_link_libraries(${PROJECT_NAME} ogs_game_shared-client)
+###############################################################################
+
 
 if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
 	set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -28,4 +32,4 @@ endif()
 
 ###############################################################################
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ./bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION ./${OGS_GAME_FOLDER_NAME}/bin)

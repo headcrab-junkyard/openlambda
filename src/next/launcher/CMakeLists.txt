@@ -1,5 +1,7 @@
 project(ogs-launcher-next)
 
+###############################################################################
+
 add_library(${PROJECT_NAME} MODULE)
 
 target_include_directories(${PROJECT_NAME}
@@ -20,6 +22,8 @@ target_sources(${PROJECT_NAME}
 	PRIVATE ${PROJECT_SOURCES}
 	PRIVATE ${PROJECT_PLATFORM_SOURCES}
 )
+
+###############################################################################
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 	OUTPUT_NAME "launcher"

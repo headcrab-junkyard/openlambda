@@ -1,5 +1,6 @@
 project(ogs-launcher_main)
 
+###############################################################################
 
 add_executable(${PROJECT_NAME})
 
@@ -21,6 +22,8 @@ target_sources(${PROJECT_NAME}
 	PRIVATE ${PROJECT_SOURCES}
 	PRIVATE ${PROJECT_PLATFORM_SOURCES}
 )
+
+###############################################################################
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 	OUTPUT_NAME ${OGS_LAUNCHER_APP_OUTPUT_NAME}

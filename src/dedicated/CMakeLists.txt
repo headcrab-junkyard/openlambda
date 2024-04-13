@@ -1,5 +1,7 @@
 project(ogs-dedicated)
 
+###############################################################################
+
 add_executable(${PROJECT_NAME})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PROJECT_SOURCES)
@@ -17,6 +19,8 @@ endif()
 target_sources(${PROJECT_NAME}
 	PRIVATE ${PROJECT_SOURCES_PLATFORM}
 )
+
+###############################################################################
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 	OUTPUT_NAME "ogsds"

@@ -1,5 +1,7 @@
 project(ogs-game-server)
 
+###############################################################################
+
 # For Next we build the code into a separate library
 set(LIB_TYPE MODULE)
 
@@ -92,10 +94,17 @@ target_sources(${PROJECT_NAME}
 	#PRIVATE world.cpp
 )
 
+
+###############################################################################
+
 if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		OUTPUT_NAME "server"
 	)
-
+	
 	target_link_libraries(${PROJECT_NAME} ogs-tier1) #ogs-pm_shared ogs-mathlib ogs_game_shared-server)
 endif()
+
+###############################################################################
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ./${OGS_GAME_FOLDER_NAME}/bin)
