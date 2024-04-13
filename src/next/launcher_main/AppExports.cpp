@@ -1,7 +1,7 @@
 /*
  * This file is part of OGSNext Engine
  *
- * Copyright (C) 2018-2020 BlackPhrase
+ * Copyright (C) 2018-2020, 2024 BlackPhrase
  *
  * OGSNext Engine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,21 +17,23 @@
  * along with OGSNext Engine. If not, see <http://www.gnu.org/licenses/>.
 */
 
+/// @file
+
 #ifdef _WIN32
-	#define EXPORT [[dllexport]]
+	#define EXPORT [[gnu::dllexport]]
 #else
-	#define EXPORT [[visibility("default")]]
+	#define EXPORT [[gnu::visibility("default")]]
 #endif
 
-// Prefer dedicated graphics cards if present
-// NOTE: This needs to be placed in the executable, it won’t work in a dll
+// Hints to prefer the dedicated GPUs over the iGPUs if both are present
+// NOTE: This needs to be placed inside of the executable or it won't work
 extern "C"
 {
 
 // https://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
-EXPORT unsigned long NvOptimusEnablement = 0x00000001;
+EXPORT unsigned long NvOptimusEnablement{0x00000001};
 
 // https://community.amd.com/thread/169965
-EXPORT int AmdPowerXpressRequestHighPerformance = 1;
+EXPORT int AmdPowerXpressRequestHighPerformance{1};
 
 };
