@@ -24,7 +24,7 @@ target_sources(${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-	OUTPUT_NAME "launcher"
+	OUTPUT_NAME ${OGS_LAUNCHER_APP_OUTPUT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} ogs-tier1)
@@ -32,3 +32,7 @@ target_link_libraries(${PROJECT_NAME} ogs-tier1)
 if(UNIX)
 	target_link_libraries(${PROJECT_NAME} -ldl)
 endif()
+
+###############################################################################
+
+install(TARGETS ${PROJECT_NAME} DESTINATION .)

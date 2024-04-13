@@ -31,3 +31,7 @@ target_link_libraries(${PROJECT_NAME} ogs-tier1 ogs-pm_shared ogs-mathlib ogs-ga
 if(WIN32)
 	target_link_libraries(${PROJECT_NAME} winmm) #joyGetPosEx
 endif()
+
+###############################################################################
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ./${OGS_GAME_FOLDER_NAME}/cl_dlls)

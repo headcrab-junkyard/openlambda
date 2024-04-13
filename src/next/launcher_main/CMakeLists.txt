@@ -1,6 +1,5 @@
 project(ogs-launcher_main)
 
-set(OGS_LAUNCHER_APP_OUTPUT_NAME "launcher" CACHE STRING "Launcher application output name")
 
 add_executable(${PROJECT_NAME})
 
@@ -32,3 +31,7 @@ target_link_libraries(${PROJECT_NAME} ogs-tier1)
 if(UNIX)
 	target_link_libraries(${PROJECT_NAME} -ldl)
 endif()
+
+###############################################################################
+
+install(TARGETS ${PROJECT_NAME} DESTINATION .)

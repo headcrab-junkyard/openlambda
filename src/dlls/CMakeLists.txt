@@ -11,7 +11,10 @@ target_sources(${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-	OUTPUT_NAME "server"
+	OUTPUT_NAME ${OGS_GAMEDLL_OUTPUT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} ogs-tier1 ogs-game-server) #ogs-pm_shared ogs-mathlib ogs_game_shared-server)
+###############################################################################
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ./${OGS_GAME_FOLDER_NAME}/dlls)

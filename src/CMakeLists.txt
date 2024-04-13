@@ -2,6 +2,10 @@
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(CMAKE_SHARED_MODULE_PREFIX "")
 
+set(OGS_GAME_FOLDER_NAME "goldsrctest" CACHE STRING "Game folder name to install the built game modules to")
+set(OGS_LAUNCHER_APP_OUTPUT_NAME "launcher" CACHE STRING "Launcher application output name")
+set(OGS_GAMEDLL_OUTPUT_NAME "hl" CACHE STRING "Legacy game dll output name")
+
 ###############################################################################
 
 # Add include directories
@@ -34,10 +38,9 @@ add_subdirectory(dedicated)
 if(NOT OGS_DEDICATED)
 	if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
 		add_subdirectory(cl_dll)
+		add_subdirectory(gameui)
+		add_subdirectory(launcher)
 	endif()
-	
-	add_subdirectory(gameui)
-	add_subdirectory(launcher)
 endif()
 
 add_subdirectory(next)

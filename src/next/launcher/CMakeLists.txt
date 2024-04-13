@@ -30,3 +30,7 @@ target_link_libraries(${PROJECT_NAME} ogs-tier1)
 if(UNIX)
 	target_link_libraries(${PROJECT_NAME} -ldl)
 endif()
+
+###############################################################################
+
+install(TARGETS ${PROJECT_NAME} DESTINATION .) # TODO: ./bin?
