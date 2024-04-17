@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019-2021 BlackPhrase
+ * Copyright (C) 2019-2021, 2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,21 @@
 
 //#include "exports.h"
 //#include "engine.h"
-#include "BaseWeapon.hpp"
+#include <BaseWeapon.hpp>
+
+enum eGlock
+{
+	GLOCK_IDLE1 = 0,
+	GLOCK_IDLE2,
+	GLOCK_IDLE3,
+	GLOCK_SHOOT,
+	GLOCK_SHOOT_EMPTY,
+	GLOCK_RELOAD,
+	GLOCK_RELOAD_NOT_EMPTY,
+	GLOCK_DRAW,
+	GLOCK_HOLSTER,
+	GLOCK_ADD_SILENCER
+};
 
 class CWeaponGlock : public CBaseWeapon
 {
@@ -31,10 +45,14 @@ public:
 	
 	bool Deploy() override;
 	
+	void WeaponIdle(); // TODO: Idle?
+	
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	
 	void Reload() override;
+	
+	int GetItemInfo(ItemInfo *apInfo) const; //(ItemInfo &aInfo);
 private:
 	void Fire(float afSpread, float afCycleTime, bool abUseAutoAim);
 private:
@@ -49,6 +67,7 @@ LINK_ENTITY_TO_CLASS(weapon_9mmhandgun, CWeaponGlock);
 
 void CWeaponGlock::Spawn()
 {
+	// Hack to allow for old names
 	SetClassName("weapon_9mmhandgun"); // TODO: gpEngine->pfnMakeString(classname)
 	
 	//
@@ -58,14 +77,14 @@ void CWeaponGlock::Spawn()
 	gpEngine->pfnPrecacheModel("models/p_9mmhandgun.mdl");
 	gpEngine->pfnPrecacheModel("models/w_9mmhandgun.mdl");
 	
-	mnShell = gpEngine->pfnPrecacheModel("models/shell.mdl");
+	mnShell = gpEngine->pfnPrecacheModel("models/shell.mdl"); // Brass shell
 	
 	gpEngine->pfnPrecacheSound("items/9mmclip1.wav");
 	gpEngine->pfnPrecacheSound("items/9mmclip2.wav");
 	
-	gpEngine->pfnPrecacheSound("weapons/pl_gun1.wav");
-	gpEngine->pfnPrecacheSound("weapons/pl_gun2.wav");
-	gpEngine->pfnPrecacheSound("weapons/pl_gun3.wav");
+	gpEngine->pfnPrecacheSound("weapons/pl_gun1.wav"); // Silenced handgun
+	gpEngine->pfnPrecacheSound("weapons/pl_gun2.wav"); // Silenced handgun
+	gpEngine->pfnPrecacheSound("weapons/pl_gun3.wav"); // Handgun
 	
 	mnFireGlock1 = gpEngine->pfnPrecacheEvent(1, "events/glock1.sc");
 	mnFireGlock2 = gpEngine->pfnPrecacheEvent(1, "events/glock2.sc");
@@ -74,11 +93,49 @@ void CWeaponGlock::Spawn()
 	mnID = WEAPON_GLOCK;
 	
 	SetModel("models/w_9mmhandgun.mdl");
+	
+	mnDefaultAmmo = GLOCK_DEFAULT_GIVE;
+	
+	// Get ready to fall down
+	FallInit();
 };
 
 bool CWeaponGlock::Deploy()
 {
-	return DefaultDeploy();
+	//self->body = 1;
+	return DefaultDeploy("models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded", /*UseDecrement() ? 1 : */ 0);
+};
+
+void CWeaponGlock::WeaponIdle()
+{
+	ResetEmptySound();
+	
+	mpOwner->GetAutoAimVector(AUTOAIM_10DEGREES);
+	
+	if(mfTimeWeaponIdle > UTIL_WeaponTimeBase())
+		return;
+	
+	// Only idle if the slid isn't back
+	if(mnClip != 0)
+	{
+		int nAnim{GLOCK_IDLE2};
+		float fRand{UTIL_SharedRandomFloat(mpOwner->random_seed, 0.0, 1.0)};
+		
+		if(fRand <= 0.3)
+		{
+			nAnim = GLOCK_IDLE3;
+			mfTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0 / 16.0;
+		}
+		else if(fRand <= 0.6)
+		{
+			nAnim = GLOCK_IDLE1;
+			mfTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 16.0;
+		};
+		
+		mfTimeWeaponIdle = UTIL_WeaponTimeBase() + 40.0 / 16.0;
+		
+		SendWeaponAnim(nAnim, 1);
+	};
 };
 
 void CWeaponGlock::PrimaryAttack()
@@ -93,25 +150,97 @@ void CWeaponGlock::SecondaryAttack()
 
 void CWeaponGlock::Reload()
 {
+	if(mpOwner->ammo_9mm <= 0)
+		return;
+	
 	bool bResult{false};
 	
 	if(mnClip == 0)
 		bResult = DefaultReload(17, GLOCK_RELOAD, 1.5);
 	else
-		bResult = DefaultReload(18, GLOCK_RELOAD_NOT_EMPTY, 1.5);
+		bResult = DefaultReload(17, GLOCK_RELOAD_NOT_EMPTY, 1.5);
 	
 	if(bResult)
-		mfTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT(10, 15);
+		//mfTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT(10, 15);
+		mfTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(mpOwner->random_seed, 10, 15);
+};
+
+int CWeaponGlock::GetItemInfo(ItemInfo *apInfo) const
+{
+	apInfo->pszName = STRING(self->classname);
+	
+	apInfo->pszAmmo1 = "9mm";
+	apInfo->iMaxAmmo1 = _9MM_MAX_CARRY;
+	
+	apInfo->pszAmmo2 = nullptr;
+	apInfo->iMaxAmmo2 = -1;
+	
+	apInfo->iMaxClip = GLOCK_MAX_CLIP;
+	
+	apInfo->iSlot = 1;
+	apInfo->iPosition = 0;
+	apInfo->iFlags = 0;
+	
+	apInfo->iId = mnID = WEAPON_GLOCK;
+	apInfo->iWeight = GLOCK_WEIGHT;
+	
+	return 1;
 };
 
 void CWeaponGlock::Fire(float afSpread, float afCycleTime, bool abUseAutoAim)
 {
 	if(mnClip <= 0)
 	{
+		if(mbFireOnEmpty)
+		{
+			PlayEmptySound();
+			mfNextPrimaryAttack = GetNextAttackDelay(0.2);
+		};
+		
 		return;
 	};
 	
 	--mnClip;
 	
+	mpOwner->AddEffects(EF_MUZZLEFLASH);
+	
+	int nFlags{0};
+	
+#ifdef OPENLAMBDA_CLIENT_WEAPONS
+	nFlags = FEV_NOTHOST;
+#endif
+	
+	// Player "shoot" animation
 	mpOwner->SetAnim(PLAYER_ATTACK1);
+	
+	if(self->body == 1)
+	{
+		// Silenced
+		mpOwner->mnWeaponVolume = QUIET_GUN_VOLUME;
+		mpOwner->mnWeaponFlash = DIM_GUN_FLASH;
+	}
+	else
+	{
+		// Non-silenced
+		mpOwner->mnWeaponVolume = NORMAL_GUN_VOLUME;
+		mpOwner->mnWeaponFlash = NORMAL_GUN_FLASH;
+	};
+	
+	idVec3 vSrc{mpOwner->GetGunPosition()};
+	idVec3 vAiming{gpGlobals->v_forward};
+	
+	if(abUseAutoAim)
+		vAiming = mpOwner->GetAutoAimVector(AUTOAIM_10DEGREES);
+	
+	idVec3 vDir{mpOwner->FireBulletsPlayer(1, vSrc, vAiming, idVec3(afSpread, afSpread, afSpread), 8192, BULLET_PLAYER_9MM, 0, 0, mpOwner->self, mpOwner->random_seed)};
+	
+	gpEngine->pfnPlaybackEventFull(nFlags, mpOwner->ToEdict(), abUseAutoAim ? mnFireGlock1 : mnFireGlock2, 0.0, (float*)&g_vecZero, (float*)&g_vecZero, vDir.x, vDir.y, 0, 0, mnClip == 0 ? 1 : 0, 0);
+	
+	mfNextPrimaryAttack = mfNextSecondaryAttack = GetNextAttackDelay(afCycleTime);
+	
+	// HEV suit - indicate out of ammo condition
+	if(!mnClip && mpOwner->m_rgAmmo[mnPrimaryAmmoType] <= 0)
+		mpOwner->SetSuitUpdate("!HEV_AMO0", false, 0);
+	
+	mfTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(mpOwner->random_seed, 10, 15);
 };
