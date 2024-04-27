@@ -23,7 +23,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_link_libraries(${PROJECT_NAME} ogs-tier1 ogs-game-server) #ogs-pm_shared ogs-mathlib ogs-game-shared-server)
 
 #target_include_directories(${PROJECT_NAME}
-	#PRIVATE ${OGS_ROOT}/game_shared
+	#PRIVATE ${OGS_ROOT}/game/shared
 #)
 
 #target_link_libraries(${PROJECT_NAME} ogs-pm_shared ogs-mathlib ogs-game-shared-server)

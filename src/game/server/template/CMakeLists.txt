@@ -3,7 +3,7 @@ project(ogs-game-server-template)
 add_library(${PROJECT_NAME} MODULE)
 
 target_include_directories(${PROJECT_NAME}
-	PRIVATE ${OGS_ROOT}/game_shared
+	PRIVATE ${OGS_ROOT}/game/shared
 )
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PROJECT_SOURCES)
