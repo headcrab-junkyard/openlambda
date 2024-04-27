@@ -13,7 +13,7 @@ endif()
 add_library(${PROJECT_NAME} ${LIB_TYPE})
 
 target_compile_definitions(${PROJECT_NAME}
-	PRIVATE MODULE_EXPORT
+	PRIVATE MODULE_EXPORT # TODO: MODULE_EXPORTS?
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -21,16 +21,6 @@ target_include_directories(${PROJECT_NAME}
 )
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PROJECT_BASE_SOURCES)
-
-if(${OPENLAMBDA_GAME_TYPE} STREQUAL "Template")
-	aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/stub PROJECT_GAME_SOURCES) # TODO: template
-elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "HL")
-	aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/hl PROJECT_GAME_SOURCES)
-elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "CStrike")
-	aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/cstrike PROJECT_GAME_SOURCES)
-elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "CSO")
-	aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/cso PROJECT_GAME_SOURCES)
-endif()
 
 target_sources(${PROJECT_NAME}
 	#PRIVATE ${PROJECT_BASE_SOURCES}
@@ -94,6 +84,18 @@ target_sources(${PROJECT_NAME}
 	#PRIVATE world.cpp
 )
 
+if(${OPENLAMBDA_GAME_TYPE} STREQUAL "Template")
+	add_subdirectory(template)
+elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "Quake")
+	add_subdirectory(quake)
+elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "HL")
+	add_subdirectory(hl)
+elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "CStrike")
+	add_subdirectory(cstrike)
+elseif(${OPENLAMBDA_GAME_TYPE} STREQUAL "CSO")
+	#add_subdirectory(cstrike)
+	add_subdirectory(cso)
+endif()
 
 ###############################################################################
 

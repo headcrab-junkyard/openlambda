@@ -8,7 +8,8 @@ add_subdirectory(game)
 if(NOT OGS_DEDICATED)
 	if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Next")
 		add_subdirectory(gameui)
-		add_subdirectory(launcher_main)
+		add_subdirectory(launcher)
+		add_subdirectory(launcher_main) # TODO: launcher_app?
 	endif()
 endif()
 

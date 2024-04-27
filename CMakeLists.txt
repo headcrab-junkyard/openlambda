@@ -51,7 +51,9 @@ set_property(CACHE OPENLAMBDA_TARGET_ENGINE PROPERTY STRINGS
 set(OPENLAMBDA_GAME_TYPE "Template" CACHE STRING "Specify the game/mod that the code will be built for")
 set_property(CACHE OPENLAMBDA_GAME_TYPE PROPERTY STRINGS
 	"Template"
+	"Quake"
 	"HL"
+	"CS" # CStrike?
 )
 
 ###############################################################################
