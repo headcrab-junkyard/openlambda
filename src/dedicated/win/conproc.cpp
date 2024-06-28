@@ -45,7 +45,7 @@ void Con_SafePrintf(const char *msg)
 	// TODO
 };
 
-void InitConProc ()
+void InitConProc(/*HANDLE hFile, HANDLE heventParent, HANDLE heventChild*/)
 {
 	HANDLE hFile = (HANDLE)0;
 	HANDLE heventParent = (HANDLE)0;
@@ -75,7 +75,7 @@ void InitConProc ()
 			heventChild = (HANDLE)Q_atoi (com_argv[t+1]);
 	};
 */
-	
+
 // ignore if we don't have all the events.
 	if (!hFile || !heventParent || !heventChild)
 		return;

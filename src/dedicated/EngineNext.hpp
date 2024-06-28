@@ -18,7 +18,7 @@
 */
 
 /// @file
-/// @brief new engine (OGSNext) wrapper
+/// @brief new engine type (OGSNext) wrapper
 
 #pragma once
 
@@ -29,27 +29,12 @@
 class CEngineNext final : public IEngine
 {
 public:
-    CEngineNext(CreateInterfaceFn afnEngineFactory, CreateInterfaceFn afnFSFactory) : mfnFSFactory(afnFSFactory)
+    CEngineNext(CreateInterfaceFn afnEngineFactory)
     {
         mpEngine = reinterpret_cast<IEngine*>(afnEngineFactory(OGS_ENGINE_INTERFACE_VERSION, nullptr));
 
         if(!mpEngine)
             throw std::runtime_error("Failed to get the engine API!");
-    };
-
-    bool Init(const InitParams &aInitParams) override
-    {
-        return pEngine->Init(aInitParams);
-    };
-
-    void Shutdown() override
-    {
-        mpEngine->Shutdown();
-    };
-
-    bool Frame() override
-    {
-        return mpEnine->Frame();
     };
 private:
 	IEngine *mpEngine{nullptr};

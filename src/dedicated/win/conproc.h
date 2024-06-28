@@ -19,6 +19,9 @@
 */
 
 /// @file
+/// @brief support for external server monitoring programs
+
+#pragma once
 
 #define CCOM_WRITE_TEXT		0x2
 // Param1 : Text
@@ -33,6 +36,7 @@
 #define CCOM_SET_SCR_LINES	0x5
 // Param1 : Number of lines
 
-void InitConProc(/*HANDLE hFile, HANDLE heventParent, HANDLE heventChild*/);
+void InitConProc();
 void DeinitConProc();
+
 void WriteStatusText(const char *asText);

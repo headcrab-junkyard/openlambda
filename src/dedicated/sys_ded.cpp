@@ -33,18 +33,32 @@
 
 #include "Engine.hpp"
 #include "EngineLegacy.hpp"
+#include "EngineNext.hpp"
 
 #include "filesystem/IFileSystem.hpp"
 
 #include "SystemModule.hpp"
 
 #ifdef _WIN32
-static bool sc_return_on_enter{false};
+//static bool sc_return_on_enter{false};
 HANDLE hinput, houtput;
 #endif
 
 CEngine *gpEngine{nullptr}; // TODO: hacky way to access the command buffer...
 
+CreateInterfaceFn gfnFSFactory{nullptr};
+
+enum class TargetEngineAPI : int
+{
+	Legacy,
+	Next
+};
+
+#ifdef OPENLAMBDA_USE_LEGACY_ENGINE_API
+	constexpr auto TargetEngine{TargetEngineAPI::Legacy};
+#else
+	constexpr auto TargetEngine{TargetEngineAPI::Next};
+#endif
 
 IBaseInterface *LauncherFactory(const char *name, int *retval)
 {
@@ -174,6 +188,7 @@ char *Sys_ConsoleInput()
 	};
 
 	return nullptr;
+// TODO
 /*
 #else // if not SWDS
 	static char text[256]{};
@@ -270,7 +285,7 @@ char *Sys_ConsoleInput()
 	text[len - 1] = 0; // rip off the /n and terminate
 
 	return text;
-#elif sun
+#elif sun // TODO: __sun_
 	static char text[256];
 	int len;
 	fd_set readfds;
@@ -315,15 +330,30 @@ void Host_GetConsoleCommands()
 		cmd = Sys_ConsoleInput();
 		if(!cmd)
 			break;
-		gpEngine->AddConsoleText(cmd);
+		gpEngine->AddConsoleText(cmd); // TODO: gpSystem->AddConsoleText? Cbuf_AddText?
 	};
 };
 
+/*
+===================
+ChooseEngineModuleName
+===================
+*/
+const char *ChooseEngineModuleName()
 {
+	const char *sName{Config::Defaults::EngineModuleName};
 
+	if constexpr(TargetEngine == TargetEngineAPI::Legacy)
 	{
+#ifdef _WIN32
+		sName = "swds";
+#else
+		sName = "engine_i386";
+#endif
 	};
 	
+	return sName;
+};
 
 /*
 ===================
@@ -332,10 +362,16 @@ RunServer
 */
 int RunServer() // void?
 {
+	bool bShouldRestart{false};
+
+	do
+	{
 		// File system module name to load
 		const char *sFSModuleName{Config::Defaults::FSModuleName};
 
 		CSystemModule FSModule(sFSModuleName);
+
+		gfnFSFactory = FSModule.GetFactory();
 
 		// Engine module name to load
 		const char *sEngineModuleName{ChooseEngineModuleName()};
@@ -350,16 +386,27 @@ int RunServer() // void?
 		
 		InitParams.fnLauncherFactory = Sys_GetFactoryThis();
 		InitParams.sGameDir = "."; // TODO: goldsrctest?
-		InitParams.sCmdLine = "TODO";
+		InitParams.sCmdLine = "TODO"; // TODO
 		InitParams.bDedicated = true;
-		
-		/*
-		if(!pEngine->Init(InitParams))
-			return EXIT_FAILURE;
-		*/
 
 		auto eResult{pEngine->Run(InitParams)};
 
+		bShouldRestart = false;
+
+		switch(eResult)
+		{
+		//case CEngine::Result::None:
+			//break;
+		case CEngine::Result::Restart:
+			bShouldRestart = true;
+			break;
+		case CEngine::Result::UnsupportedVideo:
+			// TODO: open a message box?
+			// TODO: exit failure
+			break;
+		};
+	}
+	while(bShouldRestart);
 
 	return EXIT_SUCCESS;
 };

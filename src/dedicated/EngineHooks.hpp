@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "IEngineHooks.hpp"
+#include <appframework/IEngineHooks.hpp>
 
 void Host_GetConsoleCommands();
 void UpdateStatus(bool abForce);
@@ -39,7 +39,7 @@ public:
 
     void PostFrame() override
     {
-#ifdef _WIN32		
+#ifdef _WIN32
         UpdateStatus(0);
 #endif
     };
