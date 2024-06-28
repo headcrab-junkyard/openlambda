@@ -24,19 +24,16 @@ include_directories(
 # Add subdirectories
 
 add_subdirectory(pm_shared)
-add_subdirectory(game)
+
+add_subdirectory(game) # TODO: temp
 
 if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
 	add_subdirectory(dlls)
-else() # For Next we can support external modules implemented via plugins
-	add_subdirectory(plugins)
-endif()
-
-add_subdirectory(dedicated)
-
-# If not building as dedicated server then build these modules too
-if(NOT OGS_DEDICATED)
-	if(${OPENLAMBDA_TARGET_ENGINE} STREQUAL "Legacy")
+	
+	if(OGS_DEDICATED)
+		add_subdirectory(dedicated)
+	else()
+		# If not building as dedicated server then build these modules too
 		add_subdirectory(cl_dll)
 		add_subdirectory(gameui)
 		add_subdirectory(launcher)
