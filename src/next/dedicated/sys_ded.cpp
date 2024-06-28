@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2022 BlackPhrase
+ * Copyright (C) 2018-2022, 2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,15 +29,16 @@
 	#include "win/conproc.h"
 #endif
 
-#include "tier1/interface.h"
-
 #include "Engine.hpp"
 #include "EngineLegacy.hpp"
 #include "EngineNext.hpp"
 
-#include "filesystem/IFileSystem.hpp"
+#include <next/filesystem/IFileSystem.hpp>
+#include <next/networksystem/INetworkSystem.hpp>
+#include <next/physics/IPhysics.hpp>
+#include <next/scriptsystem/IScriptSystem.hpp>
 
-#include "SystemModule.hpp"
+#include <public/appframework/SystemModule.hpp> // TODO: tier1?
 
 #ifdef _WIN32
 //static bool sc_return_on_enter{false};
@@ -47,6 +48,10 @@ HANDLE hinput, houtput;
 CEngine *gpEngine{nullptr}; // TODO: hacky way to access the command buffer...
 
 CreateInterfaceFn gfnFSFactory{nullptr};
+
+CreateInterfaceFn gfnNetworkSystemFactory{nullptr};
+CreateInterfaceFn gfnPhysicsFactory{nullptr};
+CreateInterfaceFn gfnScriptSystemFactory{nullptr};
 
 enum class TargetEngineAPI : int
 {
@@ -62,10 +67,33 @@ enum class TargetEngineAPI : int
 
 IBaseInterface *LauncherFactory(const char *name, int *retval)
 {
-	// Filesystem module factory
-	if(!strcmp(name, OGS_FILESYSTEM_INTERFACE_VERSION))
-		return gfnFSFactory(name, retval);
+	IBaseInterface *pInterface{nullptr};
 	
+	// File system module factory
+	pInterface = gfnFSFactory(name, retval);
+	
+	if(pInterface)
+		return pInterface;
+	
+	// Network system module factory
+	pInterface = gfnNetworkSystemFactory(name, retval);
+	
+	if(pInterface)
+		return pInterface;
+	
+	// Physics module factory
+	pInterface = gfnPhysicsFactory(name, retval);
+	
+	if(pInterface)
+		return pInterface;
+	
+	// Script system module factory
+	pInterface = gfnScriptSystemFactory(name, retval);
+	
+	if(pInterface)
+		return pInterface;
+	
+	// Local module(/app) factory
 	auto fnThisFactory{Sys_GetFactoryThis()};
 	return fnThisFactory(name, retval);
 };
@@ -372,7 +400,16 @@ int RunServer() // void?
 		CSystemModule FSModule(sFSModuleName);
 
 		gfnFSFactory = FSModule.GetFactory();
-
+		
+		CSystemModule NetworkSystemModule("networksystem");
+		gfnNetworkSystemFactory = NetworkSystemModule.GetFactory();
+		
+		CSystemModule PhysicsSystemModule("physics");
+		gfnPhysicsFactory = PhysicsSystemModule.GetFactory();
+		
+		CSystemModule ScriptSystemModule("scriptsystem");
+		gfnScriptSystemFactory = ScriptSystemModule.GetFactory();
+		
 		// Engine module name to load
 		const char *sEngineModuleName{ChooseEngineModuleName()};
 
