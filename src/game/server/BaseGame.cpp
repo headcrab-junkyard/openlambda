@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2019-2023 BlackPhrase
+ * Copyright (C) 2019-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,18 +33,27 @@
 
 //#include <next/physics/IPhysicsSystem.hpp>
 
+#ifdef OPENLAMBDA_ENABLE_SCRIPTING
 //#include <next/scriptsystem/IScriptSystem.hpp>
+#endif
 
 //=============================================================================
 
-bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
+bool CBaseGame::Connect(CreateInterfaceFn afnEngineFactory)
 {
+	if(!afnEngineFactory)
+		return false;
+	
 	mpSystem = reinterpret_cast<ISystem*>(afnEngineFactory(OGS_SYSTEM_INTERFACE_VERSION, nullptr));
 	mpFileSystem = reinterpret_cast<IFileSystem*>(afnEngineFactory(OGS_FILESYSTEM_INTERFACE_VERSION, nullptr));
 	mpGameServer = reinterpret_cast<IGameServer*>(afnEngineFactory(OGS_GAMESERVER_INTERFACE_VERSION, nullptr));
 	mpVoiceServer = reinterpret_cast<IVoiceServer*>(afnEngineFactory(OGS_VOICESERVER_INTERFACE_VERSION, nullptr));
-	//mpPhysics = reinterpret_cast<IPhysicsSystem*>(afnEngineFactory(OGS_PHYSICSSYSTEM_INTERFACE_VERSION, nullptr));
-	//mpScript = reinterpret_cast<IScriptSystem*>(afnEngineFactory(OGS_SCRIPTSYSTEM_INTERFACE_VERSION, nullptr));
+	//mpPhysicsSystem = reinterpret_cast<IPhysicsSystem*>(afnEngineFactory(OGS_PHYSICSSYSTEM_INTERFACE_VERSION, nullptr));
+	
+#ifdef OPENLAMBDA_ENABLE_SCRIPTING
+	//mpScriptSystem = reinterpret_cast<IScriptSystem*>(afnEngineFactory(OGS_SCRIPTSYSTEM_INTERFACE_VERSION, nullptr));
+#endif
+	
 	if(!mpSystem)
 		return false;
 	
@@ -57,12 +66,29 @@ bool CBaseGame::Init(CreateInterfaceFn afnEngineFactory)
 	if(!mpVoiceServer)
 		return false;
 	
-	//if(!mpPhysics)
+	//if(!mpPhysicsSystem)
 		//return false;
 	
-	//if(!mpScript)
+#ifdef OPENLAMBDA_ENABLE_SCRIPTING
+	//if(!mpScriptSystem)
 		//return false;
+#endif
 	
+	return true;
+};
+
+void CBaseGame::Disconnect()
+{
+	//mpScriptSystem = nullptr;
+	//mpPhysicsSystem = nullptr;
+	mpVoiceServer = nullptr;
+	mpGameServer = nullptr;
+	mpFileSystem = nullptr;
+	mpSystem = nullptr;
+};
+
+bool CBaseGame::Init()
+{
 	
 	RegisterEvents();
 	

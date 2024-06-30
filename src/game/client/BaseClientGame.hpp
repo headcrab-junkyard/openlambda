@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2018-2022 BlackPhrase
+ * Copyright (C) 2018-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,25 +23,33 @@
 
 #include <next/game/client/IClientGame.hpp>
 
+interface ISystem;
 interface IFileSystem;
 interface IInputSystem;
 interface IPhysicsSystem;
 interface IScriptSystem;
 
+interface IVGui;
+
 class CGameWorld;
+class CHUD;
 
 class CBaseClientGame : public IClientGame
 {
-public: // IClientGame interface methods
+public:
 	virtual ~CBaseClientGame() = default;
+public: // IClientGame interface methods
+	virtual bool Connect(CreateInterfaceFn afnEngineFactory) override;
+	virtual void Disconnect() override;
 	
-	virtual bool Init(CreateInterfaceFn afnEngineFactory /*, cldll_func_t *pcl_funcs*/) override;
+	virtual bool Init(/*cldll_func_t *pcl_funcs*/) override;
 	virtual void Shutdown() override;
 	
-	virtual void Update(/*double afTime*/) override;
+	virtual void Update(float afTimeStep) override;
 protected:
 	virtual void HookEvents(){}
 public: // Other public methods
+	ISystem *GetSystem() const {return mpSystem;}
 	IFileSystem *GetFileSystem() const {return mpFileSystem;}
 	IInputSystem *GetInputSystem() const {return mpInputSystem;}
 	IPhysicsSystem *GetPhysicsSystem() const {return mpPhysicsSystem;}
@@ -49,11 +57,21 @@ public: // Other public methods
 	
 	CGameWorld *GetWorld() const {return mpWorld;}
 	//IGameRules *GetRules() const {return mpRules;}
+	
+	CHUD *GetHUD() const {return mpHUD;}
 private:
+	void RegisterConVars();
+	void UnregisterConVars();
+private:
+	ISystem *mpSystem{nullptr};
 	IFileSystem *mpFileSystem{nullptr};
 	IInputSystem *mpInputSystem{nullptr};
 	IPhysicsSystem *mpPhysicsSystem{nullptr};
 	IScriptSystem *mpScriptSystem{nullptr};
 	
+	IVGui *mpVGui{nullptr};
+	
 	CGameWorld *mpWorld{nullptr};
+	
+	CHUD *mpHUD{nullptr};
 };

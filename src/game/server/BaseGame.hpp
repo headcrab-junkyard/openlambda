@@ -1,7 +1,7 @@
 /*
  * This file is part of OpenLambda Project
  *
- * Copyright (C) 2019-2023 BlackPhrase
+ * Copyright (C) 2019-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,9 +53,11 @@ public:
 	//CBaseGame(IGameRules *apRules, IGameWorld *apWorld);
 	virtual ~CBaseGame() = default;
 public: // IGame interface impl
-	bool Init(CreateInterfaceFn afnEngineFactory) override;
-	void Shutdown() override;
+	virtual bool Connect(CreateInterfaceFn afnEngineFactory) override;
+	virtual void Disconnect() override;
 	
+	virtual bool Init() override;
+	virtual void Shutdown() override;
 	void Frame(double afFrameTime) override;
 	
 	virtual bool HandleClientMessage(int anClientID, int anMsgID, INetMsg *net_message) override;
