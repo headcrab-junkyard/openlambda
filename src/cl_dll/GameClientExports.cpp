@@ -24,22 +24,26 @@ EXPOSE_SINGLE_INTERFACE(CGameClientExports, IGameClientExports, GAMECLIENTEXPORT
 
 const char *CGameClientExports::GetServerHostName()
 {
-	// TODO
+	//if(gpViewPortInterface)
+		//return gpViewPortInterface->GetServerName();
 	return "";
 };
 
 bool CGameClientExports::IsPlayerGameVoiceMuted(int anPlayerID)
 {
-	// TODO
+	if(GetClientVoiceMgr())
+		return GetClientVoiceMgr()->IsPlayerBlocked(anPlayerID);
 	return false;
 };
 
 void CGameClientExports::MutePlayerGameVoice(int anPlayerID)
 {
-	// TODO
+	if(GetClientVoiceMgr())
+		GetClientVoiceMgr()->SetPlayerBlockedState(anPlayerID, true);
 };
 
 void CGameClientExports::UnmutePlayerGameVoice(int anPlayerID)
 {
-	// TODO
+	if(GetClientVoiceMgr())
+		GetClientVoiceMgr()->SetPlayerBlockedState(anPlayerID, false);
 };

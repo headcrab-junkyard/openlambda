@@ -1,6 +1,6 @@
 /*
  * This file is part of OpenLambda Project
- * Copyright (C) 2018-2021, 2023 BlackPhrase
+ * Copyright (C) 2018-2021, 2023-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,55 @@
  */
 
 /// @file
+/// @brief triangle rendering (if any)
 
-void HUD_DrawNormalTriangles()
+#include "tri.h"
+#include "hud.h"
+
+//#include "cl_util.h"
+
+#include <common/const.h>
+#include <common/entity_state.h>
+#include <common/cl_entity.h>
+#include <common/triangleapi.h>
+
+//#include "Exports.h"
+
+// NOTE: Triangle rendering APIs are in gpEngine->pTriAPI
+
+/*
+===========
+HUD_DrawNormalTriangles
+
+NOTE: Add non-transparent triangles here
+===========
+*/
+void /*CL_DLLEXPORT*/ HUD_DrawNormalTriangles()
 {
-	// TODO
+	//RecClDrawNormalTriangles();
+	
+	gHUD.mSpectator.DrawOverview();
 };
 
-void HUD_DrawTransparentTriangles()
+#ifdef _TFC
+void RunEventList();
+#endif
+
+/*
+===========
+HUD_DrawTransparentTriangles
+
+NOTE: Render any triangles with transparent rendering mode here
+===========
+*/
+void /*CL_DLLEXPORT*/ HUD_DrawTransparentTriangles()
 {
-	// TODO
+	//RecClDrawTransparentTriangles();
+	
+#ifdef _TFC
+	RunEventList();
+#endif
+	
+	if(gpParticleMan)
+		gpParticleMan->Update();
 };

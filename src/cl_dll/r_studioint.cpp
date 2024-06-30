@@ -1,6 +1,6 @@
 /*
  * This file is part of OpenLambda Project
- * Copyright (C) 2018-2021 BlackPhrase
+ * Copyright (C) 2018-2021, 2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,29 +20,36 @@
 
 #include <cstring>
 
-#include "const.h"
-#include "r_studioint.h"
+#include <common/const.h>
+#include <common/r_studioint.h>
 
-engine_studio_api_t gStudio;
+#include "StudioModelRenderer.hpp"
 
-int StudioDrawModel(int flags)
+engine_studio_api_t gStudio; // IEngineStudio? gEngineStudio?
+
+CGameStudioModelRenderer gStudioModelRenderer;
+
+void R_StudioInit()
 {
-	// TODO
-	return 0;
+	gStudioModelRenderer.Init();
 };
 
-int StudioDrawPlayer(int flags, struct entity_state_s *pPlayer)
+int R_StudioDrawModel(int anFlags)
 {
-	// TODO
-	return 0;
+	return gStudioModelRenderer.DrawModel(anFlags);
+};
+
+int R_StudioDrawPlayer(int anFlags, struct entity_state_s *apPlayer)
+{
+	return gStudioModelRenderer.DrawPlayer(anFlags, apPlayer);
 };
 
 r_studio_interface_t gStudioAPI =
 {
 	STUDIO_INTERFACE_VERSION,
 	
-	StudioDrawModel,
-	StudioDrawPlayer
+	R_StudioDrawModel,
+	R_StudioDrawPlayer
 };
 
 //r_studio_interface_t *pStudioAPI = &gStudioAPI;
@@ -55,6 +62,8 @@ int HUD_GetStudioModelInterface(int version, struct r_studio_interface_s **ppInt
 	*ppInterface = &gStudioAPI;
 	
 	memcpy(&gStudio, pStudio, sizeof(engine_studio_api_t));
+	
+	R_StudioInit();
 	
 	return 1;
 };
