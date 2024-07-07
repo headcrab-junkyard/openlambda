@@ -2,7 +2,7 @@
  * This file is part of OpenLambda Project
  *
  * Copyright (C) 1996-1997 Id Software, Inc.
- * Copyright (C) 2018-2023 BlackPhrase
+ * Copyright (C) 2018-2024 BlackPhrase
  *
  * OpenLambda Project is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,121 @@ class Bounds;
 class CBaseGame;
 //class IGameWorld;
 
+class CGameSave;
+
+/*
+class CEntityComponent
+{
+public:
+	CEntityComponent(entvars_t *apVars = nullptr){self = apVars;}
+protected:
+	entvars_t *self{nullptr};
+};
+
+class CDamageable : public CEntityComponent
+{
+public:
+	CDamageable(entvars_t *apVars) : CEntityComponent(apVars){}
+	
+	void SetHealth(float afValue)
+	{
+		if(self)
+			self->health = afValue;
+	};
+	
+	float GetHealth() const
+	{
+		if(self)
+			mfHealth = self->health;
+		
+		return mfHealth;
+	};
+	
+	void TakeDamage();
+	
+	void TakeHealth();
+private:
+	float mfHealth{0.0f};
+};
+*/
+
+class CBaseEntityComponent;
+using tBaseEntityComponentVec = std::vector<CBaseEntityComponent*>;
+
 class CBaseEntity
+{
+public:
+	//CBaseEntity(entvars_t *apData);
+	virtual ~CBaseEntity() = default;
+	
+	// Init methods
+	
+	/// @return false if the entity shouldn't be spawned at all (instead of deleting itself on spawn)
+	virtual bool PreSpawn() const {return true;} // TODO: should this be const?
+	
+	virtual void Spawn(){}
+	
+	// TODO: virtual void Precache(){}?
+	
+	// Activation methods
+	
+	// TODO
+	//virtual void Activate(){}
+	void SetActive(bool abActive){mbActive = abActive;}
+	bool IsActive() const {return mbActive;}
+	
+	//CBaseGame *GetGame() const {return mpGame;}
+	IGameWorld *GetWorld() const {return mpWorld;}
+	
+	//SEntityTransform &GetTransform() const {return mTransform;} // TODO
+public: // BP: Some entity components experiments
+	template<typename T, typename... Args>
+	T *AddComponent(Args... aArgs);
+	
+	template<typename T>
+	void RemoveComponent(T *apComponent);
+	
+	template<typename T>
+	T *GetComponent() const;
+	
+	template<typename T>
+	T *GetComponentAt(int anIndex) const; // TODO: GetComponent?
+	
+	template<typename T>
+	bool TryGetComponent(T *apComponent) const;
+	
+	tBaseEntityComponentVec &GetComponents() const;
+	
+	int GetComponentCount() const;
+	
+	template<typename T>
+	bool HasComponent() const;
+private:
+	tBaseEntityComponentVec mvComponents;
+protected:
+	void SetClassName(const char *asName){/*self->classname = asName;*/} // TODO: gpEngine->pfnMakeString // TODO
+private: // TODO: public?
+	/// This updates global tables that need to know about entities being removed
+	void UpdateOnRemove();
+private:
+	static TYPEDESCRIPTION mSaveData[]; // TODO: public?
+	
+	Bounds mSize{};
+	
+	idVec3 mvOrigin{idVec3::Origin};
+	idVec3 mvAngles{idVec3::Origin};
+	
+	idVec3 mvAbsMin{idVec3::Origin};
+	idVec3 mvAbsMax{idVec3::Origin};
+public:
+	CBaseGame *mpGame{nullptr};
+private:
+	//IGameWorld *mpWorld{nullptr}; // TODO
+	
+	bool mbActive{false};
+};
+
+class CFatAzzEntity : public CBaseEntity
 {
 public:
 	// Enums & public defs
@@ -126,29 +240,29 @@ public:
 	using pfnUseCallback = void (CBaseEntity::*)(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
 	using pfnBlockedCallback = void (CBaseEntity::*)(CBaseEntity *apOther);
 public:
-	//CBaseEntity(entvars_t *apData);
-	virtual ~CBaseEntity() = default;
-	
-	// Init methods
-	
-	/// @return false if the entity shouldn't be spawned at all (instead of deleting itself on spawn)
-	virtual bool PreSpawn() const {return true;} // TODO: should this be const?
-	
-	virtual void Spawn(){}
-	
-	// TODO: virtual void Precache(){}?
-	
-	// Activation methods
-	
-	// TODO
-	//virtual void Activate(){}
-	
 	// Save & Load methods
 	
 	virtual int Save(CGameSave &aGameSave); // TODO: CSave &aSave in original
 	virtual int Restore(const CGameSave &aGameSave); // TODO: CRestore &aRestore in original
 	
 	// Callback methods
+	
+	template<typename T>
+	inline void SetThinkCallback(T aTCallback){SetThinkCallback(static_cast<pfnThinkCallback>(aTCallback));}
+	
+	template<typename T>
+	inline void SetTouchCallback(T aTCallback){SetTouchCallback(static_cast<pfnTouchCallback>(aTCallback));}
+	
+	template<typename T>
+	inline void SetUseCallback(T aTCallback){SetUseCallback(static_cast<pfnUseCallback>(aTCallback));}
+	
+	template<typename T>
+	inline void SetBlockedCallback(T aTCallback){SetBlockedCallback(static_cast<pfnBlockedCallback>(aTCallback));}
+	
+	void SetThinkCallback(pfnThinkCallback afnCallback){mfnThinkCallback = afnCallback;} // TODO: IEntityThinkCallback?
+	void SetTouchCallback(pfnTouchCallback afnCallback){mfnTouchCallback = afnCallback;} // TODO: IEntityTouchCallback?
+	void SetUseCallback(pfnUseCallback afnCallback){mfnUseCallback = afnCallback;} // TODO: IEntityUseCallback?
+	void SetBlockedCallback(pfnBlockedCallback afnCallback){mfnBlockedCallback = afnCallback;} // TODO: IEntityBlockedCallback?
 	
 	virtual void Think()
 	{
@@ -178,6 +292,10 @@ public:
 	
 	virtual void TraceAttack(CBaseEntity *apAttacker, float afDamage, const idVec3 &dir, TraceResult &aTraceResult, int anDmgBitSum);
 	
+	///
+	// TODO: TraceBleed?
+	virtual void TraceBlood(float afDamage, const idVec3 &avDir, TraceResult *apTraceResult, int anDmgBitSum);
+	
 	/// Called when the entity receives damage
 	virtual int TakeDamage(CBaseEntity *apInflictor, CBaseEntity *apAttacker, float afDamage, int anDmgBitSum); // TODO: was T_Damage
 	
@@ -206,7 +324,7 @@ public:
 	void SUB_Remove();
 	
 	/// Does nothing
-	void SUB_Null(){}
+	void SUB_Null(){} // aka SUB_DoNothing
 	
 	/// Lets the entity handle its settings from the map file
 	virtual bool HandleKeyValue(ogs::tStringView asKey, ogs::tStringView asValue){return false;}
@@ -215,27 +333,10 @@ public:
 	
 	edict_t *ToEdict() const; // TODO: GetDict()?
 	
-	void SetName(const std::string &asName);
-	const std::string &GetName() const;
+	void SetName(const std::string &asName); // TODO
+	const std::string &GetName() const; // TODO
 	
-	const std::string &GetClassName() const;
-	
-	template<typename T>
-	inline void SetThinkCallback(T aTCallback){SetThinkCallback(static_cast<pfnThinkCallback>(aTCallback));}
-	
-	template<typename T>
-	inline void SetTouchCallback(T aTCallback){SetTouchCallback(static_cast<pfnTouchCallback>(aTCallback));}
-	
-	template<typename T>
-	inline void SetUseCallback(T aTCallback){SetUseCallback(static_cast<pfnUseCallback>(aTCallback));}
-	
-	template<typename T>
-	inline void SetBlockedCallback(T aTCallback){SetBlockedCallback(static_cast<pfnBlockedCallback>(aTCallback));}
-	
-	void SetThinkCallback(pfnThinkCallback afnCallback); // TODO: IEntityThinkCallback?
-	void SetTouchCallback(pfnTouchCallback afnCallback); // TODO: IEntityTouchCallback?
-	void SetUseCallback(pfnUseCallback afnCallback); // TODO: IEntityUseCallback?
-	void SetBlockedCallback(pfnBlockedCallback afnCallback); // TODO: IEntityBlockedCallback?
+	const std::string &GetClassName() const; // TODO
 	
 	void SetNextThink(float afTime){self->nextthink = afTime;}
 	float GetNextThink() const {return self->nextthink;}
@@ -367,14 +468,14 @@ public:
 	int GetWaterType() const {return self->watertype;}
 	int GetWaterLevel() const {return self->waterlevel;}
 	
-	void SetOwner(CBaseEntity *apOwner){mpOwner = apOwner;}
-	CBaseEntity *GetOwner() const {return mpOwner;}
+	void SetOwner(CBaseEntity *apOwner){mpOwner = apOwner;} // TODO
+	CBaseEntity *GetOwner() const {return mpOwner;} // TODO
 	
-	void SetEnemy(CBaseEntity *apEnemy){mpEnemy = apEnemy;}
-	CBaseEntity *GetEnemy() const {return mpEnemy;}
+	void SetEnemy(CBaseEntity *apEnemy){mpEnemy = apEnemy;} // TODO
+	CBaseEntity *GetEnemy() const {return mpEnemy;} // TODO
 	
-	void SetGoal(CBaseEntity *apGoal){mpGoal = apGoal;}
-	CBaseEntity *GetGoal() const {return mpGoal;} // TODO: GetGoalEnt(ity)?
+	void SetGoal(CBaseEntity *apGoal){mpGoal = apGoal;} // TODO
+	CBaseEntity *GetGoal() const {return mpGoal;} // TODO: GetGoalEnt(ity)? // TODO
 	
 	void SetFriction(float afFriction){self->friction = afFriction;}
 	
@@ -408,10 +509,11 @@ public:
 	const std::string &GetNoise() const;
 	
 	void SetTarget(const char *asTarget);
-	const char *GetTarget() const {return reinterpret_cast<const char *>(self->target);}
+	const char *GetTarget() const {return reinterpret_cast<const char *>(self->target);} // TODO: mpGame->GetStringPool()->GetByIndex(self->target)
 	
 	void SetIdealYaw(float afValue){self->ideal_yaw = afValue;}
 	
+	/// @return entity's capabilities
 	virtual int GetObjectCaps() const {return FCAP_ACROSS_TRANSITION;}
 	
 	virtual BloodType GetBloodType() const {return BloodType::DontBleed;}
@@ -435,7 +537,7 @@ public:
 	// TODO: move some of those over to CBasePlayer/CBaseCharacter?
 	
 	void SaveSpawnParms();
-	void GetSpawnParms();
+	void GetSpawnParms() const;
 	
 	void SetCrosshairAngle(float afPitch, float afYaw);
 	
@@ -452,7 +554,7 @@ public:
 	
 	void *GetModelPtr() const;
 	
-	int GetIllum() const;
+	/*virtual*/ int GetIllum() const; // TODO: GetIllumination?
 	
 	void GetAttachment(int anAttachment, idVec3 &avOrigin, idVec3 &avAngles) const;
 	void GetBonePosition(int anBone, idVec3 &avOrigin, idVec3 &avAngles) const;
@@ -461,23 +563,6 @@ public:
 public: // TODO: protected?
 	int PrecacheModel(const char *asName);
 	bool PrecacheSound(const char *asName);
-protected:
-	void SetClassName(const char *asName){/*self->classname = asName;*/} // TODO: gpEngine->pfnMakeString
-private:
-	Bounds mSize{};
-	
-	idVec3 mvOrigin{idVec3::Origin};
-	idVec3 mvAngles{idVec3::Origin};
-	idVec3 mvVelocity{idVec3::Origin};
-	idVec3 mvAngularVelocity{idVec3::Origin};
-	idVec3 mvMoveDir{idVec3::Origin};
-	//idVec3 mvGravity{idVec3::Origin};
-	idVec3 mvAbsMin{idVec3::Origin};
-	idVec3 mvAbsMax{idVec3::Origin};
-public:
-	entvars_t *self{nullptr};
-	CBaseGame *mpGame{nullptr};
-	//IGameWorld *mpWorld{nullptr};
 private:	
 	pfnThinkCallback mfnThinkCallback{nullptr};
 	pfnTouchCallback mfnTouchCallback{nullptr};
@@ -486,7 +571,14 @@ private:
 	
 	CBaseEntity *mpOwner{nullptr};
 	CBaseEntity *mpEnemy{nullptr};
-	CBaseEntity *mpGoal{nullptr}; ///< A movetarget or an enemy 
+	CBaseEntity *mpGoal{nullptr}; ///< A movetarget or an enemy
+private:
+	idVec3 mvVelocity{idVec3::Origin};
+	idVec3 mvAngularVelocity{idVec3::Origin};
+	idVec3 mvMoveDir{idVec3::Origin};
+	//idVec3 mvGravity{idVec3::Origin};
+public:
+	entvars_t *self{nullptr};
 public:
 	//float	ammo_shells{0};
 	//float	ammo_nails{0};
