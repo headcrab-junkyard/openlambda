@@ -24,6 +24,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <engine/eiface.h>
 #include <engine/edict.h>
@@ -44,44 +46,9 @@ class CBaseGame;
 
 class CGameSave;
 
-/*
-class CEntityComponent
-{
-public:
-	CEntityComponent(entvars_t *apVars = nullptr){self = apVars;}
-protected:
-	entvars_t *self{nullptr};
-};
-
-class CDamageable : public CEntityComponent
-{
-public:
-	CDamageable(entvars_t *apVars) : CEntityComponent(apVars){}
-	
-	void SetHealth(float afValue)
-	{
-		if(self)
-			self->health = afValue;
-	};
-	
-	float GetHealth() const
-	{
-		if(self)
-			mfHealth = self->health;
-		
-		return mfHealth;
-	};
-	
-	void TakeDamage();
-	
-	void TakeHealth();
-private:
-	float mfHealth{0.0f};
-};
-*/
-
 class CBaseEntityComponent;
-using tBaseEntityComponentVec = std::vector<CBaseEntityComponent*>;
+//using tBaseEntityComponentVec = std::vector<CBaseEntityComponent*>;
+using tBaseEntityComponentVec = std::vector<std::unique_ptr<CBaseEntityComponent>>;
 
 class CBaseEntity
 {
@@ -109,12 +76,41 @@ public:
 	IGameWorld *GetWorld() const {return mpWorld;}
 	
 	//SEntityTransform &GetTransform() const {return mTransform;} // TODO
+	
+	void SetOrigin(const idVec3 &avOrigin);
+	
+	const idVec3 &GetOrigin() /*const*/
+	{
+		mvOrigin = self->origin;
+		return mvOrigin;
+	};
+	
+	void SetSize(const idVec3 &avMins, const idVec3 &avMaxs);
+	
+	void SetSize(const Bounds &aSize)
+	{
+		SetSize(aSize.mins, aSize.maxs);
+	};
+	
+	const Bounds &GetSize() const {return mSize;}
+	
+	const idVec3 &GetAbsMin() /*const*/
+	{
+		mvAbsMin = self->absmin;
+		return mvAbsMin;
+	};
+	
+	const idVec3 &GetAbsMax() /*const*/
+	{
+		mvAbsMax = self->absmax;
+		return mvAbsMax;
+	};
 public: // BP: Some entity components experiments
 	template<typename T, typename... Args>
 	T *AddComponent(Args... aArgs);
 	
-	template<typename T>
-	void RemoveComponent(T *apComponent);
+	//template<typename T>
+	//void RemoveComponent(T *apComponent);
 	
 	template<typename T>
 	T *GetComponent() const;
@@ -190,23 +186,6 @@ public:
 		DontBleed = -1,
 	};
 	
-	enum class MoveType : int
-	{
-		None = MOVETYPE_NONE,
-		
-		Walk = MOVETYPE_WALK,
-		Step,
-		Fly,
-		Toss,
-		Push,
-		NoClip,
-		FlyMissile,
-		Bounce,
-		BounceMissile,
-		Follow,
-		PushStep
-	};
-	
 	enum class Solidity : int
 	{
 		None = SOLID_NOT,
@@ -223,22 +202,9 @@ public:
 		Aim
 	};
 	
-	enum class DmgType : int
-	{
-		Generic = 0,
-	};
-	
-	enum class GibType : int
-	{
-		Normal = 0, ///< Gib if entity was overkilled
-		Never, ///< Never gib, no matter how much dmg is done (used for freezing and such)
-		Always ///< Always gib (Houndeye Shock, Barnacle Bite and such)
-	};
-	
 	using pfnThinkCallback = void (CBaseEntity::*)();
-	using pfnTouchCallback = void (CBaseEntity::*)(CBaseEntity *apOther);
+	
 	using pfnUseCallback = void (CBaseEntity::*)(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue);
-	using pfnBlockedCallback = void (CBaseEntity::*)(CBaseEntity *apOther);
 public:
 	// Save & Load methods
 	
@@ -251,18 +217,11 @@ public:
 	inline void SetThinkCallback(T aTCallback){SetThinkCallback(static_cast<pfnThinkCallback>(aTCallback));}
 	
 	template<typename T>
-	inline void SetTouchCallback(T aTCallback){SetTouchCallback(static_cast<pfnTouchCallback>(aTCallback));}
-	
-	template<typename T>
 	inline void SetUseCallback(T aTCallback){SetUseCallback(static_cast<pfnUseCallback>(aTCallback));}
 	
-	template<typename T>
-	inline void SetBlockedCallback(T aTCallback){SetBlockedCallback(static_cast<pfnBlockedCallback>(aTCallback));}
-	
 	void SetThinkCallback(pfnThinkCallback afnCallback){mfnThinkCallback = afnCallback;} // TODO: IEntityThinkCallback?
-	void SetTouchCallback(pfnTouchCallback afnCallback){mfnTouchCallback = afnCallback;} // TODO: IEntityTouchCallback?
+	
 	void SetUseCallback(pfnUseCallback afnCallback){mfnUseCallback = afnCallback;} // TODO: IEntityUseCallback?
-	void SetBlockedCallback(pfnBlockedCallback afnCallback){mfnBlockedCallback = afnCallback;} // TODO: IEntityBlockedCallback?
 	
 	virtual void Think()
 	{
@@ -270,22 +229,10 @@ public:
 			(this->*mfnThinkCallback)();
 	};
 	
-	virtual void Touch(CBaseEntity *pOther)
-	{
-		if(mfnTouchCallback)
-			(this->*mfnTouchCallback)(pOther);
-	};
-	
 	virtual void Use(CBaseEntity *apActivator, CBaseEntity *apCaller, UseType aeUseType, float afValue)
 	{
 		if(mfnUseCallback)
 			(this->*mfnUseCallback)(apActivator, apCaller, aeUseType, afValue);
-	};
-	
-	virtual void Blocked(CBaseEntity *pOther)
-	{
-		if(mfnBlockedCallback)
-			(this->*mfnBlockedCallback)(pOther);
 	};
 	
 	//
@@ -295,15 +242,6 @@ public:
 	///
 	// TODO: TraceBleed?
 	virtual void TraceBlood(float afDamage, const idVec3 &avDir, TraceResult *apTraceResult, int anDmgBitSum);
-	
-	/// Called when the entity receives damage
-	virtual int TakeDamage(CBaseEntity *apInflictor, CBaseEntity *apAttacker, float afDamage, int anDmgBitSum); // TODO: was T_Damage
-	
-	/// Called when the entity receives health
-	virtual float TakeHealth(float afValue, float afIgnore, int anDmgBitSum); // TODO: wtf is afIgnore and where did it come from?
-	
-	/// Called when the entity gets killed/destroyed
-	virtual void Killed(CBaseEntity *apAttacker, CBaseEntity *apLastInflictor, GibType aeGibType = GibType::Normal); // TODO: wtf if apLastInflictor?
 	
 	/// Used to make entity shoot in specified direction (like a turret)
 	void FireBullets(float afShotCount, const idVec3 &avDir, const idVec3 &avSpread, CBaseEntity *apAttacker = nullptr);
@@ -348,47 +286,11 @@ public:
 	
 	int GetIndex() const;
 	
-	void SetHealth(float afHealth){self->health = afHealth;}
-	void AddHealth(float afHealth){self->health += afHealth;}
-	float GetHealth() const {return self->health;}
-	
-	// TODO: should these be here?
-	void SetMaxHealth(float afValue){self->max_health = afValue;}
-	float GetMaxHealth() const {return self->max_health;}
-	
 	void SetArmorType(int anType){self->armortype = anType;}
 	int GetArmorType() const {return self->armortype;}
 	
 	void SetArmorValue(int anValue){self->armorvalue = anValue;}
 	int GetArmorValue() const {return self->armorvalue;}
-	
-	void SetVelocity(const idVec3 &avVelocity)
-	{
-		self->velocity[0] = avVelocity.x;
-		self->velocity[1] = avVelocity.y;
-		self->velocity[2] = avVelocity.z;
-	};
-	
-	const idVec3 &GetVelocity() /*const*/
-	{
-		mvVelocity = self->velocity;
-		return mvVelocity;
-	};
-	
-	void SetAngularVelocity(const idVec3 &avVelocity)
-	{
-		mvAngularVelocity = avVelocity;
-		
-		self->avelocity[0] = avVelocity.x;
-		self->avelocity[1] = avVelocity.y;
-		self->avelocity[2] = avVelocity.z;
-	};
-	
-	const idVec3 &GetAngularVelocity() /*const*/
-	{
-		mvAngularVelocity = self->avelocity;
-		return mvAngularVelocity;
-	};
 	
 	void SetAngles(const idVec3 &avAngles)
 	{
@@ -405,40 +307,11 @@ public:
 		return mvAngles;
 	};
 	
-	void SetGravity(float afY)
-	{
-		self->gravity = afY;
-		//mvGravity.y = afY;
-	};
-	
-	const float GetGravity() const {return self->gravity;}
-	//const idVec3 &GetGravity() const {return idVec3(0.0f, self->gravity, 0.0f);}
-	
 	void SetModel(const std::string &asName);
 	const std::string &GetModel() const;
 	
 	void SetModelIndex(int anIndex){self->modelindex = anIndex;}
 	int GetModelIndex() const {return self->modelindex;}
-	
-	void SetOrigin(const idVec3 &avOrigin);
-	
-	const idVec3 &GetOrigin() /*const*/
-	{
-		mvOrigin = self->origin;
-		return mvOrigin;
-	};
-	
-	void SetSize(const idVec3 &avMins, const idVec3 &avMaxs);
-	
-	void SetSize(const Bounds &aSize)
-	{
-		SetSize(aSize.mins, aSize.maxs);
-	};
-	
-	const Bounds &GetSize() const {return mSize;}
-	
-	void SetMoveType(MoveType aeType){self->movetype = static_cast<int>(aeType);}
-	MoveType GetMoveType() const {return static_cast<MoveType>(self->movetype);}
 	
 	void SetSolidity(Solidity aeSolidity){self->solid = static_cast<int >(aeSolidity);}
 	Solidity GetSolidity() const {return static_cast<Solidity>(self->solid);}
@@ -477,26 +350,6 @@ public:
 	void SetGoal(CBaseEntity *apGoal){mpGoal = apGoal;} // TODO
 	CBaseEntity *GetGoal() const {return mpGoal;} // TODO: GetGoalEnt(ity)? // TODO
 	
-	void SetFriction(float afFriction){self->friction = afFriction;}
-	
-	void SetSpeed(float afSpeed){self->speed = afSpeed;}
-	float GetSpeed() const {return self->speed;}
-	
-	void SetMoveDir(const idVec3 &avMoveDir)
-	{
-		mvMoveDir = avMoveDir;
-		
-		self->movedir[0] = mvMoveDir.x;
-		self->movedir[1] = mvMoveDir.y;
-		self->movedir[2] = mvMoveDir.z;
-	};
-	
-	const idVec3 &GetMoveDir() /*const*/
-	{
-		mvMoveDir = self->movedir;
-		return mvMoveDir;
-	};
-	
 	void SetDamageable(Damageable aeDamageable){self->takedamage = static_cast<int>(aeDamageable);}
 	Damageable GetDamageable() const {return static_cast<Damageable>(self->takedamage);}
 	
@@ -517,18 +370,6 @@ public:
 	virtual int GetObjectCaps() const {return FCAP_ACROSS_TRANSITION;}
 	
 	virtual BloodType GetBloodType() const {return BloodType::DontBleed;}
-	
-	const idVec3 &GetAbsMin() /*const*/
-	{
-		mvAbsMin = self->absmin;
-		return mvAbsMin;
-	};
-	
-	const idVec3 &GetAbsMax() /*const*/
-	{
-		mvAbsMax = self->absmax;
-		return mvAbsMax;
-	};
 	
 	void SetCollisionBox(); // TODO: SetupCollisionBox?
 	
@@ -563,20 +404,13 @@ public:
 public: // TODO: protected?
 	int PrecacheModel(const char *asName);
 	bool PrecacheSound(const char *asName);
-private:	
+private:
 	pfnThinkCallback mfnThinkCallback{nullptr};
-	pfnTouchCallback mfnTouchCallback{nullptr};
 	pfnUseCallback mfnUseCallback{nullptr};
-	pfnBlockedCallback mfnBlockedCallback{nullptr};
 	
 	CBaseEntity *mpOwner{nullptr};
 	CBaseEntity *mpEnemy{nullptr};
 	CBaseEntity *mpGoal{nullptr}; ///< A movetarget or an enemy
-private:
-	idVec3 mvVelocity{idVec3::Origin};
-	idVec3 mvAngularVelocity{idVec3::Origin};
-	idVec3 mvMoveDir{idVec3::Origin};
-	//idVec3 mvGravity{idVec3::Origin};
 public:
 	entvars_t *self{nullptr};
 public:
